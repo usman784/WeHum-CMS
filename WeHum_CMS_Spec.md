@@ -511,4 +511,51 @@ Evidence: (screenshots, Playwright traces, Sentry links, Lighthouse report)
 Status: ✅ done / ⚠️ blocked
 ```
 
-_(No phases completed yet.)_
+### Phase P0 — Foundation
+Date: 2026-10-05
+
+Built:
+- Project at the repo root from `starter/` (kept as reference): Vite 6, React 18, TypeScript strict, Tailwind 3.4 with the CSS-variable tokens, pnpm 9.
+- Inter, self-hosted through `@fontsource-variable/inter` (woff2 files bundled by Vite; no request to another origin).
+- Theme: dark by default, light switch, choice remembered (`lib/theme.ts`, `hooks/useTheme.ts`), applied before first paint in `index.html`.
+- `lib/api.ts` (starter, extended): `NETWORK` error for unreachable server, aborted requests pass through, CSRF token taken from the auth response body with the `wh_csrf` cookie as fallback, `isConflict` / `isNetworkError` helpers.
+- `lib/socket.ts` (starter, extended): `force:logout` signs out, "Reconnecting…" only after 5 s, "Offline" after 5 failed attempts, unsubscribe is safe to call twice, socket state breadcrumbs.
+- `lib/query.ts`: query client factory, retry rule (5xx and network only), server faults reported to Sentry.
+- `lib/sentry.ts`: release = git sha, replay on error only with all text masked, user = id + role, API `traceId` tag, expected 4xx answers dropped.
+- `lib/socket-events.ts` and `openapi/openapi.yaml` copied from the backend (`pnpm api:sync`); `lib/api-types.ts` generated (`pnpm api:types`).
+- MSW mock API: shared handlers, Node server for tests, browser worker for `VITE_MOCKS=1 pnpm dev` (removed from the production build).
+- P0 shell page (`app/App.tsx`): logo, environment chip, connection pill, theme switch, token swatches, button variants.
+- ESLint 9 flat config (typescript-eslint, react-hooks, jsx-a11y, tailwindcss; `fetch` is banned outside `lib/api.ts`), Prettier.
+- GitHub Actions CI: install, API types up to date, lint, format, typecheck, unit tests, build, bundle budget, Playwright.
+
+Tests run:
+- `pnpm test` → 65 passed, 0 failed (7 files): api client 18, socket client 15, rbac 12, shell + tokens 7, live hooks 5, query client 4, Sentry 4.
+- `pnpm e2e` (Chrome, against the production build) → 3 passed: dark shell + tokens + Inter + no outside requests + axe; light switch + reload + axe; mock worker not shipped.
+- `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm build` → clean. `pnpm size` → 158.5 KB gzip initial load (budget 250 KB).
+
+Bugs found → fixed:
+- Light theme failed WCAG AA in axe (three derived values). Fixed in `tokens.css`: `text-faint` #8A8F94 → #666B70, `ember-text` #C2471A → #A63A12, `on-ember` #FFFFFF → #2A0E02.
+- An aborted request was reported as a network error → now passed through as `AbortError`.
+- Starter `manualChunks` put shared React code in the "charts" chunk and loaded it on first paint → removed; lazy feature pages split Recharts and dnd-kit on their own.
+- Starter `socket-events.ts` was behind the backend (no `media` entity, no admin `force:logout` / `error`) → replaced by the backend file.
+- Starter `api:types` pointed at a path that does not exist → reads `openapi/openapi.yaml` in this repo.
+- Vitest 2 pulled in Vite 5 next to Vite 6 (type conflict in `vite.config.ts`) → Vitest 3.
+- Node 25 has a broken global `localStorage` that hides the jsdom one → in-memory store in the test setup (Node 22 in CI is not affected).
+
+Decisions / deviations from spec:
+- The three light colours above differ from the §3 table. §3 says light is derived and must pass WCAG AA, so the accessible values win. Dark is unchanged.
+- Theme choice is the only thing kept in `localStorage` (`wh_theme`). Tokens and user data are never stored (§6.2).
+- React 18 (the starter's version; the spec allows 18 or 19).
+- Lighthouse CI is not in the workflow yet: there are no real screens to measure. It is planned with the budgets in P8. Ladle stories start in P1 with the UI kit.
+- No router yet: `react-router` and `RequireRole` arrive in P1/P2 with `AppShell` and sign-in.
+
+Open issues / risks:
+- **Sentry test event not sent to a real project:** no DSN is available. The test event is proven with the real SDK and an in-memory transport (`sentry.test.ts`). When `VITE_SENTRY_DSN` is set, the shell shows a "Send Sentry test event" button (non-prod) to confirm in the Sentry UI.
+- **CI has not run on GitHub yet** at the time of writing; every CI step passes locally. Check the first run after the push. The workflow's staging API URL (`https://api.staging.wehum.app`) is a placeholder.
+- `openapi.yaml` is still the backend's hand-written outline, so `api-types.ts` is only as exact as that file. Feature code should not rely on it for response shapes until the backend generates the contract.
+- For P2: the backend sets the `wh_csrf` cookie without a `Domain`. If the CMS and API are on different subdomains, the CMS cannot read it after a page reload, so the silent refresh on load would fail. Needs a cookie domain option in the backend (or same-origin hosting).
+- Sentry with Replay is most of the 158 KB initial load. If the budget gets tight, load Replay after first paint.
+
+Evidence: Playwright screenshots `test-results/p0-shell-dark.png` and `test-results/p0-shell-light.png` (not committed; uploaded as a CI artifact).
+
+Status: ✅ done

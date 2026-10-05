@@ -8,3 +8,7 @@ build/
 .dart_tool/
 *.iml
 .idea/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
