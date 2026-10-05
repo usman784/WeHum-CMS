@@ -559,3 +559,49 @@ Open issues / risks:
 Evidence: Playwright screenshots `test-results/p0-shell-dark.png` and `test-results/p0-shell-light.png` (not committed; uploaded as a CI artifact).
 
 Status: ✅ done
+
+Follow-up (same day): the first GitHub CI run failed on one test that expected the release name `dev` (CI sets the git sha). Fixed in the next commit.
+
+### Phase P1 — UI kit
+Date: 2026-10-05
+
+Built:
+- All `ui` primitives from §5, tokens only: `Button`, `IconButton`, `Card`, `SectionCard`, `KpiTile`, `Badge`, `StatusText`, `Chip`, `TabPills`, `Tabs` (underline and vertical), `Segmented`, `Switch`, `Checkbox`, `Select`, `Input`, `SearchInput`, `Textarea` (counter), `NumberInput`, `TimeInput` (UTC + Berlin, New York, Lahore, Sydney), `DatePicker`, `FileDrop` (type/size check, progress, retry, cancel), `AudioPreview`, `ImagePicker` (1:1 crop, minimum size), `DataTable` (sort, column menu, selection, row click, virtual rows, loading/empty/error, cursor pagination), `EmptyState`, `ErrorState` (traceId), `NoPermission`, `Skeleton`, `Dialog`, `ConfirmDialog` (typed confirmation), `Drawer`, `Toast`, `Tooltip`, `Menu`, `PhonePreview`, `LiveDot`, `Sparkline`, `StatBar`, `SidebarNav`, `PageHeader`, `DragList`, `AuditStamp`.
+- `AppShell` (skip link, top bar with connection pill and theme switch, offline banner) and `Sidebar` by role (248 px; icons only under 1200 px; moderation badge; user card with sign out).
+- Router with one placeholder page per screen, `RequireRole` guard with the "No permission" state, "Page not found".
+- 37 Ladle stories in 9 files (`pnpm stories`). The same story files feed the gallery page `/kit` and the automated checks.
+- `lib/format.ts`, `lib/tz.ts`, `lib/session.ts`, `hooks/useRole.ts`, `hooks/useOnline.ts`.
+
+Tests run:
+- `pnpm test` → 219 passed, 0 failed (15 files). New in P1: every story rendered and checked with axe (39), controls (11), fields (18), overlays (14), table/charts/states (17), media (17), layout and drag list (11), shell/routes/roles (26), format and time zones (8).
+- `pnpm e2e` (Chrome, production build) → 19 passed: axe with colour contrast on every primitive in dark and light; dialog, menu and toast in both themes; sidebar width, colours, collapse under 1200 px; nav and "No permission" per role; skip link; table sort/select/hide column; 1,000 virtual rows; drag list by keyboard and by mouse; local time previews.
+- `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm build`, `pnpm stories:build` → clean. `pnpm size` → 185.3 KB gzip initial load (budget 250 KB).
+
+Bugs found → fixed:
+- Closing a dialog did not return keyboard focus to the button that opened it → the dialog now remembers and restores it.
+- A button inside a clickable table row also opened the row → clicks on buttons, links, checkboxes and fields no longer do.
+- Rows with no value were not kept last when sorting, and number columns sorted descending on the first click → empty values stay last; every column goes ascending, descending, off.
+- Drag list: the "Picked up…" screen-reader message was replaced at once by a position message → a position is announced only when it changes.
+- Light theme failed WCAG AA again on tinted backgrounds → `warning` #B45309 → #92400E, `danger-text` #C53030 → #9B2C2C, new token `success-text` #166534 for green text (`success` stays for dots and bars). The count on an active filter pill lost its 80 % opacity.
+- Initial bundle had grown to 223 KB → Sentry Replay now loads in its own chunk after startup (185 KB).
+- Test environment only: jsdom's `AbortSignal` is rejected by Node's `Request` (used by react-router and MSW) → custom Vitest environment keeps Node's.
+
+Decisions / deviations from spec:
+- **Sidebar labels and grouping follow spec §9, not the design file.** `Sidebar.dc.html` has an "OVERVIEW" section and older labels ("Sounds & Bells", "SOS Content", "Users & Members"); the spec is newer. Look and sizes follow the design.
+- **Top bar:** the design has none, but §6.3 puts the connection pill in a top bar. A slim row above the page header holds the pill and the theme switch.
+- `Select` and `DatePicker` use the browser's native controls, styled (the design uses native selects). Radix Select is not used.
+- `ImagePicker` crops to the centred square automatically; there is no manual crop handle.
+- `Textarea` does not cut text at the limit: it shows the counter in red and marks the field invalid, and the form schema blocks the save.
+- New tokens: `sidebar` (#111315 from the design) and `success-text`. Extra primitives not listed in §5 but needed by it: `Menu`, `Dialog`, `SearchInput`, `StatusText`, `NoPermission`.
+- `RequireRole` was built here instead of P2, to test the sidebar and routes by role.
+- **Temporary:** `?as=<role>` opens the shell as a demo admin (`src/app/preview.ts`), because sign-in is P2. It is off when `VITE_ENV=prod` and is removed in P2.
+
+Open issues / risks:
+- Visual match was checked against `Sidebar.dc.html` and `01_Main.png` by measured sizes and colours, and by eye on screenshots. No pixel comparison.
+- The offline banner shows, but nothing disables mutations yet (there are none until P3).
+- Initial load is 185 KB of the 250 KB budget before any feature code. Feature pages must stay lazy.
+- Open items from P0 still stand (no Sentry DSN, hand-written `openapi.yaml`, `wh_csrf` cookie domain).
+
+Evidence: `test-results/p1-shell-dark.png`, `p1-shell-light.png`, `p1-kit-dark.png`, `p1-kit-light.png` (CI artifact).
+
+Status: ✅ done

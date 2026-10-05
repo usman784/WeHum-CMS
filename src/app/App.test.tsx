@@ -1,67 +1,182 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { createMemoryRouter, RouterProvider } from 'react-router';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createQueryClient } from '../lib/query';
-import { getTheme, initTheme, setTheme } from '../lib/theme';
-import { App } from './App';
+import type { Role } from '../lib/rbac';
+import { session } from '../lib/session';
+import { getTheme, initTheme } from '../lib/theme';
+import { a11yViolations } from '../test/render';
+import { navFor } from './layout/Sidebar';
+import { applyPreviewRole, previewAdmin } from './preview';
 import { Providers } from './providers';
+import { routes } from './router';
 
-const shell = () =>
+afterEach(() => act(() => session.set(null)));
+
+function open(path: string, role?: Role) {
+  if (role) session.set(previewAdmin(role));
+  const router = createMemoryRouter(routes, { initialEntries: [path] });
   render(
     <Providers client={createQueryClient()}>
-      <App />
+      <RouterProvider router={router} />
     </Providers>,
   );
+  return router;
+}
+
+const nav = () => screen.getByRole('navigation', { name: 'CMS navigation' });
+const links = () =>
+  within(nav())
+    .getAllByRole('link')
+    .map((a) => a.textContent?.replace(/\d+ to review$/, '').trim());
 const htmlTheme = () => document.documentElement.dataset.theme;
 
-describe('shell', () => {
-  it('renders in the dark theme by default', () => {
-    initTheme();
-    shell();
-    expect(htmlTheme()).toBe('dark');
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The CMS foundation is ready');
-    expect(screen.getByRole('status')).toHaveTextContent('Offline');
-    expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
+describe('sidebar by role (spec §6.2)', () => {
+  const all = [
+    'Dashboard', 'Analytics', 'Sessions', 'Programs', 'Challenges', 'Daily Messages', 'Today screen', 'Themes', 'Teachers', 'Sounds', 'SoS',
+    'Group meditation', 'Dedications & gratitude', 'Subscriptions', 'Users', 'Push notifications', 'Settings',
+  ]; // prettier-ignore
+
+  it.each<[Role, string[]]>([
+    ['owner', all],
+    ['admin', all],
+    ['editor', all.filter((l) => l !== 'Dedications & gratitude' && l !== 'Settings')],
+    ['moderator', ['Dashboard', 'Dedications & gratitude']],
+  ])('%s sees the right links', (role, expected) => {
+    open('/', role);
+    expect(links()).toEqual(expected);
   });
 
-  it('switches to light and back, and remembers the choice', async () => {
+  it('groups links under the section names from the spec and drops empty sections', () => {
+    expect(navFor('owner').map((s) => s.section)).toEqual(['CONTENT', 'COMMUNITY', 'AUDIENCE & REVENUE', '']);
+    expect(navFor('moderator').map((s) => s.section)).toEqual(['CONTENT', 'COMMUNITY']);
+    expect(navFor(undefined)).toEqual([]);
+  });
+
+  it('marks the current page and shows the moderation badge', () => {
+    expect(navFor('moderator', 7)[1]?.items[0]).toMatchObject({ key: 'moderation', badge: 7 });
+    open('/sessions', 'owner');
+    expect(within(nav()).getByRole('link', { name: 'Sessions' })).toHaveAttribute('aria-current', 'page');
+    expect(within(nav()).getByRole('link', { name: 'Dashboard' })).not.toHaveAttribute('aria-current');
+  });
+
+  it('shows the admin name, role and initials', () => {
+    open('/', 'owner');
+    expect(within(nav()).getByText('Raphael Reiter')).toBeInTheDocument();
+    expect(within(nav()).getByText('RR')).toBeInTheDocument();
+    expect(within(nav()).getByText(/Owner/)).toBeInTheDocument();
+  });
+});
+
+describe('routes', () => {
+  it('a link opens its page inside the shell', async () => {
+    open('/', 'owner');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Dashboard');
+    await userEvent.click(within(nav()).getByRole('link', { name: 'Themes' }));
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Themes');
+    expect(screen.getByText('It arrives with build phase P3.')).toBeInTheDocument();
+  });
+
+  it('a page outside the role shows "No permission" instead of the page', () => {
+    open('/settings', 'editor');
+    expect(screen.getByText('No permission')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 1, name: 'Settings' })).not.toBeInTheDocument();
+  });
+
+  it.each<[Role, string, boolean]>([
+    ['moderator', '/moderation', true],
+    ['moderator', '/sessions', false],
+    ['moderator', '/users', false],
+    ['editor', '/moderation', false],
+    ['editor', '/notifications', true],
+    ['admin', '/settings', true],
+  ])('%s on %s → allowed: %s', (role, path, allowed) => {
+    open(path, role);
+    expect(!!screen.queryByText('No permission')).toBe(!allowed);
+  });
+
+  it('an unknown address shows "Page not found"', () => {
+    open('/nope', 'owner');
+    expect(screen.getByText('Page not found')).toBeInTheDocument();
+  });
+
+  it('without a session there is no shell and no navigation', () => {
+    open('/');
+    expect(screen.queryByRole('navigation', { name: 'CMS navigation' })).not.toBeInTheDocument();
+    expect(screen.getByText('Sign-in arrives with build phase P2.')).toBeInTheDocument();
+  });
+
+  it('sign out leaves the shell', async () => {
+    open('/', 'admin');
+    await userEvent.click(within(nav()).getAllByRole('button', { name: 'Sign out' })[0]!);
+    expect(screen.queryByRole('navigation', { name: 'CMS navigation' })).not.toBeInTheDocument();
+    expect(session.admin).toBeNull();
+  });
+
+  it('the component gallery loads at /kit', async () => {
+    open('/kit', 'owner');
+    expect(await screen.findByRole('heading', { level: 1, name: 'UI kit' }, { timeout: 5000 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'DataTable' })).toBeInTheDocument();
+  });
+});
+
+describe('shell', () => {
+  it('has a skip link, one main landmark, the connection pill, and no accessibility violations', async () => {
+    open('/', 'owner');
+    expect(screen.getByRole('link', { name: 'Skip to content' })).toHaveAttribute('href', '#main');
+    expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
+    expect(screen.getByRole('status')).toHaveTextContent('Offline');
+    expect(await a11yViolations()).toEqual([]);
+  });
+
+  it('switches between dark and light and remembers the choice', async () => {
     initTheme();
-    shell();
+    open('/', 'owner');
+    expect(htmlTheme()).toBe('dark');
     await userEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
     expect(htmlTheme()).toBe('light');
     expect(localStorage.getItem('wh_theme')).toBe('light');
     await userEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     expect(htmlTheme()).toBe('dark');
-    expect(localStorage.getItem('wh_theme')).toBe('dark');
   });
 
-  it('renders in the light theme when it was saved', () => {
+  it('starts in the saved theme and ignores a bad saved value', () => {
     localStorage.setItem('wh_theme', 'light');
     initTheme();
-    shell();
-    expect(htmlTheme()).toBe('light');
-    expect(screen.getByRole('button', { name: 'Switch to dark theme' })).toBeInTheDocument();
-  });
-
-  it('ignores a bad saved value', () => {
+    expect(getTheme()).toBe('light');
     localStorage.setItem('wh_theme', 'pink');
     initTheme();
     expect(getTheme()).toBe('dark');
   });
 
-  it('shows every button variant, with the loading one disabled', () => {
-    shell();
-    for (const name of ['Primary', 'Secondary', 'Outline', 'Danger', 'Ghost']) expect(screen.getByRole('button', { name })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Loading' })).toBeDisabled();
-    setTheme('dark');
+  it('shows a banner while the browser is offline', () => {
+    const onLine = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    open('/', 'owner');
+    expect(screen.getByRole('alert')).toHaveTextContent('You are offline');
+    onLine.mockReturnValue(true);
+    act(() => void window.dispatchEvent(new Event('online')));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+});
+
+describe('preview role (P1 only)', () => {
+  it('reads ?as=<role> and ignores anything else', () => {
+    applyPreviewRole('?as=editor');
+    expect(session.admin?.role).toBe('editor');
+    act(() => session.set(null));
+    applyPreviewRole('?as=superuser');
+    expect(session.admin).toBeNull();
+    applyPreviewRole('');
+    expect(session.admin).toBeNull();
   });
 });
 
 describe('tokens.css', () => {
   const css = readFileSync('src/styles/tokens.css', 'utf8');
   const vars = (block: string) => [...block.matchAll(/--c-[a-z-]+(?=:)/g)].map((m) => m[0]).sort();
-  const [dark = '', light = ''] = css.split(':root[data-theme="light"]');
+  const [dark = '', light = ''] = css.split('\n[data-theme="light"]');
 
   it('defines the same set of tokens for dark and light', () => {
     expect(vars(dark).length).toBeGreaterThan(20);

@@ -19,7 +19,7 @@ export default defineConfig({
     // out of the initial load. Naming them by hand moved shared React code into the "charts" chunk.
   },
   test: {
-    environment: 'jsdom',
+    environment: './src/test/env.ts', // jsdom + Node's AbortController (see the file)
     environmentOptions: { jsdom: { url: 'http://localhost:5173' } },
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],

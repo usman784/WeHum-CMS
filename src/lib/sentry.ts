@@ -17,10 +17,7 @@ export function initSentry(overrides: Partial<Sentry.BrowserOptions> = {}): bool
     environment: env.name,
     release: env.release,
     sendDefaultPii: false,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({ maskAllText: true, maskAllInputs: true, blockAllMedia: true }),
-    ],
+    integrations: [Sentry.browserTracingIntegration()],
     tracesSampleRate: env.name === 'prod' ? 0.1 : 1,
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 1,
@@ -33,6 +30,15 @@ export function initSentry(overrides: Partial<Sentry.BrowserOptions> = {}): bool
     ...overrides,
   });
   enabled = true;
+  // Replay loads after startup, in its own chunk. It records nothing until an error happens (rates above),
+  // so starting it a moment later loses nothing. Tests pass `integrations: []` and skip it.
+  if (!overrides.integrations) {
+    void import('./sentry-replay')
+      .then(({ replayIntegration }) =>
+        Sentry.addIntegration(replayIntegration({ maskAllText: true, maskAllInputs: true, blockAllMedia: true })),
+      )
+      .catch(() => {}); // a failed chunk load must never break the app
+  }
   return true;
 }
 

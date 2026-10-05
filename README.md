@@ -13,6 +13,8 @@ pnpm dev                  # http://localhost:5173
 VITE_MOCKS=1 pnpm dev     # same, against the built-in mock API (no backend needed)
 ```
 
+Until sign-in is built (phase P2), open the shell as a demo admin with `?as=owner`, `?as=admin`, `?as=editor` or `?as=moderator`, for example `http://localhost:5173/?as=owner`. The component gallery is at `/kit?as=owner`. Neither works in a production build (`VITE_ENV=prod`).
+
 ## Commands
 
 | Command | What it does |
@@ -22,6 +24,7 @@ VITE_MOCKS=1 pnpm dev     # same, against the built-in mock API (no backend need
 | `pnpm test` | Unit and component tests (Vitest + Testing Library + MSW) |
 | `pnpm build` then `pnpm size` | Production build, then the 250 KB gzip budget for the initial load |
 | `pnpm e2e` | Playwright against the production build. Run `pnpm build` first. `PW_CHANNEL=chrome` uses the installed Chrome. |
+| `pnpm stories` | Ladle: every UI primitive as a story, with a theme switch. `pnpm stories:build` builds it. |
 | `pnpm api:sync` | Copies `openapi.yaml` and `socket-events.ts` from `../backend` |
 | `pnpm api:types` | Regenerates `src/lib/api-types.ts` from `openapi/openapi.yaml`. Never edit that file by hand. |
 

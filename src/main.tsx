@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles/globals.css';
 import { App } from './app/App';
+import { applyPreviewRole } from './app/preview';
 import { Providers } from './app/providers';
 import { env } from './lib/env';
 import { initSentry } from './lib/sentry';
@@ -10,6 +11,7 @@ import { initTheme } from './lib/theme';
 async function start() {
   initTheme();
   initSentry();
+  applyPreviewRole(); // P1 only, see app/preview.ts
   // Local work without a backend: `VITE_MOCKS=1 pnpm dev`. The worker is never part of a production build.
   if (import.meta.env.DEV && env.mocks) {
     const { worker } = await import('./mocks/browser');

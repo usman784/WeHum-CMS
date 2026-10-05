@@ -1,6 +1,8 @@
 /* WeHum CMS tokens (spec §3). Values are "R G B" so Tailwind can apply alpha: rgb(var(--c-ember) / 0.12) */
-:root, :root[data-theme="dark"] {
+/* The attribute also works on any element, so a part of the page can pin a theme (PhonePreview is always dark). */
+:root, [data-theme="dark"] {
   --c-bg: 11 13 14;            /* #0B0D0E */
+  --c-sidebar: 17 19 21;       /* #111315 (design/source/Sidebar.dc.html) */
   --c-surface: 23 25 27;       /* #17191B */
   --c-surface-alt: 30 33 36;   /* #1E2124 */
   --c-input: 15 17 18;         /* #0F1112 */
@@ -19,6 +21,7 @@
   --c-teal: 18 60 58;          /* #123C3A */
   --c-teal-text: 159 227 214;  /* #9FE3D6 */
   --c-success: 74 222 128;     /* #4ADE80 */
+  --c-success-text: 74 222 128;/* same as success in dark; light needs a darker green for text */
   --c-warning: 255 155 112;    /* #FF9B70 */
   --c-danger: 217 72 59;       /* #D9483B */
   --c-danger-text: 255 138 117;/* #FF8A75 */
@@ -29,15 +32,17 @@
   --c-lilac-text: 205 182 230; /* #CDB6E6 */
   color-scheme: dark;
 }
-:root[data-theme="light"] {
-  --c-bg: 247 245 242; --c-surface: 255 255 255; --c-surface-alt: 241 238 234; --c-input: 244 241 237;
+[data-theme="light"] {
+  --c-bg: 247 245 242; --c-sidebar: 255 255 255; --c-surface: 255 255 255; --c-surface-alt: 241 238 234; --c-input: 244 241 237;
   --c-border: 228 224 218; --c-border-strong: 214 209 202; --c-outline: 189 182 174;
-  /* WCAG AA (spec §3 "verify"): three derived light values failed 4.5:1 in axe and were darkened:
-     text-faint #8A8F94 → #666B70, ember-text #C2471A → #A63A12, on-ember #FFFFFF → #2A0E02 (same as dark). */
+  /* WCAG AA (spec §3 "verify"): these derived light values failed 4.5:1 in axe and were darkened:
+     text-faint #8A8F94 → #666B70, ember-text #C2471A → #A63A12, on-ember #FFFFFF → #2A0E02 (same as dark),
+     warning #B45309 → #92400E, danger-text #C53030 → #9B2C2C (both fail on their own 10–15 % tint),
+     and green text uses the new success-text #166534 (success #16A34A stays for dots and bars). */
   --c-text: 20 22 24; --c-text-body: 43 47 51; --c-text-soft: 62 67 72; --c-text-muted: 92 97 102; --c-text-faint: 102 107 112;
   --c-ember: 232 98 44; --c-ember-text: 166 58 18; --c-ember-soft: 217 105 58; --c-on-ember: 42 14 2;
-  --c-teal: 221 243 239; --c-teal-text: 15 94 85; --c-success: 22 163 74; --c-warning: 180 83 9;
-  --c-danger: 197 48 48; --c-danger-text: 197 48 48; --c-danger-border: 245 181 174;
+  --c-teal: 221 243 239; --c-teal-text: 15 94 85; --c-success: 22 163 74; --c-success-text: 22 101 52; --c-warning: 146 64 14;
+  --c-danger: 197 48 48; --c-danger-text: 155 44 44; --c-danger-border: 245 181 174;
   --c-info: 227 236 247; --c-info-text: 44 82 130; --c-lilac: 238 230 245; --c-lilac-text: 91 62 122;
   color-scheme: light;
 }

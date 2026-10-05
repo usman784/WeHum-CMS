@@ -14,5 +14,5 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["src", "tailwind.config.ts", "vite.config.ts", "playwright.config.ts", "e2e"]
+  "include": ["src", ".ladle","tailwind.config.ts", "vite.config.ts", "playwright.config.ts", "e2e"]
 }

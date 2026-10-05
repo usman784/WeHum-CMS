@@ -7,13 +7,15 @@ export default {
   darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
+      // The sidebar collapses to icons under 1200 px (spec §5).
+      screens: { nav: '1200px' },
       colors: {
-        bg: c('bg'), surface: c('surface'), 'surface-alt': c('surface-alt'), input: c('input'),
+        bg: c('bg'), sidebar: c('sidebar'), surface: c('surface'), 'surface-alt': c('surface-alt'), input: c('input'),
         border: c('border'), 'border-strong': c('border-strong'), outline: c('outline'),
         text: { DEFAULT: c('text'), body: c('text-body'), soft: c('text-soft'), muted: c('text-muted'), faint: c('text-faint') },
         ember: { DEFAULT: c('ember'), text: c('ember-text'), soft: c('ember-soft'), on: c('on-ember') },
         teal: { DEFAULT: c('teal'), text: c('teal-text') },
-        success: c('success'), warning: c('warning'),
+        success: { DEFAULT: c('success'), text: c('success-text') }, warning: c('warning'),
         danger: { DEFAULT: c('danger'), text: c('danger-text'), border: c('danger-border') },
         info: { DEFAULT: c('info'), text: c('info-text') },
         lilac: { DEFAULT: c('lilac'), text: c('lilac-text') },

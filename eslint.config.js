@@ -7,7 +7,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', 'starter', 'design', 'public', 'playwright-report', 'test-results', 'src/lib/api-types.ts'] },
+  { ignores: ['dist', 'dist-stories','coverage', 'starter', 'design', 'public', 'playwright-report', 'test-results', 'src/lib/api-types.ts'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...tailwind.configs['flat/recommended'],
