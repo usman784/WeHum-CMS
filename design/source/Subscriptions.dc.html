@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS subscriptions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 1300px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="subscriptions" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Subscriptions</h1>
+<span style="font-size: 14px; color: #A0A4A8">Live from RevenueCat (App Store + Google Play). Prices are set in RevenueCat and the stores, so the app updates without a new release.</span>
+</div>
+<button type="button" style="height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Export CSV</button>
+<a href="#" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 12px; background: #FF7A45; color: #2A0E02; font-size: 14px; font-weight: 700; text-decoration: none">Open RevenueCat<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5H5V6h5"></path></svg></a>
+</header>
+
+<section aria-label="Key numbers" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px">
+<sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+<div style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #A0A4A8">{{ k.label }}</span>
+<span style="font-size: 26px; font-weight: 700">{{ k.value }}</span>
+<span style="font-size: 13px; color: #A0A4A8">{{ k.sub }}</span>
+</div>
+</sc-for>
+</section>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start">
+<section style="background: #17191B; border: 1.5px solid #FF7A45; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 10px"><h2 style="margin: 0; font-size: 16px; font-weight: 600; flex-grow: 1">Founding 1,000 · $59/year</h2><span style="{{ offerChip }}">{{ offerStatus }}</span></div>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 32px; font-weight: 700">{{ taken }}</span><span style="font-size: 15px; color: #A0A4A8">of 1,000 spots taken · the app shows “{{ left }} spots left”</span></div>
+<div style="height: 10px; border-radius: 999px; background: #2A2D30"><div style="{{ bar }}"></div></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; font-size: 13px">
+<div style="background: #0F1112; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><span style="color: #A0A4A8">Started</span><span style="font-weight: 600">Oct 5, 2026</span></div>
+<div style="background: #0F1112; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><span style="color: #A0A4A8">Ends</span><span style="font-weight: 600">At 1,000 members</span></div>
+<div style="background: #0F1112; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><span style="color: #A0A4A8">After it ends</span><span style="font-weight: 600">$79/year</span></div>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #A0A4A8">The cap is hard: at 1,000 the app switches to $79/year by itself.</p>
+<div style="display: flex; gap: 10px">
+<button type="button" onClick="{{ toggleOffer }}" style="height: 42px; padding: 0 16px; border-radius: 10px; border: 1px solid #5A3A2A; background: transparent; color: #FF9B70; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ offerBtn }}</button>
+<a href="#" style="height: 42px; padding: 0 16px; border-radius: 10px; border: 1px solid #3A3E42; color: #F2F2F2; font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center">Email Founding members</a>
+</div>
+</section>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">What membership unlocks</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; font-size: 13px">
+<div style="background: #0F1112; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; letter-spacing: 1px; color: #4ADE80; font-size: 11px">FREE</span><span>“Free for you”: 24 meditations from Raphael’s online library</span></div>
+<div style="background: #0F1112; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700; letter-spacing: 1px; color: #FF9B70; font-size: 11px">MEMBERS</span><span>Extended library · 118 premium meditations</span><span>Meditation of the Day · 10, 30, 45 min</span><span>Group meditations · 4 programs</span><span>Silence Room · customizable meditations</span><span>Daily message · SoS sessions</span><span>Dedications · downloads</span></div>
+</div>
+<span style="font-size: 13px; color: #A0A4A8">Each session’s Free / Premium switch is in the <a href="SessionEditor.dc.html" style="font-weight: 600; text-decoration: none">session editor</a>.</span>
+</section>
+</div>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #23262A; flex-wrap: wrap">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600; flex-grow: 1">Plans</h2>
+<span style="font-size: 13px; color: #A0A4A8">Product IDs must match App Store Connect, Google Play and RevenueCat</span>
+</div>
+<div style="display: grid; grid-template-columns: 1.6fr 1fr 1.6fr 0.9fr 0.8fr 1fr; gap: 12px; padding: 12px 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; color: #858A8F; border-bottom: 1px solid #23262A"><span>PLAN</span><span>PRICE</span><span>PRODUCT ID</span><span>TRIAL</span><span>ACTIVE</span><span>SHOWN IN APP</span></div>
+<sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
+<div style="display: grid; grid-template-columns: 1.6fr 1fr 1.6fr 0.9fr 0.8fr 1fr; gap: 12px; align-items: center; padding: 0 20px; min-height: 56px; border-bottom: 1px solid #23262A; font-size: 14px">
+<span style="font-weight: 600">{{ p.name }}</span><span>{{ p.price }}</span><span style="font-family: ui-monospace, monospace; font-size: 13px; color: #C9CCCF">{{ p.id }}</span><span style="color: #A0A4A8">{{ p.trial }}</span><span>{{ p.active }}</span><span style="{{ p.shownStyle }}">{{ p.shown }}</span>
+</div>
+</sc-for>
+</section>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; align-items: start">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-bottom: 1px solid #23262A; flex-wrap: wrap">
+<h2 style="margin: 0 8px 0 0; font-size: 16px; font-weight: 600">Members</h2>
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6"><button type="button" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+<a href="UserDetail.dc.html" style="display: grid; grid-template-columns: 1.6fr 1.3fr 1fr 1.2fr; gap: 12px; align-items: center; padding: 0 20px; min-height: 56px; border-bottom: 1px solid #23262A; font-size: 14px; color: #F2F2F2; text-decoration: none">
+<span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{ r.name }}</span><span style="font-size: 12px; color: #A0A4A8">{{ r.who }}</span></span>
+<span style="color: #C9CCCF">{{ r.plan }}</span>
+<span style="{{ r.statusStyle }}">{{ r.status }}</span>
+<span style="font-size: 13px; color: #A0A4A8">{{ r.next }}</span>
+</a>
+</sc-for>
+</section>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px">
+<h2 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600">Latest events</h2>
+<sc-for list="{{ events }}" as="e" hint-placeholder-count="6">
+<div style="display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid #23262A">
+<span style="{{ e.dot }}"></span>
+<span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1"><span style="font-size: 14px; font-weight: 600">{{ e.what }}</span><span style="font-size: 12px; color: #A0A4A8">{{ e.meta }}</span></span>
+</div>
+</sc-for>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'All', offerLive: true }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var kpis = [
+      { label: 'PAYING MEMBERS', value: '600', sub: 'Founding 412 · Monthly 188' },
+      { label: 'IN FREE TRIAL', value: '112', sub: 'Annual and monthly, 7 days' },
+      { label: 'MONTHLY REVENUE', value: '$3,904', sub: 'Before store fees' },
+      { label: 'TRIAL → PAID', value: '46%', sub: 'Last 30 days' },
+      { label: 'CANCELLED', value: '18', sub: 'This month · 4 refunds' }
+    ];
+    var live = s.offerLive;
+    var plans = [
+      { name: 'Annual · Founding 1,000', price: '$59 / year', id: 'wehum_annual_founding', trial: '7 days', active: '412', shown: live ? 'Yes · pre-selected' : 'No · ended', shownStyle: live ? 'color:#4ADE80;font-weight:600;font-size:13px;' : 'color:#A0A4A8;font-size:13px;' },
+      { name: 'Annual', price: '$79 / year', id: 'wehum_annual', trial: '7 days', active: '0', shown: live ? 'After the offer' : 'Yes', shownStyle: live ? 'color:#A0A4A8;font-size:13px;' : 'color:#4ADE80;font-weight:600;font-size:13px;' },
+      { name: 'Monthly', price: '$9.99 / month', id: 'wehum_monthly', trial: '7 days', active: '188', shown: 'Yes', shownStyle: 'color:#4ADE80;font-weight:600;font-size:13px;' }
+    ];
+    var tabs = ['All', 'Trial', 'Annual', 'Monthly', 'Payment problem', 'Cancelled'].map(function (t) {
+      var on = s.tab === t;
+      return { label: t, pick: function () { self.setState({ tab: t }); }, style: 'min-height:34px;padding:0 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;' + (on ? 'background:#FF7A45;color:#2A0E02;border:1px solid #FF7A45;' : 'background:#0F1112;color:#C9CCCF;border:1px solid #2A2D30;') };
+    });
+    var st = function (k) {
+      var c = { Trial: 'color:#9FE3D6;', Annual: 'color:#4ADE80;', Monthly: 'color:#4ADE80;', 'Payment problem': 'color:#FF9B70;', Cancelled: 'color:#A0A4A8;' }[k];
+      return 'font-size:13px;font-weight:600;' + c;
+    };
+    var data = [
+      ['Marcus', 'Guest · App Store', 'Annual · Founding', 'Trial', 'Charges Oct 12'],
+      ['Elena K.', 'elena@gmail.com · App Store', 'Annual · Founding', 'Annual', 'Renews Oct 6, 2027'],
+      ['Aiko T.', 'aiko@gmail.com · App Store', 'Monthly', 'Monthly', 'Renews Nov 3'],
+      ['Lukas B.', 'Guest · Google Play', 'Monthly', 'Payment problem', 'Access until Oct 20'],
+      ['David O.', 'david@gmail.com · Google Play', 'Monthly', 'Cancelled', 'Access ends Oct 28'],
+      ['Priya N.', 'priya@gmail.com · App Store', 'Annual · Founding', 'Trial', 'Charges Oct 13']
+    ];
+    var rows = data.filter(function (d) { return s.tab === 'All' || d[3] === s.tab; }).map(function (d) {
+      return { name: d[0], who: d[1], plan: d[2], status: d[3], statusStyle: st(d[3]), next: d[4] };
+    });
+    var dot = function (c) { return 'width:10px;height:10px;border-radius:999px;margin-top:5px;flex-shrink:0;background:' + c + ';'; };
+    var events = [
+      ['Started free trial', 'Priya N. · Founding · 12 min ago', '#9FE3D6'],
+      ['Trial converted to paid', 'Elena K. · $59/year · 1 h ago', '#4ADE80'],
+      ['New monthly member', 'Aiko T. · $9.99 · 3 h ago', '#4ADE80'],
+      ['Payment problem', 'Lukas B. · Google Play grace period · 5 h ago', '#FF7A45'],
+      ['Auto-renew turned off', 'David O. · keeps access to Oct 28 · yesterday', '#A0A4A8'],
+      ['Refund by Apple', 'Guest user · $9.99 · yesterday', '#FF7A45']
+    ].map(function (e) { return { what: e[0], meta: e[1], dot: dot(e[2]) }; });
+    return {
+      kpis: kpis, plans: plans, tabs: tabs, rows: rows, events: events,
+      taken: '412', left: live ? '588' : '0',
+      bar: 'height:10px;border-radius:999px;background:#FF7A45;width:41%;',
+      offerStatus: live ? 'LIVE' : 'ENDED', offerChip: 'font-size:11px;font-weight:700;letter-spacing:1px;border-radius:999px;padding:4px 10px;' + (live ? 'background:rgba(74,222,128,0.14);color:#4ADE80;' : 'background:#23262A;color:#A0A4A8;'),
+      offerBtn: live ? 'End offer now' : 'Offer ended · app shows $79',
+      toggleOffer: function () { self.setState({ offerLive: !live }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

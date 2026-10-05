@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS session editor</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 1100px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="sessions" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<a href="Sessions.dc.html" aria-label="Back to sessions" style="width: 44px; height: 44px; border-radius: 12px; background: #17191B; border: 1px solid #2A2D30; color: #F2F2F2; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 1.2px; color: #FF9B70">SESSIONS · EDIT</span>
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">{{ title }}</h1>
+</div>
+<span style="font-size: 13px; color: #A0A4A8">Autosaved 2 min ago</span>
+<button type="button" style="height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Save draft</button>
+<button type="button" style="height: 44px; padding: 0 20px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Publish</button>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">What is it?</h2>
+<div role="radiogroup" aria-label="Session type" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{ types }}" as="t" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{ t.on }}" onClick="{{ t.pick }}" style="{{ t.style }}"><span style="font-size: 15px; font-weight: 700">{{ t.label }}</span><span style="font-size: 12px; line-height: 1.4; opacity: 0.8">{{ t.sub }}</span></button>
+</sc-for>
+</div>
+
+<sc-if value="{{ isYouTube }}" hint-placeholder-val="{{ false }}">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">YouTube link
+<input type="url" value="https://www.youtube.com/watch?v=Qm7r2XyK8aE" style="height: 46px; padding: 0 14px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px">
+</label>
+<div style="display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 14px; background: #0F1112; border: 1px solid #2A2D30">
+<span style="width: 120px; height: 68px; border-radius: 10px; background: #2A1F33 url('img/lake.jpg') center/cover; flex-shrink: 0"></span>
+<span style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 600">Guided Meditation for Unconditional Love &amp; Healing</span><span style="font-size: 12px; color: #A0A4A8">Title, length and thumbnail filled from YouTube · 40:00</span></span>
+</div>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">Online-library meditations are always free and show as “Free for you” to free users. Members see them without a free label. Only the videos you add here appear in the app.</span>
+</sc-if>
+
+<sc-if value="{{ isUpload }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 14px; background: #0F1112; border: 1px solid #2A2D30">
+<span style="width: 48px; height: 48px; border-radius: 12px; background: #123C3A; color: #9FE3D6; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 0"><span style="font-size: 14px; font-weight: 600">{{ fileName }}</span><span style="font-size: 12px; color: #A0A4A8">{{ fileMeta }}</span></span>
+<button type="button" style="height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Replace</button>
+</div>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">Upload the finished, edited file. Nothing is mixed or edited here.</span>
+</sc-if>
+</section>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Details</h2>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Title
+<input type="text" value="{{ title }}" style="height: 46px; padding: 0 14px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Short description <span style="font-weight: 400; color: #A0A4A8">Shown on the session page, max 160 characters</span>
+<textarea rows="2" style="padding: 12px 14px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px; resize: vertical">Stay steady when stress shows up. A grounded practice to settle your body and attention before a demanding day.</textarea>
+</label>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Theme
+<select style="height: 46px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px"><option>Breathing</option><option>Transcendent</option><option>Sleep</option><option>SoS · Panic</option></select>
+</label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Teacher
+<select style="height: 46px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px"><option>Raphael</option></select>
+</label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Good for (intent)
+<select style="height: 46px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px"><option>Stress</option><option>Focus</option><option>Sleep</option><option>Going deeper</option></select>
+</label>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Raphael’s voice
+<select style="height: 46px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px"><option>With voice</option><option>Silent</option></select>
+</label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Background sound
+<select style="height: 46px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px"><option>Nature</option><option>Silence</option><option>Deep tone</option></select>
+</label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Tags
+<input type="text" value="work stress, morning" style="height: 46px; padding: 0 14px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 15px">
+</label>
+</div>
+<span style="font-size: 12px; color: #A0A4A8">Voice and background feed the app’s library filters.</span>
+</section>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 20px">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Cover image</h2>
+<div style="{{ coverStyle }}">
+<span style="font-size: 12px; font-weight: 600; background: rgba(0,0,0,0.55); border-radius: 8px; padding: 4px 8px">{{ coverNote }}</span>
+<span style="font-size: 11px; background: rgba(0,0,0,0.55); border-radius: 8px; padding: 4px 8px">1:1, min 1200 px · drop to replace</span>
+</div>
+</section>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Access</h2>
+<sc-if value="{{ isUpload }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="Access level" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 4px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30">
+<button type="button" onClick="{{ setFree }}" style="{{ freeStyle }}">Free</button>
+<button type="button" onClick="{{ setPremium }}" style="{{ premiumStyle }}">Premium</button>
+</div>
+<sc-if value="{{ isPremium }}" hint-placeholder-val="{{ true }}">
+
+</sc-if>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Members can download
+<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45">
+</label>
+</sc-if>
+<sc-if value="{{ isYouTube }}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 14px; line-height: 1.5; color: #D9DBDD">Free for everyone. No download needed.</span>
+</sc-if>
+</section>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Publishing</h2>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px">Show in the library from
+<input type="text" value="Oct 8, 2026 · 07:00 (each user’s local time)" style="height: 40px; padding: 0 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px">
+</label>
+<a href="TodayScreen.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 40px; font-size: 14px; text-decoration: none"><span style="color: #F2F2F2">Meditation of the Day on</span><span style="font-weight: 600">Oct 12 · change</span></a>
+<a href="GroupSits.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 40px; font-size: 14px; text-decoration: none"><span style="color: #F2F2F2">Group meditation</span><span style="font-weight: 600">16:00 on Oct 8 · change</span></a>
+<div style="display: flex; align-items: center; justify-content: space-between; min-height: 40px; font-size: 14px"><span>Used in programs</span><span style="color: #A0A4A8">7-Day Autonomic Reset · Day 4</span></div>
+<div style="display: flex; align-items: center; justify-content: space-between; min-height: 40px; font-size: 14px"><span>Dedications</span><a href="Moderation.dc.html" style="font-weight: 600; text-decoration: none">128 · view</a></div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { type: 'audio', premium: true }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var on = 'height:40px;border-radius:9px;border:none;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:#FF7A45;color:#2A0E02;';
+    var off = 'height:40px;border-radius:9px;border:none;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;background:transparent;color:#A0A4A8;';
+    var types = [['audio', 'Audio', 'Upload a finished MP3, WAV or M4A'], ['video', 'Video', 'Upload a finished MP4'], ['youtube', 'YouTube link', 'Free for you · paste a link']].map(function (t) {
+      var sel = s.type === t[0];
+      return { label: t[1], sub: t[2], on: sel, pick: function () { self.setState({ type: t[0] }); }, style: 'display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px;border-radius:14px;font-family:inherit;text-align:left;cursor:pointer;color:#F2F2F2;' + (sel ? 'background:rgba(255,122,69,0.10);border:1.5px solid #FF7A45;' : 'background:#0F1112;border:1px solid #2A2D30;') };
+    });
+    var yt = s.type === 'youtube', vid = s.type === 'video';
+    return {
+      types: types, isYouTube: yt, isUpload: !yt, isPremium: s.premium,
+      title: yt ? 'Unconditional Love & Healing' : (vid ? 'Love Without Fear' : 'Steady Under Pressure'),
+      fileName: vid ? 'love_without_fear_final.mp4' : 'steady_under_pressure_final.wav',
+      fileMeta: vid ? '40:00 · 1080p · streamed to the app' : '15:00 · converted to AAC for the app · 14 MB',
+      coverNote: yt ? 'Uses the YouTube thumbnail (you can replace it)' : 'Session cover',
+      coverStyle: 'height:170px;border-radius:14px;background:#123C3A url(img/' + (yt ? 'lake' : 'ocean') + '.jpg) center/cover;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:4px;padding:12px;box-sizing:border-box;color:#F2F2F2;',
+      freeStyle: s.premium ? off : on, premiumStyle: s.premium ? on : off,
+      setFree: function () { self.setState({ premium: false }); },
+      setPremium: function () { self.setState({ premium: true }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

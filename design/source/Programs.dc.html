@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS program builder</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="programs" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Programs</h1>
+<span style="font-size: 14px; color: #A0A4A8">Multi-day protocols: one session unlocks per day</span>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New program</button>
+</header>
+
+<div style="display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start">
+<aside aria-label="Programs list" style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{ programs }}" as="p" hint-placeholder-count="4">
+<button type="button" onClick="{{ p.pick }}" style="{{ p.style }}">
+<span style="display: flex; align-items: center; gap: 8px"><span style="font-size: 15px; font-weight: 600; flex-grow: 1; text-align: left">{{ p.name }}</span><span style="{{ p.chip }}">{{ p.status }}</span></span>
+<span style="font-size: 13px; color: #A0A4A8; text-align: left">{{ p.meta }}</span>
+</button>
+</sc-for>
+</aside>
+
+<div style="display: flex; flex-direction: column; gap: 20px; min-width: 0">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: flex-start; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: #FF9B70">PREMIUM PROTOCOL · 7 DAYS</span>
+<h2 style="margin: 0; font-size: 22px; font-weight: 700">7-Day Autonomic Reset</h2>
+<span style="font-size: 14px; color: #A0A4A8">A progressive nervous system down-regulation protocol led by Raphael. 12–15 minutes every morning.</span>
+</div>
+<button type="button" style="height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Preview in app</button>
+<button type="button" style="height: 40px; padding: 0 16px; border-radius: 10px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">Save</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Unlock rule
+<select style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>Next day at 07:00</option><option>After previous day done</option><option>All at once</option></select></label>
+
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Access
+<select style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>Premium · Day 1 free</option><option>Premium</option><option>Free</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Cohort start
+<select style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>Anytime (self-paced)</option><option>Every Monday</option></select></label>
+</div>
+<div style="display: flex; gap: 24px; padding: 14px 16px; border-radius: 12px; background: #0F1112; border: 1px solid #23262A; font-size: 13px; color: #A0A4A8">
+<span><strong style="color: #F2F2F2; font-size: 15px">1,240</strong> enrolled now</span>
+<span><strong style="color: #F2F2F2; font-size: 15px">57%</strong> reach Day 4</span>
+<span><strong style="color: #F2F2F2; font-size: 15px">31%</strong> finish all 7</span>
+<span><strong style="color: #F2F2F2; font-size: 15px">101 min</strong> total length</span>
+</div>
+</section>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; margin-bottom: 4px"><h2 style="margin: 0; font-size: 16px; font-weight: 600; flex-grow: 1">Day schedule</h2><span style="font-size: 13px; color: #A0A4A8">Drag to reorder</span></div>
+<sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+<div style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: #0F1112; border: 1px solid #23262A">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="#6E7378" aria-hidden="true"><circle cx="9" cy="6" r="1.6"></circle><circle cx="15" cy="6" r="1.6"></circle><circle cx="9" cy="12" r="1.6"></circle><circle cx="15" cy="12" r="1.6"></circle><circle cx="9" cy="18" r="1.6"></circle><circle cx="15" cy="18" r="1.6"></circle></svg>
+<span style="{{ d.badge }}">{{ d.day }}</span>
+<span style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0"><span style="font-size: 15px; font-weight: 600">{{ d.title }}</span><span style="font-size: 13px; color: #A0A4A8">{{ d.meta }}</span></span>
+<span style="font-size: 13px; color: #A0A4A8; width: 60px">{{ d.len }}</span>
+<button type="button" style="height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Change session</button>
+</div>
+</sc-for>
+<button type="button" style="height: 48px; border-radius: 12px; border: 1px dashed #3A3E42; background: transparent; color: #FF9B70; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">+ Add day</button>
+</section>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0 }; }
+  renderVals() {
+    var self = this;
+    var chip = function (s) { return 'font-size:11px;font-weight:700;letter-spacing:0.6px;border-radius:999px;padding:3px 8px;' + (s === 'LIVE' ? 'background:rgba(74,222,128,0.14);color:#4ADE80;' : 'background:rgba(255,185,154,0.14);color:#FFB99A;'); };
+    var list = [
+      ['7-Day Autonomic Reset', '7 days · Raphael · 1,240 enrolled', 'LIVE'],
+      ['7-Day Steady Baseline', '7 days · Raphael · 18.4k completed', 'LIVE'],
+      ['21-Day Resilience Arc', '21 days · starts Mondays', 'LIVE'],
+      ['14-Day Sleep Repair', '14 days · 6 of 14 filled', 'DRAFT']
+    ];
+    var programs = list.map(function (p, i) {
+      var on = self.state.sel === i;
+      return {
+        name: p[0], meta: p[1], status: p[2], chip: chip(p[2]),
+        pick: function () { self.setState({ sel: i }); },
+        style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:16px;border-radius:14px;cursor:pointer;font-family:inherit;color:#F2F2F2;' + (on ? 'background:rgba(255,122,69,0.10);border:1.5px solid #FF7A45;' : 'background:#17191B;border:1px solid #23262A;')
+      };
+    });
+    var badge = function (done) { return 'width:64px;flex-shrink:0;text-align:center;font-size:12px;font-weight:700;letter-spacing:0.6px;border-radius:8px;padding:6px 0;' + (done ? 'background:#123C3A;color:#4ADE80;' : 'background:#23262A;color:#C9CCCF;'); };
+    var days = [
+      ['DAY 1', 'The Grounding Exhale', 'Breathing · free sample day', '10 min', true],
+      ['DAY 2', 'Cadence Synchronization 4s/6s', 'Breathing', '12 min', true],
+      ['DAY 3', 'Peripheral Vision & Somatic Softening', 'Body Scan', '14 min', true],
+      ['DAY 4', 'Steadiness Under Pressure', 'Breathing · 432Hz brown bed', '15 min', true],
+      ['DAY 5', 'Vagus Nerve Reset', 'Breathing · scheduled', '15 min', false],
+      ['DAY 6', 'Open Awareness & Silence', 'Transcendent · draft, needs transcript', '18 min', false],
+      ['DAY 7', 'Integration & Habit Seal', 'Graduation · finisher badge', '20 min', false]
+    ].map(function (d) { return { day: d[0], title: d[1], meta: d[2], len: d[3], badge: badge(d[4]) }; });
+    return { programs: programs, days: days };
+  }
+}
+</script>
+</body>
+</html>

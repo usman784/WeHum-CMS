@@ -1,0 +1,44 @@
+/* WeHum CMS tokens (spec §3). Values are "R G B" so Tailwind can apply alpha: rgb(var(--c-ember) / 0.12) */
+:root, :root[data-theme="dark"] {
+  --c-bg: 11 13 14;            /* #0B0D0E */
+  --c-surface: 23 25 27;       /* #17191B */
+  --c-surface-alt: 30 33 36;   /* #1E2124 */
+  --c-input: 15 17 18;         /* #0F1112 */
+  --c-border: 35 38 42;        /* #23262A */
+  --c-border-strong: 42 45 48; /* #2A2D30 */
+  --c-outline: 58 62 66;       /* #3A3E42 */
+  --c-text: 242 242 242;       /* #F2F2F2 */
+  --c-text-body: 217 219 221;  /* #D9DBDD */
+  --c-text-soft: 201 204 207;  /* #C9CCCF */
+  --c-text-muted: 160 164 168; /* #A0A4A8 */
+  --c-text-faint: 133 138 143; /* #858A8F */
+  --c-ember: 255 122 69;       /* #FF7A45 */
+  --c-ember-text: 255 155 112; /* #FF9B70 */
+  --c-ember-soft: 255 185 154; /* #FFB99A */
+  --c-on-ember: 42 14 2;       /* #2A0E02 */
+  --c-teal: 18 60 58;          /* #123C3A */
+  --c-teal-text: 159 227 214;  /* #9FE3D6 */
+  --c-success: 74 222 128;     /* #4ADE80 */
+  --c-warning: 255 155 112;    /* #FF9B70 */
+  --c-danger: 217 72 59;       /* #D9483B */
+  --c-danger-text: 255 138 117;/* #FF8A75 */
+  --c-danger-border: 122 46 34;/* #7A2E22 */
+  --c-info: 30 42 58;          /* #1E2A3A */
+  --c-info-text: 169 196 232;  /* #A9C4E8 */
+  --c-lilac: 42 31 51;         /* #2A1F33 */
+  --c-lilac-text: 205 182 230; /* #CDB6E6 */
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --c-bg: 247 245 242; --c-surface: 255 255 255; --c-surface-alt: 241 238 234; --c-input: 244 241 237;
+  --c-border: 228 224 218; --c-border-strong: 214 209 202; --c-outline: 189 182 174;
+  --c-text: 20 22 24; --c-text-body: 43 47 51; --c-text-soft: 62 67 72; --c-text-muted: 92 97 102; --c-text-faint: 138 143 148;
+  --c-ember: 232 98 44; --c-ember-text: 194 71 26; --c-ember-soft: 217 105 58; --c-on-ember: 255 255 255;
+  --c-teal: 221 243 239; --c-teal-text: 15 94 85; --c-success: 22 163 74; --c-warning: 180 83 9;
+  --c-danger: 197 48 48; --c-danger-text: 197 48 48; --c-danger-border: 245 181 174;
+  --c-info: 227 236 247; --c-info-text: 44 82 130; --c-lilac: 238 230 245; --c-lilac-text: 91 62 122;
+  color-scheme: light;
+}
+@font-face { font-family: Inter; src: url('/fonts/InterVariable.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+html, body { background: rgb(var(--c-bg)); color: rgb(var(--c-text)); font-family: Inter, system-ui, sans-serif; }
+.tabular { font-variant-numeric: tabular-nums; }

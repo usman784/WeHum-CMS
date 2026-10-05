@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS users and members</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="users" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Users &amp; Members</h1>
+<span style="font-size: 14px; color: #A0A4A8">4,860 people · 2,310 with a free account · 2,550 guests · 600 paying · 112 in trial</span>
+</div>
+<a href="Subscriptions.dc.html" style="display: flex; align-items: center; height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #3A3E42; color: #F2F2F2; font-size: 14px; font-weight: 600; text-decoration: none">Subscriptions</a>
+<button type="button" style="height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Export CSV</button>
+</header>
+
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<label style="display: flex; align-items: center; gap: 10px; height: 44px; width: 340px; padding: 0 14px; box-sizing: border-box; background: #17191B; border: 1px solid #2A2D30; border-radius: 12px; color: #A0A4A8">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+<input type="search" aria-label="Search users" placeholder="Search name, email or user ID" style="flex-grow: 1; background: transparent; border: none; outline: none; color: #F2F2F2; font-family: inherit; font-size: 14px">
+</label>
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="7"><button type="button" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+</div>
+<div style="font-size: 13px; line-height: 1.5; color: #A0A4A8; padding: 12px 16px; border-radius: 12px; background: #17191B; border: 1px dashed #3A3E42">A <b style="color: #F2F2F2">guest</b> uses the app without an account (Apple allows this, and they can still subscribe). If they later save their progress, the guest record and purchase move into the new account automatically.</div>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 2.4fr 1.1fr 0.8fr 0.7fr 1.1fr 1fr 1fr; gap: 12px; padding: 14px 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; color: #6E7378; border-bottom: 1px solid #23262A">
+<span>USER</span><span>MEMBERSHIP</span><span>THIS WEEK</span><span>MEDITATIONS</span><span>COUNTRY</span><span>JOINED</span><span>LAST ACTIVE</span>
+</div>
+<sc-for list="{{ rows }}" as="u" hint-placeholder-count="8">
+<a href="UserDetail.dc.html" style="display: grid; grid-template-columns: 2.4fr 1.1fr 0.8fr 0.7fr 1.1fr 1fr 1fr; gap: 12px; align-items: center; padding: 0 20px; min-height: 62px; border-bottom: 1px solid #23262A; font-size: 14px; text-decoration: none; color: #F2F2F2">
+<span style="display: flex; align-items: center; gap: 12px; min-width: 0"><span style="{{ u.avatar }}">{{ u.initial }}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 600">{{ u.name }}</span><span style="font-size: 12px; color: #A0A4A8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ u.email }}</span></span></span>
+<span style="{{ u.planStyle }}">{{ u.plan }}</span>
+<span>{{ u.streak }}</span>
+<span style="color: #A0A4A8">{{ u.sits }}</span>
+<span style="color: #A0A4A8">{{ u.country }}</span>
+<span style="color: #A0A4A8; font-size: 13px">{{ u.joined }}</span>
+<span style="color: #A0A4A8; font-size: 13px">{{ u.last }}</span>
+</a>
+</sc-for>
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 20px; font-size: 13px; color: #A0A4A8"><span style="flex-grow: 1">Showing {{ count }} · sorted by last active</span><button type="button" style="height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600">Load more</button></div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { f: 'all' }; }
+  renderVals() {
+    var self = this;
+    var f = this.state.f;
+    var tabs = [['all', 'All'], ['guest', 'Guests'], ['account', 'Free account'], ['trial', 'Trial'], ['annual', 'Annual'], ['monthly', 'Monthly'], ['churned', 'Cancelled']].map(function (t) {
+      var on = f === t[0];
+      return { label: t[1], pick: function () { self.setState({ f: t[0] }); }, style: 'height:40px;padding:0 16px;border-radius:999px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;' + (on ? 'background:#FF7A45;color:#2A0E02;border:1px solid #FF7A45;' : 'background:#17191B;color:#C9CCCF;border:1px solid #2A2D30;') };
+    });
+    var colors = { annual: 'background:rgba(255,122,69,0.14);color:#FF9B70;', monthly: 'background:rgba(255,122,69,0.14);color:#FF9B70;', trial: 'background:#123C3A;color:#9FE3D6;', account: 'background:#23262A;color:#C9CCCF;', guest: 'background:#23262A;color:#A0A4A8;', churned: 'background:transparent;color:#6E7378;border:1px solid #3A3E42;' };
+    var plan = function (p) { return 'font-size:12px;font-weight:700;letter-spacing:0.4px;border-radius:999px;padding:4px 10px;justify-self:start;' + colors[p]; };
+    var label = { annual: 'Annual · Founding $59', monthly: 'Monthly · $9.99', trial: 'Trial · day 4 of 7', account: 'Free · account', guest: 'Free · guest', churned: 'Cancelled' };
+    var bgs = ['#123C3A', '#3A1D12', '#1E2A3A', '#2A1F33'];
+    var data = [
+      ['Marcus Vance', 'marcus.v@gmail.com · Apple', 'annual', '95 min', '64', 'United States', 'Sep 2, 2026', '2 min ago'],
+      ['Elena K.', 'elena@gmail.com · Google', 'monthly', '140 min', '112', 'United Kingdom', 'Aug 14, 2026', '14 min ago'],
+      ['Aiko T.', 'Guest · no account yet', 'trial', '40 min', '6', 'Japan', 'Sep 27, 2026', '1 h ago'],
+      ['Lukas B.', 'lukas@gmail.com · Email', 'account', '20 min', '9', 'Germany', 'Sep 19, 2026', '3 h ago'],
+      ['Sam R.', 'Guest · no account yet', 'guest', '10 min', '1', 'Worldwide', 'Oct 1, 2026', '5 h ago'],
+      ['Hannah M.', 'hannah@gmail.com · Apple', 'annual', '70 min', '41', 'Austria', 'Aug 30, 2026', 'Yesterday'],
+      ['David O.', 'david@gmail.com · Email', 'churned', '—', '23', 'Canada', 'Jul 21, 2026', '2 weeks ago'],
+      ['Priya N.', 'priya@gmail.com · Apple', 'trial', '55 min', '8', 'United States', 'Sep 25, 2026', 'Yesterday']
+    ];
+    var rows = data.filter(function (d) { return f === 'all' || d[2] === f; }).map(function (d, i) {
+      return { name: d[0], email: d[1], initial: d[0].charAt(0), plan: label[d[2]], planStyle: plan(d[2]), streak: d[3], sits: d[4], country: d[5], joined: d[6], last: d[7], avatar: 'width:36px;height:36px;flex-shrink:0;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#F2F2F2;background:' + bgs[i % 4] + ';' };
+    });
+    return { tabs: tabs, rows: rows, count: rows.length + ' of 4,860' };
+  }
+}
+</script>
+</body>
+</html>

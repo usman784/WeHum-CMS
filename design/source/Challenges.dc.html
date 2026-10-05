@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS challenges</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="challenges" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Challenges</h1>
+<span style="font-size: 14px; color: #A0A4A8">Coming soon. Habit challenges: any meditation counts, once a day. Unlike programs, they need no new content.</span>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New challenge</button>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 2fr 0.8fr 1.4fr 1fr 1fr 0.8fr; gap: 12px; padding: 14px 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; color: #858A8F; border-bottom: 1px solid #23262A">
+<span>CHALLENGE</span><span>DAYS</span><span>WHAT COUNTS</span><span>IN IT NOW</span><span>FINISH RATE</span><span>STATUS</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+<button type="button" onClick="{{ r.pick }}" style="{{ r.row }}">
+<span style="display: flex; align-items: center; gap: 12px; text-align: left"><span style="{{ r.art }}"></span><span style="font-weight: 600">{{ r.name }}</span></span>
+<span>{{ r.days }}</span>
+<span style="color: #A0A4A8; text-align: left">{{ r.counts }}</span>
+<span>{{ r.now }}</span>
+<span>{{ r.rate }}</span>
+<span style="{{ r.statusStyle }}">{{ r.status }}</span>
+</button>
+</sc-for>
+</section>
+
+<aside style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">{{ sel.name }}</h2>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Length in days
+<select style="height: 42px; padding: 0 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>{{ sel.days }}</option><option>7</option><option>14</option><option>21</option><option>30</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">What counts as a day
+<select style="height: 42px; padding: 0 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>Any meditation of 3 min or more</option><option>Only sleep meditations</option><option>Only group meditations</option></select></label>
+
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Members only<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Show on the You tab<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<span style="font-size: 12px; line-height: 1.5; color: #6E7378">Missing a day never resets progress. No streaks, no grace days.</span>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0 }; }
+  renderVals() {
+    var self = this;
+    var data = [
+      ['7 days of calm', '7', 'Any meditation', '1,904', '62%', 'Live', 'ocean', '1'],
+      ['21 days to a habit', '21', 'Any meditation', '842', '28%', 'Live', 'dawn', '2'],
+      ['Sleep week', '7', 'Sleep sessions', '311', '48%', 'Live', 'night', '1'],
+      ['New year, 30 days', '30', 'Any meditation', '—', '—', 'Starts Jan 1', 'aurora', '3']
+    ];
+    var rows = data.map(function (d, i) {
+      var on = self.state.sel === i;
+      return {
+        name: d[0], days: d[1], counts: d[2], now: d[3], rate: d[4], status: d[5],
+        statusStyle: 'font-size:12px;font-weight:700;' + (d[5] === 'Live' ? 'color:#4ADE80;' : 'color:#FF9B70;'),
+        art: 'width:40px;height:40px;border-radius:10px;flex-shrink:0;background:#0F1112 url(img/' + d[6] + '.jpg) center/cover;',
+        pick: function () { self.setState({ sel: i }); },
+        row: 'display:grid;grid-template-columns:2fr 0.8fr 1.4fr 1fr 1fr 0.8fr;gap:12px;align-items:center;width:100%;padding:0 20px;min-height:64px;border:none;border-bottom:1px solid #23262A;font-family:inherit;font-size:14px;color:#F2F2F2;cursor:pointer;text-align:left;' + (on ? 'background:rgba(255,122,69,0.08);' : 'background:transparent;')
+      };
+    });
+    var d = data[this.state.sel];
+    return { rows: rows, sel: { name: d[0], days: d[1], grace: d[7] } };
+  }
+}
+</script>
+</body>
+</html>

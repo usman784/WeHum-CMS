@@ -1,0 +1,236 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Login.dc.html": {
+      "x": 0,
+      "y": 1520,
+      "w": 1440,
+      "h": 960,
+      "title": "00 · Sign in (before Dashboard)",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "01 · Dashboard",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Sessions.dc.html": {
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "03 · Sessions",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "SessionEditor.dc.html": {
+      "x": 4560,
+      "y": 0,
+      "w": 1440,
+      "h": 1100,
+      "title": "04 · Session editor",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Programs.dc.html": {
+      "x": 6080,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "05 · Programs",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "DailyMessages.dc.html": {
+      "x": 9120,
+      "y": 0,
+      "w": 1440,
+      "h": 1240,
+      "title": "07 · Daily Messages",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Moderation.dc.html": {
+      "x": 19760,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "14 · Dedications & gratitude",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Analytics.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "02 · Analytics",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "TodayScreen.dc.html": {
+      "x": 10640,
+      "y": 0,
+      "w": 1440,
+      "h": 1140,
+      "title": "08 · Today screen",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Disciplines.dc.html": {
+      "x": 12160,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "09 · Themes",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Teachers.dc.html": {
+      "x": 13680,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "10 · Teachers",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Sounds.dc.html": {
+      "x": 15200,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "11 · Sounds & building blocks",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "SOS.dc.html": {
+      "x": 16720,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "12 · SoS · How can I help?",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "GroupSits.dc.html": {
+      "x": 18240,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "13 · Group meditation",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Users.dc.html": {
+      "x": 22800,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "16 · Users & members",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "UserDetail.dc.html": {
+      "x": 24320,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "17 · User detail",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Notifications.dc.html": {
+      "x": 25840,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "18 · Push notifications",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Settings.dc.html": {
+      "x": 27360,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "title": "19 · Settings",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Sidebar.dc.html": {
+      "x": 1520,
+      "y": 1520,
+      "w": 248,
+      "h": 960,
+      "title": "Shared sidebar component"
+    },
+    "Subscriptions.dc.html": {
+      "w": 1440,
+      "expand": "fill",
+      "is_interactive": true,
+      "x": 21280,
+      "y": 0,
+      "h": 1300,
+      "title": "15 · Subscriptions (new)"
+    },
+    "Challenges.dc.html": {
+      "w": 1440,
+      "expand": "fill",
+      "is_interactive": true,
+      "x": 7600,
+      "y": 0,
+      "h": 960,
+      "title": "06 · Challenges (coming soon)"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-01T12:50:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "cmsTitle": {
+      "kind": "title1",
+      "maxW": 28800,
+      "text": "WeHum CMS · Admin panel — screens in sidebar order",
+      "w": 240,
+      "x": 0,
+      "y": -320
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Analytics.dc.html",
+    "Sessions.dc.html",
+    "SessionEditor.dc.html",
+    "Programs.dc.html",
+    "Challenges.dc.html",
+    "DailyMessages.dc.html",
+    "TodayScreen.dc.html",
+    "Disciplines.dc.html",
+    "Teachers.dc.html",
+    "Sounds.dc.html",
+    "SOS.dc.html",
+    "GroupSits.dc.html",
+    "Moderation.dc.html",
+    "Subscriptions.dc.html",
+    "Users.dc.html",
+    "UserDetail.dc.html",
+    "Notifications.dc.html",
+    "Settings.dc.html",
+    "Login.dc.html",
+    "Sidebar.dc.html"
+  ],
+  "pages": [],
+  "title": "WeHum CMS"
+}

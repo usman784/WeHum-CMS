@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS sidebar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A0A4A8}a:hover{color:#F2F2F2}
+</style>
+</helmet>
+<nav aria-label="CMS navigation" style="width: 248px; min-height: 960px; height: 100%; box-sizing: border-box; background: #111315; border-right: 1px solid #23262A; display: flex; flex-direction: column; padding: 18px 14px; gap: 2px; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<div style="display: flex; align-items: center; gap: 10px; padding: 2px 10px 14px 10px">
+<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="none" stroke="#FF7A45" stroke-width="3.5" stroke-dasharray="52 18" stroke-linecap="round"></circle><circle cx="15" cy="15" r="6" fill="#4ADE80"></circle><circle cx="15" cy="15" r="2.4" fill="#0B0D0E"></circle></svg>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 17px; font-weight: 700; letter-spacing: -0.2px">WeHum</span>
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 1.2px; color: #FF9B70">ADMIN CMS</span>
+</div>
+</div>
+
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 1.2px; color: #6E7378; padding: 8px 12px 4px 12px">OVERVIEW</div>
+<a href="Main.dc.html" style="{{ nav.dashboard }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Dashboard</a>
+<a href="Analytics.dc.html" style="{{ nav.analytics }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>Analytics</a>
+
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 1.2px; color: #6E7378; padding: 12px 12px 4px 12px">CONTENT</div>
+<a href="Sessions.dc.html" style="{{ nav.sessions }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"></path></svg>Sessions</a>
+<a href="Programs.dc.html" style="{{ nav.programs }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Programs</a>
+<a href="Challenges.dc.html" style="{{ nav.challenges }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 6h3a3 3 0 0 1-3 4M7 6H4a3 3 0 0 0 3 4"></path></svg>Challenges</a>
+<a href="DailyMessages.dc.html" style="{{ nav.daily }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>Daily Messages</a>
+<a href="TodayScreen.dc.html" style="{{ nav.today }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"></rect><path d="M10 18h4"></path></svg>Today Screen</a>
+<a href="Disciplines.dc.html" style="{{ nav.disciplines }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Themes</a>
+<a href="Teachers.dc.html" style="{{ nav.teachers }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Teachers</a>
+<a href="Sounds.dc.html" style="{{ nav.sounds }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10 21h4"></path></svg>Sounds &amp; Bells</a>
+<a href="SOS.dc.html" style="{{ nav.sos }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.5-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.5-7 11-7 11z"></path></svg>SOS Content</a>
+
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 1.2px; color: #6E7378; padding: 12px 12px 4px 12px">COMMUNITY</div>
+<a href="GroupSits.dc.html" style="{{ nav.groupsits }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Group meditation</a>
+<a href="Moderation.dc.html" style="{{ nav.moderation }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path></svg><span style="flex-grow: 1">Dedications &amp; gratitude</span><span style="font-size: 11px; font-weight: 700; color: #2A0E02; background: #FF7A45; border-radius: 999px; padding: 2px 8px">7</span></a>
+
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 1.2px; color: #858A8F; padding: 12px 12px 4px 12px">AUDIENCE &amp; REVENUE</div>
+<a href="Subscriptions.dc.html" style="{{ nav.subscriptions }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20M6 15h4"></path></svg>Subscriptions</a>
+<a href="Users.dc.html" style="{{ nav.users }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3 2.2 3.5 5"></path></svg>Users &amp; Members</a>
+<a href="Notifications.dc.html" style="{{ nav.notifications }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"></path></svg>Push Notifications</a>
+
+<div style="flex-grow: 1; min-height: 12px"></div>
+<a href="Settings.dc.html" style="{{ nav.settings }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>Settings</a>
+<a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 10px 12px; border-radius: 12px; background: #1A1D1F; border: 1px solid #23262A; text-decoration: none; color: #F2F2F2">
+<span style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 999px; background: #123C3A; color: #4ADE80; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">RR</span>
+<span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 13px; font-weight: 600">Raphael Reiter</span><span style="font-size: 12px; color: #A0A4A8">Owner · Sign out</span></span>
+</a>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["dashboard","analytics","sessions","programs","challenges","daily","today","disciplines","teachers","sounds","sos","groupsits","moderation","subscriptions","users","notifications","settings"],"default":"dashboard"},"$preview":{"width":248,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var a = this.props.active ?? 'dashboard';
+    var base = 'display:flex;align-items:center;gap:12px;min-height:36px;padding:0 12px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:500;color:#A0A4A8;';
+    var on = 'display:flex;align-items:center;gap:12px;min-height:36px;padding:0 12px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:600;color:#FF9B70;background:rgba(255,122,69,0.12);';
+    var keys = ['dashboard','analytics','sessions','programs','challenges','daily','today','disciplines','teachers','sounds','sos','groupsits','moderation','subscriptions','users','notifications','settings'];
+    var nav = { base: base };
+    keys.forEach(function (k) { nav[k] = a === k ? on : base; });
+    return { nav: nav };
+  }
+}
+</script>
+</body>
+</html>

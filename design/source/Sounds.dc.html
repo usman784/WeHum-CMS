@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS sounds and building blocks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="sounds" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Sounds &amp; building blocks</h1>
+<span style="font-size: 14px; color: #A0A4A8">The pieces people combine in Build your own, plus the chimes for the Silence Room. You name each one; the app shows your names.</span>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"></path></svg>{{ uploadLabel }}</button>
+</header>
+
+<div role="tablist" aria-label="Block type" style="display: flex; gap: 6px; border-bottom: 1px solid #23262A; flex-wrap: wrap">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6"><button type="button" role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 56px 2fr 1fr 1.6fr 0.9fr 90px; gap: 12px; align-items: center; padding: 14px 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; color: #858A8F; border-bottom: 1px solid #23262A">
+<span></span><span>NAME IN THE APP</span><span>LENGTH</span><span>USED IN</span><span>ACCESS</span><span>ORDER</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 56px 2fr 1fr 1.6fr 0.9fr 90px; gap: 12px; align-items: center; padding: 0 20px; min-height: 64px; border-bottom: 1px solid #23262A; font-size: 14px">
+<button type="button" aria-label="Play sample" style="width: 40px; height: 40px; border-radius: 999px; border: none; background: #23262A; color: #FF9B70; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7z"></path></svg></button>
+<span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{ r.name }}</span><span style="font-size: 12px; color: #A0A4A8">{{ r.sub }}</span></span>
+<span style="color: #C9CCCF">{{ r.len }}</span>
+<span style="color: #A0A4A8; font-size: 13px">{{ r.used }}</span>
+<span style="{{ r.accStyle }}">{{ r.acc }}</span>
+<span aria-hidden="true" style="color: #6E7378; cursor: grab">⋮⋮ {{ r.n }}</span>
+</div>
+</sc-for>
+</section>
+
+<aside style="display: flex; flex-direction: column; gap: 16px">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">{{ tip.title }}</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #C9CCCF">{{ tip.body }}</p>
+</section>
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">How Build your own puts them together</h2>
+<div style="display: flex; gap: 4px; height: 34px; border-radius: 10px; overflow: hidden; font-size: 11px; font-weight: 700">
+<span style="flex: 2; background: #3A1D12; color: #FFB99A; display: flex; align-items: center; justify-content: center">INTRO</span>
+<span style="flex: 7; background: #123C3A; color: #9FE3D6; display: flex; align-items: center; justify-content: center">MEDITATION</span>
+<span style="flex: 2; background: #2A1F33; color: #CDB6E6; display: flex; align-items: center; justify-content: center">OUTRO</span>
+</div>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">Opening → core → silence padding → closing. The app joins them with no gaps and the total lands within 1 second of the chosen length. Background plays under everything; bells ring at the interval picked.</span>
+</section>
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Loudness check</h2>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">Every upload is measured so blocks sound equally loud when joined. Target −16 LUFS.</span>
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span>Arrival</span><span style="color: #4ADE80; font-weight: 600">−16.2 LUFS ✓</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span>Guided Focus</span><span style="color: #4ADE80; font-weight: 600">−15.8 LUFS ✓</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span>Closing Words</span><span style="color: #FF9B70; font-weight: 600">−12.4 LUFS · too loud</span></div>
+</section>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'intros' }; }
+  renderVals() {
+    var self = this, t = this.state.tab;
+    var defs = [['intros', 'Openings · 3'], ['blocks', 'Core blocks · 3'], ['outros', 'Closings · 3'], ['backgrounds', 'Sounds · 4'], ['chimes', 'Bells · 3'], ['loops', 'OM & mantra loops · 3']];
+    var tabs = defs.map(function (x) {
+      var on = t === x[0];
+      return { label: x[1], on: on, pick: function () { self.setState({ tab: x[0] }); }, style: 'height:44px;padding:0 16px;border:none;background:transparent;font-family:inherit;font-size:14px;cursor:pointer;margin-bottom:-1px;' + (on ? 'color:#FF9B70;font-weight:700;border-bottom:2px solid #FF7A45;' : 'color:#A0A4A8;font-weight:600;border-bottom:2px solid transparent;') };
+    });
+    var free = 'font-size:12px;font-weight:700;color:#4ADE80;';
+    var prem = 'font-size:12px;font-weight:700;color:#FF9B70;';
+    var sets = {
+      intros: [['Arrival', 'Raphael’s voice, settling in', '2 min', 'Build your own', 'Premium'], ['Body Settle', 'Short body scan to arrive', '3 min', 'Build your own', 'Premium'], ['None', 'Start in silence (built in)', '—', 'Build your own', 'Free']],
+      blocks: [['Silence', 'Unguided, stretches to any length', 'Any', 'Build your own', 'Free'], ['Guided Focus', 'Raphael guides, with pauses', '5–60 min', 'Build your own', 'Premium'], ['Open Awareness', 'Light guidance every few minutes', '5–60 min', 'Build your own', 'Premium']],
+      outros: [['Closing Words', 'Raphael brings you back', '2 min', 'Build your own', 'Premium'], ['Three Bells', 'Soft ending, no voice', '20 s', 'Build your own', 'Free'], ['None', 'Just end (built in)', '—', 'Build your own', 'Free']],
+      backgrounds: [['Rain on Cedar', 'Seamless loop', '2 min loop', 'Build your own', 'Premium'], ['Distant Stream', 'Seamless loop', '2.5 min loop', 'Build your own', 'Premium'], ['Deep Tone', 'Binaural, headphones', 'Generated', 'Build your own', 'Premium'], ['Silence', 'No sound (built in)', '—', 'Everywhere', 'Free']],
+      loops: [['OM', 'Raphael, one long OM', '40 s', 'Advanced builder', 'Premium'], ['Humming', 'Low hum, seamless', '30 s', 'Advanced builder', 'Premium'], ['Lokah samastah', 'Mantra, one round', '1 min', 'Advanced builder', 'Premium']],
+      chimes: [['Tibetan bowl', 'One deep strike', '8 s', 'Silence Room, Build your own', 'Premium'], ['Temple bell', 'Bright, clear', '6 s', 'Silence Room, Build your own', 'Premium'], ['Soft tone', 'Interval marker', '3 s', 'Build your own', 'Free']]
+    };
+    var rows = sets[t].map(function (r, i) { return { n: String(i + 1), name: r[0], sub: r[1], len: r[2], used: r[3], acc: r[4], accStyle: r[4] === 'Free' ? free : prem }; });
+    var tips = {
+      intros: { title: 'Intros', body: 'Short voice openings that play first. Upload finished files; keep them 1–3 minutes.' },
+      blocks: { title: 'Meditation blocks', body: 'The main part of a custom meditation. Guided blocks need a few spoken cues spread out, so the app can stretch them to the chosen length.' },
+      outros: { title: 'Outros', body: 'How the meditation ends. A voice close, bells, or nothing.' },
+      backgrounds: { title: 'Backgrounds', body: 'Loops must end where they start, so the app can repeat them. “Deep Tone” is generated in the app from the numbers you give it, and needs headphones.' },
+      loops: { title: 'OM & mantra loops', body: 'Short pieces the advanced builder repeats. The start and end must match so loops join without a click.' },
+      chimes: { title: 'Bells', body: 'Used at the start, at intervals and at the end. Trim silence at the start of the file so the strike lands on time.' }
+    };
+    return { tabs: tabs, rows: rows, tip: tips[t], uploadLabel: t === 'chimes' ? 'Upload chime' : 'Upload block' };
+  }
+}
+</script>
+</body>
+</html>

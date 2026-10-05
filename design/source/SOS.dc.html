@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS SoS sessions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="sos" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">SoS sessions</h1>
+<span style="font-size: 14px; color: #A0A4A8">A category of short sessions for hard moments. Each tile in the app opens one session you upload in Sessions.</span>
+</div>
+<a href="SessionEditor.dc.html" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; background: #FF7A45; color: #2A0E02; font-size: 14px; font-weight: 700; text-decoration: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New SoS session</a>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 50px 1.3fr 1.8fr 2fr 0.8fr 1fr; gap: 12px; padding: 14px 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; color: #858A8F; border-bottom: 1px solid #23262A">
+<span>ORDER</span><span>FEELING (TILE)</span><span>SUBTITLE</span><span>SESSION IT PLAYS</span><span>LENGTH</span><span>STATUS</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+<div style="display: grid; grid-template-columns: 50px 1.3fr 1.8fr 2fr 0.8fr 1fr; gap: 12px; align-items: center; padding: 0 20px; min-height: 58px; border-bottom: 1px solid #23262A; font-size: 14px">
+<span aria-hidden="true" style="color: #6E7378; cursor: grab">⋮⋮ {{ r.n }}</span>
+<span style="font-weight: 600">{{ r.name }}</span>
+<span style="color: #A0A4A8">{{ r.sub }}</span>
+<a href="SessionEditor.dc.html" style="font-weight: 600; text-decoration: none">{{ r.session }}</a>
+<span style="color: #C9CCCF">{{ r.len }}</span>
+<span style="{{ r.style }}">{{ r.status }}</span>
+</div>
+</sc-for>
+</section>
+<aside style="display: flex; flex-direction: column; gap: 16px">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">How it works</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #C9CCCF">The SoS button is on every screen of the app. Tapping a feeling starts its session right away, with no intro music. Sessions are part of membership.</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #C9CCCF">Drag rows to change the order of the tiles. Up to 8 tiles fit on one screen.</p>
+</section>
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Header text in the app</h2>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Title<input type="text" value="How can I help?" style="height: 42px; padding: 0 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Subtitle<textarea rows="2" style="padding: 10px 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px; resize: vertical">Short sessions for hard moments. Pick one and Raphael’s voice starts right away.</textarea></label>
+</section>
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">“Need more help?” card</h2>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">Shown under the tiles: “You can contact us and book a personal session with Raphael.”</span>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Booking link<input type="text" value="https://wehum.app/book" style="height: 42px; padding: 0 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Contact email<input type="text" value="support@wehum.app" style="height: 42px; padding: 0 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+</section>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var ok = 'font-size:12px;font-weight:700;color:#4ADE80;';
+    var warn = 'font-size:12px;font-weight:700;color:#FF9B70;';
+    var rows = [
+      ['Panic', 'Grounding with the senses', 'Panic · Grounding', '4 min', true],
+      ['Anxiety', 'A long, slow exhale', 'Anxiety · Slow Exhale', '6 min', false],
+      ['Can’t stop thinking', 'Step back from the loop', 'Quiet the Loop', '5 min', true],
+      ['Low mood', 'Gentle, spacious awareness', 'Soft Light', '8 min', true],
+      ['Anger', 'Release and soften', 'Release the Jaw', '5 min', true],
+      ['Can’t sleep', 'Heavy body, slow descent', 'Heavy Body Descent', '8 min', true],
+      ['Overwhelm', 'One thing at a time', 'One Thing Now', '4 min', true],
+      ['Grief', 'Steady holding', 'Holding Steady', '7 min', true]
+    ].map(function (r, i) { return { n: String(i + 1), name: r[0], sub: r[1], session: r[2], len: r[3], status: r[4] ? 'Live' : 'Audio missing', style: r[4] ? ok : warn }; });
+    return { rows: rows };
+  }
+}
+</script>
+</body>
+</html>

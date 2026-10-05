@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS group meditation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="groupsits" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Group meditation</h1>
+<span style="font-size: 14px; color: #A0A4A8">For now, a group meditation is simply the Meditation of the Day starting for everyone at the same moment. No separate schedule to plan.</span>
+</div>
+<button type="button" style="height: 44px; padding: 0 20px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Save</button>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 20px; min-width: 0">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">When the Meditation of the Day starts together</h2>
+<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Start time (UTC)
+<input type="time" value="16:00" style="height: 46px; width: 140px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 16px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Length used for the group start
+<select style="height: 46px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>30 min</option><option>10 min</option><option>45 min</option></select></label>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{ zones }}" as="z" hint-placeholder-count="4"><div style="background: #0F1112; border: 1px solid #23262A; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #A0A4A8">{{ z.city }}</span><span style="font-size: 18px; font-weight: 700">{{ z.time }}</span></div></sc-for>
+</div>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">Each person sees the start in their own time. Anyone can still begin the Meditation of the Day on their own at any time.</span>
+</section>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 1.2fr 2fr 1fr 1fr; gap: 12px; padding: 14px 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; color: #858A8F; border-bottom: 1px solid #23262A">
+<span>DAY</span><span>MEDITATION OF THE DAY</span><span>IN THE GROUP</span><span>ON THEIR OWN</span>
+</div>
+<sc-for list="{{ days }}" as="d" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 1.2fr 2fr 1fr 1fr; gap: 12px; align-items: center; padding: 0 20px; min-height: 56px; border-bottom: 1px solid #23262A; font-size: 14px">
+<span style="color: #A0A4A8">{{ d.day }}</span><a href="TodayScreen.dc.html" style="font-weight: 600; text-decoration: none">{{ d.name }}</a><span>{{ d.group }}</span><span style="color: #A0A4A8">{{ d.solo }}</span>
+</div>
+</sc-for>
+</section>
+</div>
+
+<aside style="display: flex; flex-direction: column; gap: 16px">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Lobby</h2>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Open the lobby before the start<select style="height: 38px; padding: 0 10px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 13px"><option>15 min</option><option>5 min</option><option>30 min</option></select></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Reminder before the start<select style="height: 38px; padding: 0 10px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 13px"><option>10 min</option><option>5 min</option></select></label>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">Reminders go only to people who tapped “Remind me”.</span>
+</section>
+<section style="background: #17191B; border: 1px dashed #3A3E42; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">More start times later</h2>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">One start a day for now. More can be added when the app grows, without a separate schedule.</span>
+<button type="button" disabled style="height: 40px; border-radius: 10px; border: 1px solid #2A2D30; background: transparent; color: #6E7378; font-family: inherit; font-size: 13px; font-weight: 600">+ Add another start time</button>
+</section>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var zones = [['Berlin', '18:00'], ['New York', '12:00'], ['Lahore', '21:00'], ['Sydney', '03:00']].map(function (z) { return { city: z[0], time: z[1] }; });
+    var days = [
+      ['Today · Mon Oct 5', 'Steady Under Pressure', '312 in the lobby', '1,280'],
+      ['Sun Oct 4', 'Evening Settle', '486 meditated', '1,940'],
+      ['Sat Oct 3', 'End-of-Week Grounding', '402 meditated', '1,610'],
+      ['Fri Oct 2', 'Open Awareness', '377 meditated', '1,522'],
+      ['Thu Oct 1', 'Midday Reset', '351 meditated', '1,488']
+    ].map(function (d) { return { day: d[0], name: d[1], group: d[2], solo: d[3] }; });
+    return { zones: zones, days: days };
+  }
+}
+</script>
+</body>
+</html>

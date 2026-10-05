@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS Today screen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 1140px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="today" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Today Screen</h1>
+<span style="font-size: 14px; color: #A0A4A8">Choose what every user sees first when they open the app</span>
+</div>
+<button type="button" style="height: 44px; padding: 0 20px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Save changes</button>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 20px; min-width: 0">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px"><h2 style="margin: 0; font-size: 16px; font-weight: 600; flex-grow: 1">Meditation of the Day</h2>
+<button type="button" aria-label="Previous week" style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #2A2D30; background: #0F1112; color: #F2F2F2; cursor: pointer">‹</button><span style="font-size: 13px; font-weight: 600">Sep 28 – Oct 4</span><button type="button" aria-label="Next week" style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #2A2D30; background: #0F1112; color: #F2F2F2; cursor: pointer">›</button></div>
+<p style="margin: 0 0 4px 0; font-size: 13px; line-height: 1.5; color: #A0A4A8">The big card members see first on Today. Drag a row to swap two days, or pick “Change” to choose another session. Empty days fall back to the most played session.</p>
+<sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+<button type="button" onClick="{{ d.pick }}" style="{{ d.style }}">
+<span aria-hidden="true" style="color: #6E7378; font-size: 14px; letter-spacing: -2px">⋮⋮</span>
+<span style="width: 100px; text-align: left; font-size: 13px; font-weight: 600; color: #A0A4A8">{{ d.day }}</span>
+<span style="display: flex; flex-direction: column; flex-grow: 1; text-align: left"><span style="font-size: 15px; font-weight: 600">{{ d.title }}</span><span style="font-size: 13px; color: #A0A4A8">{{ d.meta }}</span></span>
+<span style="font-size: 13px; font-weight: 600; color: #FF9B70">Change</span><span style="font-size: 13px; font-weight: 600; color: #A0A4A8">Move date</span>
+</button>
+</sc-for>
+</section>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Three lengths for {{ sel.title }} <span style="font-weight: 400; font-size: 13px; color: #A0A4A8">every Meditation of the Day comes in 10, 30 and 45 min</span></h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{ lens }}" as="l" hint-placeholder-count="3"><div style="background: #0F1112; border: 1px solid #23262A; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 18px; font-weight: 700">{{ l.len }}</span><span style="{{ l.style }}">{{ l.state }}</span><button type="button" style="height: 36px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{ l.btn }}</button></div></sc-for>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">One decision on Today</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #C9CCCF">Today shows one big card: title, length, live count and a single Begin button. Members pick 10, 30 or 45 min and press Begin. Below it: their program, the Silence Room (on every home page, members only) and their progress.</p>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Show the Daily Message as a small line under the card<input type="checkbox" style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<span style="font-size: 12px; color: #6E7378">Off by default. Waiting for Raphael to decide.</span>
+</section>
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Sections on Today</h2>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Raphael’s note (Daily Message)<input type="checkbox" style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Progress card (minutes this week)<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Live “meditating now” counter<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">World map + World Vibration<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px">Empty-room rule
+<span style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #C9CCCF">Below <input type="number" value="10" aria-label="Minimum people" style="width: 64px; height: 38px; padding: 0 10px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"> people at once, show “meditated today” instead of “meditating now”</span>
+<span style="font-size: 12px; color: #6E7378">Numbers are never faked or rounded up. Counts come from the presence service every 5–10 seconds.</span>
+</label>
+</section>
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; grid-column: 1 / -1">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">For free users</h2>
+<span style="font-size: 13px; line-height: 1.5; color: #A0A4A8">Free users see the premium Meditation of the Day on top (locked, “Try 7 days free”), then “Free for you” with meditations from Raphael’s online library, then the Silence Room marked Premium. No previews.</span>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">“Free for you” shows first
+<select style="height: 40px; padding: 0 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>A random free meditation each day</option><option>The newest free meditation</option></select>
+</label>
+</section>
+</div>
+</div>
+
+<aside aria-label="App preview" style="display: flex; flex-direction: column; align-items: center; gap: 12px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: #A0A4A8">PREVIEW · {{ sel.day }}</span>
+<div style="width: 320px; height: 660px; border-radius: 44px; background: #0B0D0E; border: 8px solid #23262A; box-sizing: border-box; padding: 26px 16px; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 8px"><span style="font-size: 14px; font-weight: 700; flex-grow: 1">WeHum</span><span style="font-size: 10px; font-weight: 700; background: #1E2124; border-radius: 999px; padding: 4px 8px">● SOS</span></div>
+<span style="font-size: 10px; font-weight: 600; background: #17191B; border-radius: 999px; padding: 6px 10px; align-self: flex-start"><span style="color: #4ADE80">●</span> 1,248 MEDITATING WORLDWIDE NOW</span>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 20px; font-weight: 700">Good morning, Alex</span><span style="font-size: 11px; color: #A0A4A8">Thursday · Sustained focus conditioning</span></div>
+<div style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 9px; font-weight: 700; letter-spacing: 1px; color: #FFB99A; background: #2A1C15; border-radius: 6px; padding: 4px 6px; align-self: flex-start">MEDITATION OF THE DAY · 10 · 30 · 45 MIN</span>
+<span style="font-size: 17px; font-weight: 700; line-height: 1.25">{{ sel.title }}</span>
+<span style="font-size: 11px; color: #A0A4A8; line-height: 1.4">{{ sel.meta }}</span>
+<span style="height: 40px; border-radius: 12px; background: #FF7A45; color: #2A0E02; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center">▶  Begin</span>
+</div>
+<div style="background: #17191B; border: 1px solid #23262A; border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 10px"><span style="width: 32px; height: 32px; border-radius: 999px; background: #123C3A"></span><span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 9px; font-weight: 700; letter-spacing: 1px; color: #FF9B70">RAPHAEL’S NOTE · 4 MIN</span><span style="font-size: 12px; font-weight: 600">Releasing Cognitive Friction…</span></span></div>
+<div style="background: #17191B; border: 1px solid #23262A; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; font-weight: 600">105 min this week</span><div style="display: flex; gap: 6px"><span style="flex-grow: 1; height: 22px; border-radius: 999px; background: #3A2A22"></span><span style="flex-grow: 1; height: 22px; border-radius: 999px; background: #3A2A22"></span><span style="flex-grow: 1; height: 22px; border-radius: 999px; background: #3A2A22"></span><span style="flex-grow: 1; height: 22px; border-radius: 999px; background: #FF7A45"></span><span style="flex-grow: 1; height: 22px; border-radius: 999px; background: #23262A"></span><span style="flex-grow: 1; height: 22px; border-radius: 999px; background: #23262A"></span><span style="flex-grow: 1; height: 22px; border-radius: 999px; background: #23262A"></span></div></div>
+<div style="background: #17191B; border: 1px solid #23262A; border-radius: 14px; padding: 12px; font-size: 13px; font-weight: 600">Silence Room</div>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1140}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 3 }; }
+  renderVals() {
+    var self = this;
+    var data = [
+      ['Mon, Sep 28', 'Steady Under Pressure', 'Breath pacing & grounding · Raphael', '15 MIN'],
+      ['Tue, Sep 29', 'Cadence Synchronization 4s/6s', 'Breathing · Raphael', '12 MIN'],
+      ['Wed, Sep 30', 'Peripheral Vision & Somatic Softening', 'Body scan · Raphael', '14 MIN'],
+      ['Thu, Oct 1', 'Reset Your Nervous System', 'A grounded reset for mental clarity before your day begins', '12 MIN'],
+      ['Fri, Oct 2', 'Pre-Competition Dial-In', 'Somatic focus drill before high-stakes moments', '12 MIN'],
+      ['Sat, Oct 3', 'Loving Kindness for a Hard Week', 'Metta practice · Raphael', '20 MIN'],
+      ['Sun, Oct 4', 'Not chosen yet · falls back to most popular', 'Pick a session or leave on auto', 'AUTO']
+    ];
+    var days = data.map(function (d, i) {
+      var on = self.state.sel === i;
+      var lens = [['10 min', 'Uploaded', 'Replace'], ['30 min', 'Uploaded', 'Replace'], ['45 min', 'Missing', 'Upload']].map(function (l) { return { len: l[0], state: l[1], btn: l[2], style: 'font-size:12px;font-weight:700;color:' + (l[1] === 'Uploaded' ? '#4ADE80' : '#FF9B70') + ';' }; });
+    return {
+      lens: lens,
+        day: d[0], title: d[1], meta: d[2],
+        pick: function () { self.setState({ sel: i }); },
+        style: 'display:flex;align-items:center;gap:14px;width:100%;padding:12px 14px;border-radius:12px;cursor:pointer;font-family:inherit;color:#F2F2F2;' + (on ? 'background:rgba(255,122,69,0.10);border:1.5px solid #FF7A45;' : 'background:#0F1112;border:1px solid #23262A;')
+      };
+    });
+    var s = data[this.state.sel];
+    return { days: days, sel: { day: s[0].toUpperCase(), title: s[1], meta: s[2], len: s[3] } };
+  }
+}
+</script>
+</body>
+</html>

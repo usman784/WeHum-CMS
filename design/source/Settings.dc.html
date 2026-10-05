@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="settings" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Settings</h1>
+<span style="font-size: 14px; color: #A0A4A8">Team access, membership, app releases and legal pages</span>
+</div>
+<button type="button" style="height: 44px; padding: 0 20px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Save changes</button>
+</header>
+
+<div style="display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; align-items: start">
+<nav aria-label="Settings sections" style="display: flex; flex-direction: column; gap: 4px; background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 10px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><button type="button" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+</nav>
+
+<div style="min-width: 0">
+<sc-if value="{{ show.team }}" hint-placeholder-val="{{ true }}">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center"><h2 style="margin: 0; font-size: 18px; font-weight: 700; flex-grow: 1">Team &amp; roles</h2><button type="button" style="height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">+ Invite member</button></div>
+<div style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr 1fr; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; color: #6E7378; padding-bottom: 4px"><span>MEMBER</span><span>ROLE</span><span>LAST SIGN-IN</span><span>2-STEP</span></div>
+<sc-for list="{{ team }}" as="m" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr 1fr; gap: 12px; align-items: center; min-height: 56px; border-top: 1px solid #23262A; font-size: 14px">
+<span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{ m.name }}</span><span style="font-size: 12px; color: #A0A4A8">{{ m.email }}</span></span>
+<select aria-label="Role" style="height: 38px; padding: 0 10px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 13px; justify-self: start"><option>{{ m.role }}</option><option>Admin</option><option>Editor</option><option>Moderator</option></select>
+<span style="color: #A0A4A8; font-size: 13px">{{ m.last }}</span>
+<span style="{{ m.mfaStyle }}">{{ m.mfa }}</span>
+</div>
+</sc-for>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding-top: 6px">
+<div style="padding: 12px; border-radius: 12px; background: #0F1112; font-size: 12px; line-height: 1.5; color: #A0A4A8"><strong style="color: #F2F2F2; font-size: 13px">Owner</strong><br>Everything, incl. billing and deleting the app data</div>
+<div style="padding: 12px; border-radius: 12px; background: #0F1112; font-size: 12px; line-height: 1.5; color: #A0A4A8"><strong style="color: #F2F2F2; font-size: 13px">Admin</strong><br>All content, users, settings except owner</div>
+<div style="padding: 12px; border-radius: 12px; background: #0F1112; font-size: 12px; line-height: 1.5; color: #A0A4A8"><strong style="color: #F2F2F2; font-size: 13px">Editor</strong><br>Sessions, programs, daily messages</div>
+<div style="padding: 12px; border-radius: 12px; background: #0F1112; font-size: 12px; line-height: 1.5; color: #A0A4A8"><strong style="color: #F2F2F2; font-size: 13px">Moderator</strong><br>Dedications queue only</div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.general }}" hint-placeholder-val="{{ false }}">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 700">General</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">App name<input type="text" value="WeHum" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Support email<input type="text" value="support@wehum.app" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Default daily reminder time<select style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>07:00</option><option>06:30</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">App languages<select style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>English</option><option>English + German</option></select></label>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.membership }}" hint-placeholder-val="{{ false }}">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 700">Membership</h2>
+<span style="font-size: 14px; color: #A0A4A8">Plans, the Founding 1,000 offer and the member list now live on their own page.</span>
+<a href="Subscriptions.dc.html" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 14px; background: rgba(255,122,69,0.10); border: 1.5px solid #FF7A45; text-decoration: none; color: #F2F2F2"><span style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 15px; font-weight: 700">Open Subscriptions</span><span style="font-size: 13px; color: #A0A4A8">$59 Founding (1,000) · $79/yr · $9.99/mo · 7-day trial on both</span></span><span style="font-size: 20px; color: #FF9B70">→</span></a>
+
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px"><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Guests can use the app without an account</span><span style="font-size: 12px; color: #A0A4A8">Required by Apple. Keep this on.</span></span><input type="checkbox" checked disabled style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.app }}" hint-placeholder-val="{{ false }}">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 700">App &amp; releases</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Minimum iOS version allowed<input type="text" value="1.0.0" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Minimum Android version allowed<input type="text" value="1.0.0" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+</div>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px"><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Maintenance mode</span><span style="font-size: 12px; color: #A0A4A8">Downloads and SOS keep working offline</span></span><input type="checkbox" style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px"><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Together tab</span><span style="font-size: 12px; color: #A0A4A8">Turn on when Phase 2 ships</span></span><input type="checkbox" style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.legal }}" hint-placeholder-val="{{ false }}">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 700">Legal &amp; privacy</h2>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Privacy policy URL<input type="text" value="https://wehum.app/privacy" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Terms of use URL<input type="text" value="https://wehum.app/terms" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Health disclaimer <span style="font-weight: 400; color: #A0A4A8">Shown before binaural sessions and on SOS</span>
+<textarea rows="3" style="padding: 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px; line-height: 1.5; resize: vertical">WeHum is not medical care. Do not use binaural sessions while driving or if you have epilepsy. In a crisis, call your local emergency number.</textarea></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Delete inactive anonymous data after<select style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>12 months</option><option>6 months</option></select></label>
+</section>
+</sc-if>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'team' }; }
+  renderVals() {
+    var self = this;
+    var t = this.state.tab;
+    var tabs = [['general', 'General'], ['team', 'Team & roles'], ['membership', 'Membership'], ['app', 'App & releases'], ['legal', 'Legal & privacy']].map(function (x) {
+      var on = t === x[0];
+      return { label: x[1], pick: function () { self.setState({ tab: x[0] }); }, style: 'height:42px;padding:0 14px;border-radius:10px;border:none;text-align:left;font-family:inherit;font-size:14px;cursor:pointer;' + (on ? 'background:rgba(255,122,69,0.12);color:#FF9B70;font-weight:600;' : 'background:transparent;color:#A0A4A8;font-weight:500;') };
+    });
+    var ok = 'font-size:12px;font-weight:700;color:#4ADE80;';
+    var bad = 'font-size:12px;font-weight:700;color:#FF9B70;';
+    var team = [
+      ['Raphael Reiter', 'raphael@wehum.app', 'Owner', 'Today', 'On', ok],
+      ['Usman', 'usman@wehum.app', 'Admin', 'Today', 'On', ok],
+      ['Lena Fischer', 'lena@wehum.app', 'Editor', 'Sep 29', 'Off', bad],
+      ['Jonas Weber', 'jonas@wehum.app', 'Moderator', 'Invite pending', '—', bad]
+    ].map(function (m) { return { name: m[0], email: m[1], role: m[2], last: m[3], mfa: m[4], mfaStyle: m[5] }; });
+    return { tabs: tabs, team: team, show: { general: t === 'general', team: t === 'team', membership: t === 'membership', app: t === 'app', legal: t === 'legal' } };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS teachers</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="teachers" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Teachers</h1>
+<span style="font-size: 14px; color: #A0A4A8">Voices behind the sessions. Shown on session cards, programs and the teacher bio page</span>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add teacher</button>
+</header>
+
+<div style="display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 20px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{ teachers }}" as="t" hint-placeholder-count="2">
+<button type="button" onClick="{{ t.pick }}" style="{{ t.style }}">
+<span style="{{ t.avatar }}">{{ t.initials }}</span>
+<span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">{{ t.name }}</span><span style="font-size: 13px; color: #FF9B70; font-weight: 600">{{ t.role }}</span><span style="font-size: 12px; color: #A0A4A8">{{ t.stats }}</span></span>
+</button>
+</sc-for>
+<div style="padding: 16px; border-radius: 14px; border: 1px dashed #3A3E42; font-size: 13px; color: #A0A4A8; line-height: 1.5">Only Raphael at launch? Keep one teacher and the app hides teacher filters automatically.</div>
+</div>
+
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 20px">
+<div style="width: 112px; height: 112px; border-radius: 999px; background: #123C3A url('img/seated.jpg') center/cover; display: flex; align-items: flex-end; justify-content: center; overflow: hidden"><span style="width: 100%; padding: 5px 0; background: rgba(0,0,0,0.55); color: #F2F2F2; font-size: 11px; font-weight: 600; text-align: center">Replace</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: #FF9B70">TEACHER PROFILE</span>
+<h2 style="margin: 0; font-size: 24px; font-weight: 700">{{ sel.name }}</h2>
+<span style="font-size: 14px; color: #A0A4A8">{{ sel.stats }}</span>
+</div>
+<button type="button" style="height: 44px; padding: 0 20px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Save</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Display name<input type="text" value="{{ sel.name }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Role label<input type="text" value="{{ sel.role }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Specialty<input type="text" value="{{ sel.spec }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">YouTube<input type="text" value="{{ sel.link }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Instagram handle<input type="text" value="{{ sel.insta }}" placeholder="@handle" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Website<input type="text" value="" placeholder="https://" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+</div>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Bio <span style="font-weight: 400; color: #A0A4A8">Shown when users tap “Bio” on a program</span>
+<textarea rows="4" style="padding: 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px; line-height: 1.5; resize: vertical">{{ sel.bio }}</textarea></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Signature quote <span style="font-weight: 400; color: #A0A4A8">Used on onboarding and previews</span>
+<input type="text" value="{{ sel.quote }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<div style="display: flex; gap: 24px; flex-wrap: wrap">
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px"><input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45">Visible in app</label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px"><input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45">Can lead group meditations</label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px"><input type="checkbox" style="width: 20px; height: 20px; accent-color: #FF7A45">Has CMS login (editor)</label>
+</div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0 }; }
+  renderVals() {
+    var self = this;
+    var data = [
+      { name: 'Raphael Reiter', initials: 'RR', role: 'Head of Practice', stats: '131 sessions · 4 programs · 5,768 min meditated this week', spec: 'Somatic breathwork & autonomic regulation', link: 'youtube.com/raphaelreiter', insta: '@raphael.meditates', bio: 'Raphael has taught meditation for over ten years and shares it with thousands of people on YouTube. No incense, no jargon: a calm voice and a few minutes a day.', quote: 'Meditation without the incense. And you’re never meditating alone.', bg: '#123C3A', fg: '#4ADE80' },
+      { name: 'Coach Sarah D.', initials: 'SD', role: 'Performance Coach', stats: '11 sessions · masterclass only', spec: 'Endurance & athletic focus', link: 'youtube.com/@coachsarahd', insta: '@coach.sarahd', bio: 'Sarah coaches endurance athletes and teaches focus under pressure. Her sessions are short, practical and built for race day.', quote: 'Calm is a skill. Train it like one.', bg: '#3A1D12', fg: '#FFB99A' }
+    ];
+    var teachers = data.map(function (t, i) {
+      var on = self.state.sel === i;
+      return {
+        name: t.name, initials: t.initials, role: t.role, stats: t.stats,
+        pick: function () { self.setState({ sel: i }); },
+        avatar: 'width:56px;height:56px;flex-shrink:0;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;background:' + t.bg + ';color:' + t.fg + ';',
+        style: 'display:flex;align-items:center;gap:14px;width:100%;padding:16px;border-radius:16px;cursor:pointer;font-family:inherit;color:#F2F2F2;' + (on ? 'background:rgba(255,122,69,0.10);border:1.5px solid #FF7A45;' : 'background:#17191B;border:1px solid #23262A;')
+      };
+    });
+    return { teachers: teachers, sel: data[this.state.sel] };
+  }
+}
+</script>
+</body>
+</html>

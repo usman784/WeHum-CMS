@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS dedications moderation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="moderation" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<div style="display: flex; align-items: center; gap: 10px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Dedications &amp; gratitude</h1>
+</div>
+<span style="font-size: 14px; color: #A0A4A8">{{ sub }}</span>
+</div>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start">
+<section style="display: flex; flex-direction: column; gap: 12px; min-width: 0">
+<div role="tablist" aria-label="Feed" style="display: flex; gap: 6px; border-bottom: 1px solid #23262A">
+<sc-for list="{{ feeds }}" as="t" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+<span style="height: 40px; padding: 0 16px; border-radius: 999px; background: #FF7A45; color: #2A0E02; font-size: 13px; font-weight: 700; display: flex; align-items: center">Needs review · {{ count }}</span>
+<span style="height: 40px; padding: 0 16px; border-radius: 999px; background: #17191B; border: 1px solid #2A2D30; color: #C9CCCF; font-size: 13px; font-weight: 600; display: flex; align-items: center">Auto-flagged · 2</span>
+<span style="height: 40px; padding: 0 16px; border-radius: 999px; background: #17191B; border: 1px solid #2A2D30; color: #C9CCCF; font-size: 13px; font-weight: 600; display: flex; align-items: center">All posts</span>
+<span style="height: 40px; padding: 0 16px; border-radius: 999px; background: #17191B; border: 1px solid #2A2D30; color: #C9CCCF; font-size: 13px; font-weight: 600; display: flex; align-items: center">Hidden</span>
+<span style="flex-grow: 1"></span>
+<sc-if value="{{ isDed }}" hint-placeholder-val="{{ true }}"><label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #A0A4A8">Session
+<select aria-label="Filter by session" style="height: 40px; padding: 0 10px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 13px"><option>All sessions</option><option>Steady Under Pressure</option><option>The Midday Coherence</option><option>Pre-Competition Dial-In</option><option>Group meditation · Oct 5</option></select></label></sc-if>
+</div>
+<sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px; border-radius: 16px; background: #17191B; border: 1px solid #23262A">
+<span style="width: 48px; height: 48px; border-radius: 999px; background: #123C3A; color: #4ADE80; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"></path></svg></span>
+<span style="font-size: 16px; font-weight: 600">Queue is clear</span>
+<span style="font-size: 14px; color: #A0A4A8">New reports will show up here</span>
+</div>
+</sc-if>
+<sc-for list="{{ posts }}" as="p" hint-placeholder-count="5">
+<article style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px">
+<span style="width: 32px; height: 32px; border-radius: 999px; background: #23262A; display: flex; align-items: center; justify-content: center; font-weight: 700">{{ p.initial }}</span>
+<span style="font-weight: 600">{{ p.name }}</span>
+<span style="color: #A0A4A8">· {{ p.place }} · {{ p.ago }}</span>
+<span style="{{ p.tagStyle }}">{{ p.tag }}</span>
+<span style="flex-grow: 1"></span>
+<span style="{{ p.reasonStyle }}">{{ p.reason }}</span>
+</div>
+<p style="margin: 0; font-size: 16px; line-height: 1.5; color: #E6E7E8">“{{ p.text }}”</p>
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="font-size: 13px; color: #A0A4A8; flex-grow: 1">{{ p.meta }}</span>
+<button type="button" onClick="{{ p.hide }}" style="height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #5A3A2A; background: transparent; color: #FF9B70; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Hide post</button>
+<button type="button" onClick="{{ p.hide }}" style="height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Mute user</button>
+<button type="button" onClick="{{ p.keep }}" style="height: 38px; padding: 0 16px; border-radius: 10px; border: none; background: #4ADE80; color: #062B14; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">Keep</button>
+</div>
+</article>
+</sc-for>
+</section>
+
+<aside style="display: flex; flex-direction: column; gap: 16px">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Today</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="padding: 14px; border-radius: 12px; background: #0F1112; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 22px; font-weight: 700">612</span><span style="font-size: 12px; color: #A0A4A8">posts</span></div>
+<div style="padding: 14px; border-radius: 12px; background: #0F1112; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 22px; font-weight: 700">9</span><span style="font-size: 12px; color: #A0A4A8">reports</span></div>
+<div style="padding: 14px; border-radius: 12px; background: #0F1112; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 22px; font-weight: 700">4</span><span style="font-size: 12px; color: #A0A4A8">hidden</span></div>
+<div style="padding: 14px; border-radius: 12px; background: #0F1112; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 22px; font-weight: 700">2.1k</span><span style="font-size: 12px; color: #A0A4A8">“holding this” taps</span></div>
+</div>
+</section>
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Where these appear</h2>
+<span style="font-size: 13px; line-height: 1.55; color: #C9CCCF"><b style="color: #F2F2F2">Dedications</b> are written only after a finished meditation and shown on that session’s own feed.</span>
+<span style="font-size: 13px; line-height: 1.55; color: #C9CCCF"><b style="color: #F2F2F2">Gratitude feed</b> is coming soon.</span>
+</section>
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Rules</h2>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Block links and handles<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Profanity filter<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Posts per person per day<input type="number" value="3" aria-label="Posts per day" style="width: 64px; height: 36px; padding: 0 10px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Users can block each other<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Auto-hide at 3 reports<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Crisis words: show SOS to writer<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Posting needs membership<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<span style="font-size: 12px; line-height: 1.5; color: #6E7378">Everyone can read. Members can post, and the app asks guests to add an account first so their name can show.</span>
+</section>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { done: {}, feed: 'ded' }; }
+  renderVals() {
+    var self = this, feed = this.state.feed;
+    var reason = function (r) { return 'font-size:12px;font-weight:700;letter-spacing:0.4px;border-radius:999px;padding:4px 10px;' + (r.indexOf('Auto') === 0 ? 'background:#123C3A;color:#9FE3D6;' : 'background:rgba(255,122,69,0.14);color:#FF9B70;'); };
+    var tagStyle = 'font-size:12px;font-weight:600;color:#C9CCCF;background:#23262A;border-radius:8px;padding:4px 8px;white-space:nowrap;';
+    var ded = [
+      ['a', 'Elena', 'London, UK', '12m ago', 'Reported ×2 · spam', 'For hospital night shift workers finding quiet before dawn. DM me for my breathwork course', 'Steady Under Pressure', 'Written after the meditation'],
+      ['b', 'Marcus', 'Toronto, CA', '34m ago', 'Auto · link detected', 'Meditating for everyone at our office today, join us at calm-team dot com', 'The Midday Coherence', 'Written after the meditation'],
+      ['c', 'Aiko', 'Tokyo, JP', '1h ago', 'Reported ×1 · off-topic', 'For my team before the product launch. Steady hands, steady minds.', 'Group meditation · Oct 5', 'Written after the meditation'],
+      ['d', 'Sam', 'Worldwide', '2h ago', 'Auto · crisis words', 'For myself. I don’t know how much longer I can keep going like this.', 'Pre-Competition Dial-In', 'SoS screen was shown to the writer']
+    ];
+    var gra = [
+      ['g1', 'Hannah', 'Vienna, AT', '20m ago', 'Reported ×1 · spam', 'Grateful for this app, also check my shop for calming candles!', 'Gratitude', 'Together tab'],
+      ['g2', 'Lukas', 'Berlin, DE', '3h ago', 'Reported ×3 · rude', 'Grateful that some of you finally stopped posting nonsense here.', 'Gratitude', 'Auto-hidden at 3 reports']
+    ];
+    var src = feed === 'ded' ? ded : gra;
+    var posts = src.filter(function (p) { return !self.state.done[p[0]]; }).map(function (p) {
+      var close = function () { var d = Object.assign({}, self.state.done); d[p[0]] = true; self.setState({ done: d }); };
+      return { initial: p[1].charAt(0), name: p[1], place: p[2], ago: p[3], reason: p[4], reasonStyle: reason(p[4]), text: p[5], tag: p[6], tagStyle: tagStyle, meta: p[7], hide: close, keep: close };
+    });
+    var feeds = [['ded', 'Dedications · per session'], ['gra', 'Gratitude feed']].map(function (x) {
+      var on = feed === x[0];
+      return { label: x[1], on: on, pick: function () { self.setState({ feed: x[0] }); }, style: 'height:44px;padding:0 16px;border:none;background:transparent;font-family:inherit;font-size:14px;cursor:pointer;margin-bottom:-1px;' + (on ? 'color:#FF9B70;font-weight:700;border-bottom:2px solid #FF7A45;' : 'color:#A0A4A8;font-weight:600;border-bottom:2px solid transparent;') };
+    });
+    return { posts: posts, count: posts.length, empty: posts.length === 0, feeds: feeds, isDed: feed === 'ded',
+      sub: feed === 'ded' ? 'Written after a finished meditation and shown under each session. Text only, 200 characters, no links. Read free, post as a member.' : 'One shared feed on the Together tab. People write what they are grateful for today.' };
+  }
+}
+</script>
+</body>
+</html>

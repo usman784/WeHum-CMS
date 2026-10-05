@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS themes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="disciplines" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Themes</h1>
+<span style="font-size: 14px; color: #A0A4A8">The 8 practice categories in the Library. Drag a card to change its place; the app shows them in this order.</span>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New theme</button>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<button type="button" onClick="{{ pick.c0 }}" style="{{ card.c0 }}"><span style="{{ iconBox }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9B70" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 8c-2.2 0-4 1.8-4 4s1.8 4 4 4c3.5 0 6.5-8 10-8 2.2 0 4 1.8 4 4s-1.8 4-4 4c-3.5 0-6.5-8-10-8z"></path></svg></span><span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">Transcendent</span><span style="font-size: 13px; color: #A0A4A8">Spacious open awareness</span><span style="font-size: 12px; color: #6E7378">14 tracks · 20–45 min</span></span><span style="{{ order }}">1</span></button>
+<button type="button" onClick="{{ pick.c1 }}" style="{{ card.c1 }}"><span style="{{ iconBox }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9B70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.3-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.7-7 10-7 10z"></path></svg></span><span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">Loving Kindness</span><span style="font-size: 13px; color: #A0A4A8">Metta practice</span><span style="font-size: 12px; color: #6E7378">12 tracks · 12–25 min</span></span><span style="{{ order }}">2</span></button>
+<button type="button" onClick="{{ pick.c2 }}" style="{{ card.c2 }}"><span style="{{ iconBox }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9B70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"></path><circle cx="12" cy="12" r="2.5"></circle></svg></span><span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">Mindfulness</span><span style="font-size: 13px; color: #A0A4A8">Vipassana &amp; open</span><span style="font-size: 12px; color: #6E7378">22 tracks · 10–20 min</span></span><span style="{{ order }}">3</span></button>
+<button type="button" onClick="{{ pick.c3 }}" style="{{ card.c3 }}"><span style="{{ iconBox }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h11a3 3 0 1 0-3-3M3 13h15a3 3 0 1 1-3 3M3 17h7"></path></svg></span><span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">Breathing</span><span style="font-size: 13px; color: #A0A4A8">Cadence &amp; pranayama</span><span style="font-size: 12px; color: #6E7378">18 tracks · 5–15 min</span></span><span style="{{ order }}">4</span></button>
+<button type="button" onClick="{{ pick.c4 }}" style="{{ card.c4 }}"><span style="{{ iconBox }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9B70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.5" r="2"></circle><path d="M5 9h14M12 9v5M12 14l-3 7M12 14l3 7"></path></svg></span><span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">Body Scan</span><span style="font-size: 13px; color: #A0A4A8">Somatic grounding</span><span style="font-size: 12px; color: #6E7378">16 tracks · 15–30 min</span></span><span style="{{ order }}">5</span></button>
+<button type="button" onClick="{{ pick.c5 }}" style="{{ card.c5 }}"><span style="{{ iconBox }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9B70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></span><span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">Sleep</span><span style="font-size: 13px; color: #A0A4A8">Delta &amp; heavy body</span><span style="font-size: 12px; color: #6E7378">20 tracks · 20–60 min</span></span><span style="{{ order }}">6</span></button>
+<button type="button" onClick="{{ pick.c6 }}" style="{{ card.c6 }}"><span style="{{ iconBox }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9B70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2M10 2h4"></path></svg></span><span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">Short Resets</span><span style="font-size: 13px; color: #A0A4A8">Quick dispatch</span><span style="font-size: 12px; color: #6E7378">28 tracks · 3–10 min</span></span><span style="{{ order }}">7</span></button>
+<button type="button" onClick="{{ pick.c7 }}" style="{{ card.c7 }}"><span style="{{ iconBox }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2"></circle><path d="M8 11h8M12 9v5M4 18c2-1 4-2 8-2s6 1 8 2M7 15l-2 2M17 15l2 2"></path></svg></span><span style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; text-align: left"><span style="font-size: 16px; font-weight: 600">Deep Meditation</span><span style="font-size: 13px; color: #A0A4A8">Unguided / light bells</span><span style="font-size: 12px; color: #6E7378">15 tracks · 30–60 min</span></span><span style="{{ order }}">8</span></button>
+</div>
+
+<aside aria-label="Edit theme" style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: #FF9B70">EDIT THEME</span><h2 style="margin: 0; font-size: 20px; font-weight: 700">{{ sel.name }}</h2></div>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Name
+<input type="text" value="{{ sel.name }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Subtitle
+<input type="text" value="{{ sel.sub }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Description <span style="font-weight: 400; color: #A0A4A8">Shown at the top of the theme page</span>
+<textarea rows="3" style="padding: 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px; resize: vertical">{{ sel.desc }}</textarea></label>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Min length<input type="text" value="{{ sel.min }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Max length<input type="text" value="{{ sel.max }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"></label>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-size: 13px; font-weight: 600; color: #C9CCCF">Icon</span>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{ icons }}" as="ic" hint-placeholder-count="12"><button type="button" aria-label="{{ ic.name }}" onClick="{{ ic.pick }}" style="{{ ic.style }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ ic.d }}"></path></svg></button></sc-for>
+</div>
+<button type="button" style="align-self: flex-start; min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px dashed #3A3E42; background: transparent; color: #FF9B70; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Upload your own icon (SVG)</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-size: 13px; font-weight: 600; color: #C9CCCF">Icon color</span>
+<div style="display: flex; gap: 10px"><span style="width: 32px; height: 32px; border-radius: 999px; background: #FF7A45; border: 2px solid #F2F2F2"></span><span style="width: 32px; height: 32px; border-radius: 999px; background: #4ADE80"></span><span style="width: 32px; height: 32px; border-radius: 999px; background: #9FE3D6"></span><span style="width: 32px; height: 32px; border-radius: 999px; background: #FFB99A"></span></div></div>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Visible in app<input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Show in onboarding picks<input type="checkbox" style="width: 20px; height: 20px; accent-color: #FF7A45"></label>
+<div style="display: flex; gap: 10px"><a href="Sessions.dc.html" style="flex-grow: 1; height: 44px; border-radius: 12px; border: 1px solid #3A3E42; color: #F2F2F2; font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center">View {{ sel.tracks }} tracks</a><button type="button" style="flex-grow: 1; height: 44px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Save</button></div>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0, icon: 0 }; }
+  renderVals() {
+    var self = this;
+    var paths = [
+      ['Infinity', 'M7 8c-2.2 0-4 1.8-4 4s1.8 4 4 4c3.5 0 6.5-8 10-8 2.2 0 4 1.8 4 4s-1.8 4-4 4c-3.5 0-6.5-8-10-8z'],
+      ['Heart', 'M12 20s-7-4.3-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.7-7 10-7 10z'],
+      ['Focus', 'M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4'],
+      ['Wind', 'M3 9h11a3 3 0 1 0-3-3M3 13h15a3 3 0 1 1-3 3M3 17h7'],
+      ['Moon', 'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z'],
+      ['Timer', 'M12 9v4l2 2M10 2h4M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16z'],
+      ['Sun', 'M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z'],
+      ['Wave', 'M2 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0'],
+      ['Leaf', 'M5 19c0-8 6-14 14-14 0 8-6 14-14 14zM5 19l7-7'],
+      ['Bowl', 'M3 11h18a9 9 0 0 1-18 0zM8 20h8'],
+      ['Spark', 'M12 3v4M12 17v4M3 12h4M17 12h4'],
+      ['Mountain', 'M3 20l6-10 4 6 3-4 5 8z']
+    ];
+    var icons = paths.map(function (p, i) {
+      var on = self.state.icon === i;
+      return { name: p[0], d: p[1], pick: function () { self.setState({ icon: i }); }, style: 'height:44px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;' + (on ? 'background:rgba(255,122,69,0.14);border:1.5px solid #FF7A45;color:#FF9B70;' : 'background:#0F1112;border:1px solid #2A2D30;color:#C9CCCF;') };
+    });
+    var data = [
+      ['Transcendent', 'Spacious open awareness', 'Spacious, open awareness practices that move beyond technique into stillness and meta-cognition.', '20 min', '45 min', 14],
+      ['Loving Kindness', 'Metta practice', 'Grounding relational resilience and poise through classic metta phrases.', '12 min', '25 min', 12],
+      ['Mindfulness', 'Vipassana & open', 'Attention training that holds up under intense pressure.', '10 min', '20 min', 22],
+      ['Breathing', 'Cadence & pranayama', 'Nervous system down-regulation through paced breathing and cadences.', '5 min', '15 min', 18],
+      ['Body Scan', 'Somatic grounding', 'Tension release and athletic muscle recovery, head to toe.', '15 min', '30 min', 16],
+      ['Sleep', 'Delta & heavy body', 'Nocturnal restoration and parasympathetic drift for falling asleep.', '20 min', '60 min', 20],
+      ['Short Resets', 'Quick dispatch', '3–10 minute recalibrations between demands.', '3 min', '10 min', 28],
+      ['Deep Meditation', 'Unguided / light bells', '30–60 minute unguided silent endurance work.', '30 min', '60 min', 15]
+    ];
+    var card = {}, pick = {};
+    data.forEach(function (d, i) {
+      var on = self.state.sel === i;
+      card['c' + i] = 'display:flex;align-items:center;gap:14px;padding:18px;border-radius:16px;cursor:pointer;font-family:inherit;color:#F2F2F2;' + (on ? 'background:rgba(255,122,69,0.10);border:1.5px solid #FF7A45;' : 'background:#17191B;border:1px solid #23262A;');
+      pick['c' + i] = function () { self.setState({ sel: i }); };
+    });
+    var s = data[this.state.sel];
+    return {
+      icons: icons,
+      card: card, pick: pick,
+      iconBox: 'width:48px;height:48px;flex-shrink:0;border-radius:12px;background:#0F1112;border:1px solid #2A2D30;display:flex;align-items:center;justify-content:center;',
+      order: 'font-size:12px;font-weight:700;color:#A0A4A8;background:#23262A;border-radius:8px;padding:4px 9px;cursor:grab;',
+      sel: { name: s[0], sub: s[1], desc: s[2], min: s[3], max: s[4], tracks: s[5] }
+    };
+  }
+}
+</script>
+</body>
+</html>

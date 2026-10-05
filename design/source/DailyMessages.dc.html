@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WeHum CMS daily messages</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0D0E}
+a{color:#FF9B70}a:hover{color:#FFB99A}
+</style>
+</helmet>
+<div style="display: flex; width: 100%; min-height: 960px; background: #0B0D0E; font-family: 'Inter', sans-serif; color: #F2F2F2">
+<dc-import name="Sidebar" active="daily" hint-size="248px,960px"></dc-import>
+<main style="flex-grow: 1; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<header style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.4px">Daily Messages</h1>
+<span style="font-size: 14px; color: #A0A4A8">One short audio or video from Raphael per day, delivered at each user’s chosen time</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" aria-label="Previous month" style="width: 40px; height: 40px; border-radius: 10px; border: 1px solid #2A2D30; background: #17191B; color: #F2F2F2; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<span style="font-size: 16px; font-weight: 600; width: 128px; text-align: center">October 2026</span>
+<button type="button" aria-label="Next month" style="width: 40px; height: 40px; border-radius: 10px; border: 1px solid #2A2D30; background: #17191B; color: #F2F2F2; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+</div>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start">
+<section style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 18px">
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #6E7378; padding: 0 4px 10px 4px">
+<span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+<button type="button" onClick="{{ c.pick }}" style="{{ c.style }}">
+<span style="{{ c.numStyle }}">{{ c.num }}</span>
+<sc-if value="{{ c.has }}" hint-placeholder-val="{{ true }}">
+<span style="{{ c.chip }}">{{ c.label }}</span>
+<span style="font-size: 12px; line-height: 1.35; color: #D9DBDD; text-align: left">{{ c.title }}</span>
+</sc-if>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; gap: 18px; padding: 14px 4px 0 4px; font-size: 12px; color: #A0A4A8">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #A0A4A8"></span>Published</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #4ADE80"></span>Live today</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #9FE3D6"></span>Scheduled</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #FFB99A"></span>Draft</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #FF7A45"></span>Missing</span>
+</div>
+</section>
+
+<aside aria-label="Selected day" style="background: #17191B; border: 1px solid #23262A; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 1.2px; color: #FF9B70">{{ sel.date }}</span>
+<h2 style="margin: 0; font-size: 20px; font-weight: 700">{{ sel.title }}</h2>
+<span style="font-size: 13px; color: #A0A4A8">{{ sel.status }}</span>
+</div>
+<div role="radiogroup" aria-label="Message type" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 4px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30">
+<sc-for list="{{ kinds }}" as="k" hint-placeholder-count="3"><button type="button" role="radio" aria-checked="{{ k.on }}" onClick="{{ k.pick }}" style="{{ k.style }}">{{ k.label }}</button></sc-for>
+</div>
+<sc-if value="{{ isMedia }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 110px; border-radius: 14px; border: 1px dashed #3A3E42; background: #0F1112; color: #A0A4A8">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"></path></svg>
+<span style="font-size: 13px; font-weight: 600; color: #F2F2F2">{{ dropLabel }}</span>
+<span style="font-size: 12px">Finished file, 3–6 min</span>
+</div>
+</sc-if>
+<sc-if value="{{ isText }}" hint-placeholder-val="{{ false }}">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Message text
+<textarea rows="6" style="padding: 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px; line-height: 1.5; resize: vertical">Before you open your messages, take three slow breaths…</textarea>
+</label>
+</sc-if>
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: #0F1112; border: 1px dashed #3A3E42">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A0A4A8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-9 9"></path></svg>
+<span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1"><span style="font-size: 13px; font-weight: 600">Image (optional)</span><span style="font-size: 12px; color: #A0A4A8">Shown above audio or text</span></span>
+<button type="button" style="height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Add</button>
+</div>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Title
+<input type="text" value="{{ sel.title }}" style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px">
+</label>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 600; color: #C9CCCF">Theme</span>
+<div style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="4"><button type="button" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+</div>
+<div style="display: flex; gap: 6px">
+<input type="text" aria-label="New theme name" value="{{ newTheme }}" onChange="{{ setNewTheme }}" placeholder="New theme" style="flex-grow: 1; min-width: 0; height: 38px; padding: 0 12px; border-radius: 10px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 13px">
+<button type="button" onClick="{{ addTheme }}" style="height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A3E42; background: transparent; color: #FF9B70; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">+ Add theme</button>
+</div>
+</div>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #C9CCCF">Follow-up meditation <span style="font-weight: 400; color: #A0A4A8">off · Raphael asked for no meditation link on the message</span>
+<select style="height: 44px; padding: 0 12px; border-radius: 12px; background: #0F1112; border: 1px solid #2A2D30; color: #F2F2F2; font-family: inherit; font-size: 14px"><option>Steady Under Pressure · 15 min</option><option>None</option></select>
+</label>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">Free for everyone this day
+<input type="checkbox" style="width: 20px; height: 20px; accent-color: #FF7A45">
+</label>
+<span style="font-size: 12px; line-height: 1.5; color: #A0A4A8">After its day, every message stays in the app’s “Past messages”, searchable by date and word, so you can say “remember what we talked about on Oct 5”.</span>
+<div style="display: flex; gap: 10px">
+<button type="button" style="flex-grow: 1; height: 44px; border-radius: 12px; border: 1px solid #3A3E42; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Save draft</button>
+<button type="button" style="flex-grow: 1; height: 44px; border-radius: 12px; border: none; background: #FF7A45; color: #2A0E02; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Schedule</button>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 'o2', kind: 'Audio', theme: 'Attention', themes: ['Attention', 'Work', 'Rest', 'Pacing'], newTheme: '' }; }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    var seg = function (on) { return 'height:40px;border-radius:9px;border:none;font-family:inherit;font-size:14px;cursor:pointer;' + (on ? 'background:#FF7A45;color:#2A0E02;font-weight:700;' : 'background:transparent;color:#A0A4A8;font-weight:600;'); };
+    var kinds = ['Audio', 'Video', 'Text'].map(function (k) { return { label: k, on: st.kind === k, style: seg(st.kind === k), pick: function () { self.setState({ kind: k }); } }; });
+    var themes = st.themes.map(function (t) { var on = st.theme === t; return { label: t, pick: function () { self.setState({ theme: t }); }, style: 'min-height:34px;padding:0 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;' + (on ? 'background:#123C3A;color:#9FE3D6;border:1px solid #2F6B66;' : 'background:#0F1112;color:#C9CCCF;border:1px solid #2A2D30;') }; });
+    var extra = {
+      kinds: kinds, themes: themes, isText: st.kind === 'Text', isMedia: st.kind !== 'Text',
+      dropLabel: st.kind === 'Video' ? 'Drop video file' : 'Drop audio file',
+      newTheme: st.newTheme,
+      setNewTheme: function (e) { self.setState({ newTheme: e.target.value }); },
+      addTheme: function () { var n = st.newTheme.trim(); if (n) self.setState({ themes: st.themes.concat([n]), theme: n, newTheme: '' }); }
+    };
+    var col = { done: '#A0A4A8', live: '#4ADE80', sched: '#9FE3D6', draft: '#FFB99A', miss: '#FF7A45' };
+    var word = { done: 'PUBLISHED', live: 'LIVE', sched: 'SCHEDULED', draft: 'DRAFT', miss: 'MISSING' };
+    var entries = {
+      s28: ['done', 'Steadiness Under Modern Work Urgency', 'Mon, Sep 28'],
+      s29: ['done', 'Quiet Power: Settling the Inner Rush', 'Tue, Sep 29'],
+      s30: ['done', 'The Single Deep Exhale', 'Wed, Sep 30'],
+      o1: ['live', 'Releasing Cognitive Friction Before Work', 'Thu, Oct 1'],
+      o2: ['sched', 'Dissolving Defensiveness', 'Fri, Oct 2'],
+      o3: ['draft', 'End-of-Week Grounding', 'Sat, Oct 3'],
+      o4: ['miss', 'No message yet', 'Sun, Oct 4'],
+      o5: ['sched', 'Monday Reset: Starting Unhurried', 'Mon, Oct 5'],
+      o6: ['sched', 'The Pause Before Replying', 'Tue, Oct 6'],
+      o7: ['draft', 'Walking Meditation Between Meetings', 'Wed, Oct 7']
+    };
+    var cells = [];
+    var days = [['s28', 28], ['s29', 29], ['s30', 30]];
+    for (var d = 1; d <= 31; d++) days.push(['o' + d, d]);
+    days.push(['n1', 1]);
+    days.forEach(function (k) {
+      var e = entries[k[0]];
+      var on = self.state.sel === k[0];
+      var outside = k[0].charAt(0) !== 'o';
+      var c = e ? col[e[0]] : '#3A3E42';
+      cells.push({
+        num: k[1], has: !!e,
+        label: e ? word[e[0]] : '', title: e ? e[1] : '',
+        pick: function () { if (e) self.setState({ sel: k[0] }); },
+        numStyle: 'font-size:13px;font-weight:600;' + (k[0] === 'o1' ? 'color:#2A0E02;background:#FF7A45;border-radius:999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;' : (outside ? 'color:#6E7378;' : 'color:#F2F2F2;')),
+        chip: 'font-size:10px;font-weight:700;letter-spacing:0.6px;color:' + c + ';',
+        style: 'display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:104px;padding:10px;border-radius:12px;font-family:inherit;cursor:pointer;color:#F2F2F2;' + (on ? 'background:rgba(255,122,69,0.10);border:1.5px solid #FF7A45;' : (e ? 'background:#1E2124;border:1px solid #2A2D30;border-top:3px solid ' + c + ';' : 'background:#141618;border:1px solid #1E2124;'))
+      });
+    });
+    var s = entries[this.state.sel] || entries.o2;
+    var statusLine = { done: 'Published · 3,840 listens', live: 'Live now · went out at each user’s 07:00 window', sched: 'Scheduled · delivered at each user’s chosen time', draft: 'Draft · audio uploaded, transcript missing', miss: 'Nothing scheduled yet' }[s[0]];
+    return Object.assign(extra, { cells: cells, sel: { date: s[2].toUpperCase(), title: s[1], status: statusLine } });
+  }
+}
+</script>
+</body>
+</html>
