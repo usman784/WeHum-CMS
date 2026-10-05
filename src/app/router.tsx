@@ -1,7 +1,12 @@
-import { Outlet, type RouteObject } from 'react-router';
-import { useAdmin } from '../hooks/useRole';
+import { lazy, Suspense, useEffect } from 'react';
+import { Navigate, Outlet, useLocation, type RouteObject } from 'react-router';
+import { signOut } from '../features/auth/api';
+import { IdleWarning } from '../features/auth/components/SessionDialogs';
+import { useModerationCount, useOwnAdminSync } from '../features/auth/effects';
+import { useLiveInvalidation } from '../hooks/useLive';
+import { useSessionState } from '../hooks/useRole';
 import { env } from '../lib/env';
-import { session } from '../lib/session';
+import type { Admin } from '../lib/session';
 import { Card } from '../ui/Card';
 import { PageHeader } from '../ui/PageHeader';
 import { EmptyState } from '../ui/States';
@@ -41,36 +46,48 @@ function ComingSoon({ title, itemKey }: { title: string; itemKey: string }) {
   );
 }
 
-function SignedOut() {
+/** First paint while the silent refresh runs: nothing to read, so only say that it is loading. */
+function Splash() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-gutter text-center">
-      <h1 className="text-h1">WeHum CMS</h1>
-      <p className="text-text-muted">Sign-in arrives with build phase P2.</p>
-      {env.name !== 'prod' ? (
-        <p className="text-sm text-text-muted">
-          Preview the shell as{' '}
-          {(['owner', 'admin', 'editor', 'moderator'] as const).map((r, i) => (
-            <span key={r}>
-              {i ? ' · ' : ''}
-              <a className="font-semibold text-ember-text underline-offset-2 hover:underline" href={`/?as=${r}`}>
-                {r}
-              </a>
-            </span>
-          ))}
-        </p>
-      ) : null}
+    <div role="status" aria-label="Loading WeHum CMS" className="flex h-full items-center justify-center">
+      <span className="size-8 animate-spin rounded-full border-2 border-ember border-t-transparent" aria-hidden />
     </div>
   );
 }
 
-function ShellLayout() {
-  const admin = useAdmin();
-  if (!admin) return <SignedOut />;
+// The sign-in form (react-hook-form, zod, QR code) stays out of the first load. The dialog that reuses it is
+// fetched right after the shell appears, so it is already there when a session ends, even if the network is gone by then.
+const loadReLogin = () => import('../features/auth/components/ReLoginDialog');
+const ReLoginDialog = lazy(async () => ({ default: (await loadReLogin()).ReLoginDialog }));
+
+/** Everything that needs a signed-in admin lives here, so none of it runs on the sign-in pages. */
+function SignedInShell({ admin, expired }: { admin: Admin; expired: boolean }) {
+  useLiveInvalidation();
+  useOwnAdminSync();
+  const moderationOpen = useModerationCount();
+  useEffect(() => {
+    void loadReLogin().catch(() => {});
+  }, []);
   return (
-    <AppShell admin={admin} onSignOut={() => session.set(null)}>
-      <Outlet />
-    </AppShell>
+    <>
+      <AppShell admin={admin} moderationOpen={moderationOpen} onSignOut={() => void signOut('user')}>
+        <Outlet />
+      </AppShell>
+      <IdleWarning enabled={!expired} />
+      <Suspense fallback={null}>{expired ? <ReLoginDialog admin={admin} open /> : null}</Suspense>
+    </>
   );
+}
+
+function ShellLayout() {
+  const { status, admin } = useSessionState();
+  const location = useLocation();
+  if (status === 'loading') return <Splash />;
+  if (!admin) {
+    const next = location.pathname + location.search;
+    return <Navigate to={next === '/' ? '/login' : `/login?next=${encodeURIComponent(next)}`} replace />;
+  }
+  return <SignedInShell admin={admin} expired={status === 'expired'} />;
 }
 
 function NotFound() {
@@ -81,7 +98,13 @@ function NotFound() {
   );
 }
 
+const auth = () => import('../features/auth/Page');
+
 export const routes: RouteObject[] = [
+  { path: '/login', lazy: async () => ({ Component: (await auth()).LoginPage }) },
+  { path: '/forgot-password', lazy: async () => ({ Component: (await auth()).ForgotPasswordPage }) },
+  { path: '/reset-password', lazy: async () => ({ Component: (await auth()).ResetPasswordPage }) },
+  { path: '/accept-invite', lazy: async () => ({ Component: (await auth()).AcceptInvitePage }) },
   {
     element: <ShellLayout />,
     children: [

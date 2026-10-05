@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getSocket, onStatus, subscribe, type SocketStatus } from '../lib/socket';
 import { qk } from '../lib/query';
@@ -10,16 +10,19 @@ export function useSubscribe(channels: string[]) {
   useEffect(() => subscribe(channels), [key]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
-/** Listen to one server event. */
+/** Listen to one server event. The handler may be an inline function: the latest one is always called, without re-binding. */
 export function useSocketEvent<E extends keyof AdminServerToClient>(event: E, handler: AdminServerToClient[E]) {
+  const latest = useRef(handler);
+  latest.current = handler;
   useEffect(() => {
     const s = getSocket();
     if (!s) return;
-    s.on(event, handler as never);
+    const listener = (...args: unknown[]) => (latest.current as (...a: unknown[]) => void)(...args);
+    s.on(event, listener as never);
     return () => {
-      s.off(event, handler as never);
+      s.off(event, listener as never);
     };
-  }, [event, handler]);
+  }, [event]);
 }
 
 /**

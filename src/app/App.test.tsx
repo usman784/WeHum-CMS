@@ -3,20 +3,26 @@ import userEvent from '@testing-library/user-event';
 import { readFileSync } from 'node:fs';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { auth } from '../lib/api';
+import { url } from '../mocks/handlers';
+import { server } from '../mocks/server';
 import { createQueryClient } from '../lib/query';
 import type { Role } from '../lib/rbac';
 import { session } from '../lib/session';
 import { getTheme, initTheme } from '../lib/theme';
 import { a11yViolations } from '../test/render';
 import { navFor } from './layout/Sidebar';
-import { applyPreviewRole, previewAdmin } from './preview';
+import { mockAdmin } from '../mocks/handlers';
 import { Providers } from './providers';
 import { routes } from './router';
 
-afterEach(() => act(() => session.set(null)));
+afterEach(() => act(() => session.reset()));
 
+/** Open a route as a signed-in admin of that role, or signed out when no role is given. */
 function open(path: string, role?: Role) {
-  if (role) session.set(previewAdmin(role));
+  if (role) session.signIn(mockAdmin(role));
+  else session.signOut();
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   render(
     <Providers client={createQueryClient()}>
@@ -102,17 +108,41 @@ describe('routes', () => {
     expect(screen.getByText('Page not found')).toBeInTheDocument();
   });
 
-  it('without a session there is no shell and no navigation', () => {
-    open('/');
+  it('without a session every page sends you to sign in and remembers where you wanted to go', async () => {
+    const router = open('/sessions?tab=drafts');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Sign in' })).toBeInTheDocument();
     expect(screen.queryByRole('navigation', { name: 'CMS navigation' })).not.toBeInTheDocument();
-    expect(screen.getByText('Sign-in arrives with build phase P2.')).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/login');
+    expect(router.state.location.search).toBe(`?next=${encodeURIComponent('/sessions?tab=drafts')}`);
   });
 
-  it('sign out leaves the shell', async () => {
-    open('/', 'admin');
+  it('while the first silent refresh runs, only a loading state shows (no flash of the sign-in page)', () => {
+    session.reset();
+    render(
+      <Providers client={createQueryClient()}>
+        <RouterProvider router={createMemoryRouter(routes, { initialEntries: ['/'] })} />
+      </Providers>,
+    );
+    expect(screen.getByRole('status', { name: 'Loading WeHum CMS' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Sign in' })).not.toBeInTheDocument();
+  });
+
+  it('sign out calls the API, leaves the shell and lands on the sign-in page', async () => {
+    let called = 0;
+    server.use(
+      http.post(url('/v1/admin/auth/logout'), () => {
+        called += 1;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    auth.set('tok-1');
+    const router = open('/', 'admin');
     await userEvent.click(within(nav()).getAllByRole('button', { name: 'Sign out' })[0]!);
-    expect(screen.queryByRole('navigation', { name: 'CMS navigation' })).not.toBeInTheDocument();
-    expect(session.admin).toBeNull();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Sign in' })).toBeInTheDocument();
+    expect(called).toBe(1);
+    expect(session.state).toMatchObject({ status: 'signedOut', admin: null, reason: 'user' });
+    expect(auth.token).toBeNull();
+    expect(router.state.location.pathname).toBe('/login');
   });
 
   it('the component gallery loads at /kit', async () => {
@@ -158,18 +188,6 @@ describe('shell', () => {
     onLine.mockReturnValue(true);
     act(() => void window.dispatchEvent(new Event('online')));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  });
-});
-
-describe('preview role (P1 only)', () => {
-  it('reads ?as=<role> and ignores anything else', () => {
-    applyPreviewRole('?as=editor');
-    expect(session.admin?.role).toBe('editor');
-    act(() => session.set(null));
-    applyPreviewRole('?as=superuser');
-    expect(session.admin).toBeNull();
-    applyPreviewRole('');
-    expect(session.admin).toBeNull();
   });
 });
 

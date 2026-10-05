@@ -13,7 +13,12 @@ pnpm dev                  # http://localhost:5173
 VITE_MOCKS=1 pnpm dev     # same, against the built-in mock API (no backend needed)
 ```
 
-Until sign-in is built (phase P2), open the shell as a demo admin with `?as=owner`, `?as=admin`, `?as=editor` or `?as=moderator`, for example `http://localhost:5173/?as=owner`. The component gallery is at `/kit?as=owner`. Neither works in a production build (`VITE_ENV=prod`).
+**Signing in**
+
+- With the real backend: use the owner account from the backend's `.env` (`SEED_OWNER_EMAIL` / `SEED_OWNER_PASSWORD`). The first sign-in asks you to set up two-step sign-in with an authenticator app.
+- With the mock API (`VITE_MOCKS=1`): `owner@wehum.app`, `admin@wehum.app`, `editor@wehum.app` or `moderator@wehum.app`, password `correct-horse-battery`, code `123456`. `new@wehum.app` walks through the two-step setup.
+
+The component gallery is at `/kit` after signing in (not in a production build, `VITE_ENV=prod`).
 
 ## Commands
 
@@ -24,9 +29,26 @@ Until sign-in is built (phase P2), open the shell as a demo admin with `?as=owne
 | `pnpm test` | Unit and component tests (Vitest + Testing Library + MSW) |
 | `pnpm build` then `pnpm size` | Production build, then the 250 KB gzip budget for the initial load |
 | `pnpm e2e` | Playwright against the production build. Run `pnpm build` first. `PW_CHANNEL=chrome` uses the installed Chrome. |
+| `pnpm e2e:backend` | Playwright against the **real backend** (sign-in, two-step codes, roles, lockout, token refresh, reset, invite). See below. |
 | `pnpm stories` | Ladle: every UI primitive as a story, with a theme switch. `pnpm stories:build` builds it. |
 | `pnpm api:sync` | Copies `openapi.yaml` and `socket-events.ts` from `../backend` |
 | `pnpm api:types` | Regenerates `src/lib/api-types.ts` from `openapi/openapi.yaml`. Never edit that file by hand. |
+
+## Tests against the real backend
+
+`pnpm e2e:backend` starts the backend itself and stops it at the end. It needs:
+
+- the backend repo next to this one (`../backend`, with `npm install` done), or `E2E_BACKEND_DIR`;
+- Postgres and Redis from the backend's `docker compose up -d`;
+- port 3000 free, and a build made with `VITE_API_URL=http://localhost:3000 pnpm build`.
+
+It creates its own database `wehum_e2e` (dropped and recreated on every run) and uses Redis DB 14, so development data is not touched. If your ports differ from the compose defaults, set `E2E_DATABASE_URL` and `E2E_REDIS_URL`, for example:
+
+```bash
+E2E_DATABASE_URL=postgresql://wehum:wehum@localhost:5433/wehum_e2e E2E_REDIS_URL=redis://localhost:6380/14 pnpm e2e:backend
+```
+
+The run takes about two minutes: one test waits for a real access token to expire. The backend log, including the "emails" with reset and invite links, is in `test-results/backend.log`.
 
 ## Backend contract
 

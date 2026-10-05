@@ -2,6 +2,7 @@ import { io, type Socket } from 'socket.io-client';
 import { auth, refresh } from './api';
 import { env } from './env';
 import { breadcrumb } from './sentry';
+import { session } from './session';
 import type { AdminClientToServer, AdminServerToClient } from './socket-events';
 
 /** `/admin` namespace client (spec §6.3): websocket only, backoff reconnect, token refresh, ref-counted channels. */
@@ -87,6 +88,7 @@ export function connectSocket(): AdminSocket {
   // Role revoked or admin disabled: sign out at once (spec §6.2).
   s.on('force:logout', () => {
     auth.set(null);
+    session.signOut('forced');
     disconnectSocket();
   });
   socket = s;

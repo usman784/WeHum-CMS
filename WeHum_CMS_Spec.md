@@ -605,3 +605,51 @@ Open issues / risks:
 Evidence: `test-results/p1-shell-dark.png`, `p1-shell-light.png`, `p1-kit-dark.png`, `p1-kit-light.png` (CI artifact).
 
 Status: ✅ done
+
+Follow-up: GitHub CI passed for P0 (after the test fix) and for P1.
+
+### Phase P2 — Auth
+Date: 2026-10-06
+
+Built:
+- Sign in (00): password step, 6-digit code step (submits itself at 6 digits), recovery-code option, first-time two-step setup with QR code and typed key, 10 recovery codes shown once (copy, download, "I have saved these" before continuing).
+- Forgot password, reset password (`/reset-password?token=`), accept invite (`/accept-invite?token=`, then the two-step setup).
+- Session: silent refresh on page load, single-flight refresh on `TOKEN_EXPIRED`/`TOKEN_INVALID`, refreshes take turns across tabs (Web Lock, plus one retry when another tab rotated the cookie), access token in memory only.
+- Session end: sign out (server + local, cached data dropped), `force:logout` with a reason on the sign-in page, idle timeout (warning dialog at 11 h 55 min with countdown, sign-out at 12 h, activity shared across tabs), re-login dialog that keeps the open screen when the session ends mid-work (spec §10).
+- Route guard: signed out → `/login?next=…` (only paths inside the CMS are accepted as `next`); loading state during the first refresh; `RequireRole` and "No permission" from P1.
+- Live: socket connects only while signed in; `entity:changed{admin}` for my own id re-reads `/me`; `moderation:count` drives the sidebar badge.
+- zod schemas mirroring the backend DTOs; API field errors (`VALIDATION_FAILED.details.fields[]`) mapped onto forms; lockout message with minutes.
+- Backend: new public `GET /v1/admin/public/live` for the sign-in counter (see backend spec §16 addendum).
+- The temporary `?as=<role>` preview from P1 is removed.
+
+Tests run:
+- `pnpm test` → 275 passed, 0 failed (17 files). New: sign-in flows, setup, reset, invite, session start/end, re-login (42), idle timeout and session effects (11), API client additions (4).
+- `pnpm e2e` (Chrome, production build, mocked API) → 26 passed: sign-in page against the design and axe in dark and light, keyboard-only use, reset/invite pages, plus the P1 shell and gallery tests now behind a session.
+- `pnpm e2e:backend` (Chrome, **real backend**, own database) → 14 passed: first sign-in with real authenticator codes; password + code; reload keeps the session; no token in browser storage and cookie flags; wrong password / wrong code; recovery code works once; navigation and "No permission" for admin, editor, moderator; the API returns 403/401 for the same roles; five wrong passwords → "Too many attempts. Try again in 15 minutes."; silent renewal before expiry; a really expired token is renewed on the next request; forgot → emailed link → new password → other browser signed out; invitation → setup → invited role; role change by an owner signs the admin out at once.
+- `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm build`, `pnpm stories:build` → clean. `pnpm size` → 198.9 KB gzip initial load (budget 250 KB).
+- Backend `npm test` → 221 passed.
+
+Bugs found → fixed:
+- **Sign-out with an expired access token did not end the session on the server** (found by the real-backend test): the client did not renew the token for the sign-out call, so the refresh cookie stayed valid and a reload signed the admin back in. Now the token is renewed first. Also new: a sign-out made while offline is finished on the next page load.
+- Two tabs could send the same one-time refresh cookie; the loser was treated as "session ended". Now refreshes take turns and the loser retries with the rotated cookie.
+- The CSRF header preferred the value kept in memory over the cookie, which breaks once another tab rotates the cookie. The cookie now wins; memory is the fallback.
+- `useSocketEvent` re-bound its listener on every render when given an inline handler → it keeps one listener and always calls the latest handler.
+
+Decisions / deviations from spec:
+- **No "Continue with Google" button.** It is in the design and in §9, but the backend has no Google sign-in for admins and §6.2 describes only password + authenticator code. A dead button was not added.
+- **No "Keep me signed in" checkbox.** The backend always sets the same cookie lifetime (12 h idle, 7 days at most), so the box would change nothing.
+- Password hint says 10 characters (the backend rule), not 8 as in the design placeholder.
+- The sign-in hero uses the new public endpoint instead of `GET /v1/live`, which needs an app token.
+- "Refresh after 10 min works" is tested with a 65-second token lifetime on the test backend (waiting 10 minutes per run is not practical). It cannot be shorter: the socket asks for a new token 60 s before the end.
+- A role change signs the admin out (backend behaviour: all sessions are revoked), so the sidebar changes after the next sign-in. The live `/me` re-read covers name changes.
+- The real-backend tests are not in GitHub CI: the workflow would need to check out the private backend repo and start Postgres and Redis. They run locally with one command (README). CI runs the mocked browser tests.
+
+Open issues / risks:
+- `wh_csrf` cookie has no `Domain` (open since P0): with the CMS and API on different subdomains the CMS cannot read it after a reload, so the silent refresh on page load would be rejected. Locally (same host, different ports) it works. Needs a cookie-domain setting in the backend, or the CMS and API under one domain, before staging.
+- Recovery of an admin who lost both phone and recovery codes has no screen yet (Team & roles, P8) — check that the backend offers an owner-side reset.
+- Initial load is 198.9 KB of 250 KB.
+- No Sentry DSN and hand-written `openapi.yaml` (open since P0).
+
+Evidence: `test-results/login-dark.png`, `login-light.png`, `shell-dark.png`, `shell-light.png`; real-backend log `test-results/backend.log`.
+
+Status: ✅ done

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { bodyBackground, OPEN_LAYER, seriousViolations } from './axe';
+import { openAs } from './session';
 
 // The gallery at /kit shows every UI primitive (the same stories Ladle shows). These tests are the
 // "component tests + axe; dark/light" exit check of phase P1, run in a real browser.
@@ -7,7 +8,7 @@ import { bodyBackground, OPEN_LAYER, seriousViolations } from './axe';
 for (const theme of ['dark', 'light'] as const) {
   test(`every primitive passes axe (incl. colour contrast) in ${theme}`, async ({ page }) => {
     await page.addInitScript((t) => localStorage.setItem('wh_theme', t), theme);
-    await page.goto('/kit?as=owner');
+    await openAs(page, 'owner', '/kit');
     await expect(page.getByRole('heading', { level: 1, name: 'UI kit' })).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
     expect(await bodyBackground(page)).toBe(theme === 'dark' ? 'rgb(11, 13, 14)' : 'rgb(247, 245, 242)');
@@ -18,7 +19,7 @@ for (const theme of ['dark', 'light'] as const) {
 
   test(`dialog, typed confirm, menu and toast pass axe in ${theme}`, async ({ page }) => {
     await page.addInitScript((t) => localStorage.setItem('wh_theme', t), theme);
-    await page.goto('/kit?as=owner');
+    await openAs(page, 'owner', '/kit');
 
     await page.getByRole('button', { name: 'Delete user' }).click();
     const dialog = page.getByRole('dialog', { name: 'Delete account and data' });
@@ -45,7 +46,7 @@ for (const theme of ['dark', 'light'] as const) {
 }
 
 test('table: sort by click, select a row, hide a column', async ({ page }) => {
-  await page.goto('/kit?as=owner');
+  await openAs(page, 'owner', '/kit');
   const story = page.locator('[data-story="DataTable/Sort select and columns"]');
   const table = story.getByRole('table', { name: 'Sessions' });
   const first = () => table.getByRole('row').nth(1).getByRole('cell').nth(1);
@@ -61,16 +62,19 @@ test('table: sort by click, select a row, hide a column', async ({ page }) => {
 });
 
 test('table: 1,000 rows stay light (virtual rows) and scroll to the end', async ({ page }) => {
-  await page.goto('/kit?as=owner');
+  await openAs(page, 'owner', '/kit');
   const table = page.locator('[data-story="DataTable/Virtual rows"]').getByRole('table');
   expect(await table.getByRole('row').count()).toBeLessThan(40);
-  await table.locator('[role="rowgroup"]').last().evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  await table
+    .locator('[role="rowgroup"]')
+    .last()
+    .evaluate((el) => el.scrollTo(0, el.scrollHeight));
   await expect(table.getByText('Session 1000', { exact: true })).toBeVisible();
   expect(await table.getByRole('row').count()).toBeLessThan(40);
 });
 
 test('drag list: reorder with the keyboard', async ({ page }) => {
-  await page.goto('/kit?as=owner');
+  await openAs(page, 'owner', '/kit');
   const list = page.getByRole('list', { name: 'Theme order' });
   const names = () => list.getByRole('listitem').locator('.font-semibold').allTextContents();
   await expect.poll(names).toEqual(['Transcendent', 'Loving Kindness', 'Mindfulness', 'Breathing']);
@@ -89,7 +93,7 @@ test('drag list: reorder with the keyboard', async ({ page }) => {
 });
 
 test('drag list: reorder with the mouse', async ({ page }) => {
-  await page.goto('/kit?as=owner');
+  await openAs(page, 'owner', '/kit');
   const list = page.getByRole('list', { name: 'Theme order' });
   const names = () => list.getByRole('listitem').locator('.font-semibold').allTextContents();
   await list.scrollIntoViewIfNeeded(); // mouse coordinates are relative to the viewport
@@ -103,7 +107,7 @@ test('drag list: reorder with the mouse', async ({ page }) => {
 });
 
 test('time input shows the four local times for the UTC time', async ({ page }) => {
-  await page.goto('/kit?as=owner');
+  await openAs(page, 'owner', '/kit');
   const times = page.getByRole('list', { name: 'Local times' });
   await expect(times.getByRole('listitem')).toHaveCount(4);
   await expect(times).toContainText('Berlin15:00'); // 13:00 UTC on 2026-10-08 (summer time)

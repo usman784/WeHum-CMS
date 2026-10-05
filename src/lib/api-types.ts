@@ -1328,6 +1328,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/public/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Totals for the CMS sign-in page
+         * @description Auth: public. meditatedToday, meditatingNow, at. No countries, nothing per user. Cached 10 s.
+         */
+        get: operations["get_v1_admin_public_live"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/admin/team": {
         parameters: {
             query?: never;
@@ -5015,6 +5035,35 @@ export interface operations {
         };
     };
     get_v1_admin_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    get_v1_admin_public_live: {
         parameters: {
             query?: never;
             header?: never;

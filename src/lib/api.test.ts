@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fail, mockSession, ok, url } from '../mocks/handlers';
 import { server } from '../mocks/server';
 import { api, ApiError, auth, isConflict, isNetworkError, refresh } from './api';
+import { session } from './session';
 
 const setCsrfCookie = (v: string) => {
   document.cookie = `wh_csrf=${v}; path=/`;
@@ -67,18 +68,19 @@ describe('api() request', () => {
     expect(r.meta?.version).toBe(8);
   });
 
-  it('prefers the CSRF token from the last auth response over the cookie', async () => {
-    let csrf: string | null = null;
+  it('CSRF: the cookie wins (another tab may have rotated it); the value from the auth response is the fallback', async () => {
+    const seen: (string | null)[] = [];
     server.use(
       http.post(url('/v1/admin/themes'), ({ request }) => {
-        csrf = request.headers.get('x-csrf');
+        seen.push(request.headers.get('x-csrf'));
         return ok({ id: 't2' }, undefined, { status: 201 });
       }),
     );
-    setCsrfCookie('cookie-csrf');
     auth.set('tok-1', 'body-csrf');
+    await api('/v1/admin/themes', { method: 'POST', body: {} }); // cookie not readable (other subdomain)
+    setCsrfCookie('rotated-by-other-tab');
     await api('/v1/admin/themes', { method: 'POST', body: {} });
-    expect(csrf).toBe('body-csrf');
+    expect(seen).toEqual(['body-csrf', 'rotated-by-other-tab']);
   });
 
   it('returns undefined data on 204', async () => {
@@ -238,9 +240,62 @@ describe('silent refresh', () => {
     setCsrfCookie('cookie-csrf');
     expect(await refresh()).toBe(true);
     expect(auth.token).toBe('tok-1');
+    setCsrfCookie('csrf-1'); // the real server sets the new cookie with the response
     expect(await refresh()).toBe(true);
     expect(auth.token).toBe('tok-2');
     expect(csrf).toEqual(['cookie-csrf', 'csrf-1']);
+    expect(session.state).toMatchObject({ status: 'signedIn', admin: { role: 'owner' } });
+  });
+
+  it('two tabs refresh at once: the loser sees the rotated cookie and tries once more instead of ending the session', async () => {
+    session.signIn(mockSession().admin);
+    setCsrfCookie('old');
+    let calls = 0;
+    server.use(
+      http.post(url('/v1/admin/auth/refresh'), ({ request }) => {
+        calls += 1;
+        if (request.headers.get('x-csrf') === 'old') {
+          setCsrfCookie('new'); // the other tab's refresh landed first and rotated the cookie
+          return fail(401, 'TOKEN_INVALID', 'Session expired. Sign in again.');
+        }
+        return ok({ ...mockSession(), accessToken: 'fresh' });
+      }),
+    );
+    expect(await refresh()).toBe(true);
+    expect(calls).toBe(2);
+    expect(auth.token).toBe('fresh');
+    expect(session.state.status).toBe('signedIn');
+  });
+
+  it('a rejected refresh while signed in marks the session expired (the screen stays); on page load it means signed out', async () => {
+    server.use(http.post(url('/v1/admin/auth/refresh'), () => fail(401, 'TOKEN_INVALID', 'Session expired. Sign in again.')));
+    session.signIn(mockSession().admin);
+    expect(await refresh()).toBe(false);
+    expect(session.state).toMatchObject({ status: 'expired', admin: { role: 'owner' } });
+    session.reset();
+    expect(await refresh()).toBe(false);
+    expect(session.state).toMatchObject({ status: 'signedOut', admin: null });
+  });
+
+  it('a revoked access token (TOKEN_INVALID, e.g. after a role change) is renewed like an expired one, but not on sign-in endpoints', async () => {
+    const calls = { users: 0, refresh: 0 };
+    server.use(
+      http.get(url('/v1/admin/users'), ({ request }) => {
+        calls.users += 1;
+        return request.headers.get('authorization') === 'Bearer fresh' ? ok([]) : fail(401, 'TOKEN_INVALID', 'Token revoked');
+      }),
+      http.post(url('/v1/admin/auth/reset'), () => fail(401, 'TOKEN_INVALID', 'This link is invalid or has expired')),
+      http.post(url('/v1/admin/auth/refresh'), () => {
+        calls.refresh += 1;
+        return ok({ ...mockSession(), accessToken: 'fresh' });
+      }),
+    );
+    auth.set('revoked');
+    await api('/v1/admin/users');
+    expect(calls).toEqual({ users: 2, refresh: 1 });
+    const e = await api('/v1/admin/auth/reset', { method: 'POST', body: {} }).catch((x: unknown) => x);
+    expect(e).toMatchObject({ code: 'TOKEN_INVALID' });
+    expect(calls.refresh).toBe(1);
   });
 
   it('refresh() resolves false on a network failure and keeps the current token', async () => {

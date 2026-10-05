@@ -2,6 +2,8 @@
  * Fetch wrapper (spec §6.1–6.2): access token in memory, silent refresh via httpOnly cookie (single-flight),
  * CSRF double-submit, envelope unwrapping, typed ApiError with traceId.
  */
+import { session, type Admin } from './session';
+
 const BASE = import.meta.env.VITE_API_URL as string;
 
 export class ApiError extends Error {
@@ -46,31 +48,89 @@ export const auth = {
   },
 };
 
-/** Double-submit value: the one from the last auth response, else the readable `wh_csrf` cookie (page reload). */
-const csrf = () => csrfToken ?? document.cookie.match(/(?:^|; )wh_csrf=([^;]+)/)?.[1] ?? '';
+const csrfCookie = () => document.cookie.match(/(?:^|; )wh_csrf=([^;]+)/)?.[1] ?? null;
 
-/** Single-flight: every caller that hits TOKEN_EXPIRED at the same time shares one refresh request. */
+/**
+ * Double-submit value. The readable `wh_csrf` cookie wins, because the server compares the header with that cookie
+ * and another tab may have rotated it. The value from the last auth response is the fallback for when the cookie
+ * cannot be read from this origin.
+ */
+const csrf = () => csrfCookie() ?? csrfToken ?? '';
+
+/** What every auth endpoint returns once the admin is fully signed in. */
+export type SessionPayload = { accessToken: string; expiresIn: number; csrfToken?: string; admin: Admin };
+
+/** Store the tokens in memory and mark the admin as signed in. Used by sign-in, MFA, enrollment and refresh. */
+export function startSession(p: SessionPayload) {
+  auth.set(p.accessToken, p.csrfToken);
+  session.signIn(p.admin);
+}
+
+/** The refresh cookie was rejected: keep the screen and ask to sign in again if someone was signed in, else just be signed out. */
+function endSession() {
+  auth.set(null);
+  if (session.state.status === 'signedIn') session.expire();
+  else if (session.state.status === 'loading') session.signOut();
+}
+
+const postRefresh = () => fetch(`${BASE}/v1/admin/auth/refresh`, { method: 'POST', credentials: 'include', headers: { 'X-CSRF': csrf() } });
+
+async function doRefresh(): Promise<boolean> {
+  try {
+    const before = csrfCookie();
+    let r = await postRefresh();
+    // Two tabs can refresh at the same moment with the same cookie; only one wins. If the cookie changed while
+    // we were waiting, the other tab rotated it: try once more with the new one.
+    if (!r.ok && r.status === 401 && before !== null && csrfCookie() !== before) r = await postRefresh();
+    if (!r.ok) {
+      endSession();
+      return false;
+    }
+    const { data } = (await r.json()) as { data: SessionPayload };
+    startSession(data);
+    return true;
+  } catch {
+    return false; // network problem: the session may still be fine, so change nothing
+  }
+}
+
+/**
+ * Single-flight: every caller that hits TOKEN_EXPIRED at the same time shares one refresh request.
+ * Across tabs a Web Lock makes refreshes take turns, so two tabs never spend the same one-time cookie.
+ */
 export function refresh(): Promise<boolean> {
-  refreshing ??= fetch(`${BASE}/v1/admin/auth/refresh`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'X-CSRF': csrf() },
-  })
-    .then(async (r) => {
-      if (!r.ok) {
-        auth.set(null);
-        return false;
-      }
-      const { data } = (await r.json()) as { data: { accessToken: string; csrfToken?: string } };
-      auth.set(data.accessToken, data.csrfToken);
-      return true;
-    })
-    .catch(() => false)
-    .finally(() => {
+  if (!refreshing) {
+    const run: Promise<boolean> = navigator.locks ? navigator.locks.request('wh-refresh', doRefresh).then((ok) => ok) : doRefresh();
+    refreshing = run.finally(() => {
       refreshing = null;
     });
+  }
   return refreshing;
 }
+
+/**
+ * End the server session that the refresh cookie belongs to, without signing in on this page.
+ * Used on page load to finish a sign-out that could not reach the server earlier.
+ * True when the session is gone (or was already); false when the server still cannot be reached.
+ */
+export async function endServerSession(): Promise<boolean> {
+  try {
+    const r = await postRefresh();
+    if (!r.ok) return r.status < 500; // 401: the cookie is already dead
+    const { data } = (await r.json()) as { data: SessionPayload };
+    const out = await fetch(`${BASE}/v1/admin/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${data.accessToken}`, 'X-CSRF': csrfCookie() ?? data.csrfToken ?? '' },
+    });
+    return out.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Auth endpoints that are called without an access token. */
+const PUBLIC_AUTH = /^\/v1\/admin\/auth\/(login|mfa\/|refresh|forgot|reset|accept-invite)/;
 
 export type ApiMeta = { nextCursor?: string | null; version?: number };
 export type ApiResult<T> = { data: T; meta?: ApiMeta };
@@ -115,6 +175,10 @@ export async function api<T>(path: string, opts: Opts = {}, retried = false): Pr
   if (res.ok) return json;
 
   const e = json.error ?? { code: 'INTERNAL', message: res.statusText || 'Something went wrong' };
-  if (e.code === 'TOKEN_EXPIRED' && !retried && (await refresh())) return api<T>(path, opts, true);
+  // Expired access token (normal, every 10 min) or one revoked by a role change: get a new one and repeat once.
+  // Not for the sign-in endpoints: they take no access token, and there TOKEN_INVALID means "this link or step is
+  // no longer valid". Sign-out DOES take a token and must be renewed, or the server session would stay open.
+  const renewable = (e.code === 'TOKEN_EXPIRED' || e.code === 'TOKEN_INVALID') && !PUBLIC_AUTH.test(path);
+  if (renewable && !retried && (await refresh())) return api<T>(path, opts, true);
   throw new ApiError(e.code, res.status, e.message, e.details, e.traceId ?? res.headers.get('x-trace-id') ?? undefined);
 }

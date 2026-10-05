@@ -6,10 +6,12 @@ import { defineConfig } from '@playwright/test';
  */
 export default defineConfig({
   testDir: 'e2e',
+  testIgnore: 'backend/**', // real-backend tests have their own config: playwright.backend.config.ts
   outputDir: 'test-results',
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  expect: { timeout: 10_000 }, // the first test after the preview server starts loads every chunk cold
   use: {
     baseURL: 'http://localhost:4173',
     channel: process.env.PW_CHANNEL || undefined,
