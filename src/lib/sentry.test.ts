@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ApiError } from './api';
+import { env } from './env';
 import { captureError, initSentry, sendSentryTestEvent, setSentryUser } from './sentry';
 
 type SentEvent = { message?: string; release?: string; environment?: string; user?: object; tags?: Record<string, unknown> };
@@ -38,7 +39,9 @@ describe('sentry', () => {
     sendSentryTestEvent();
     await Sentry.flush(2000);
     expect(events).toHaveLength(1);
-    expect(events[0]).toMatchObject({ message: 'WeHum CMS: Sentry test event', environment: 'test', release: 'dev' });
+    // The release is the git sha in CI (VITE_RELEASE) and "dev" on a developer machine.
+    expect(events[0]).toMatchObject({ message: 'WeHum CMS: Sentry test event', environment: 'test', release: env.release });
+    expect(env.release).not.toBe('');
   });
 
   it('identifies the admin by id and role only, never the email', async () => {
