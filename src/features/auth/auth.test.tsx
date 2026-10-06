@@ -524,12 +524,14 @@ describe('session start and end', () => {
 
   it('session ended mid-work: the page stays, a dialog asks to sign in again with the same email, and work continues', async () => {
     session.signIn(mockAdmin('editor'));
+    auth.set('tok-1');
     open('/themes');
     expect(await heading('Themes')).toBeInTheDocument();
+    await screen.findByText('Loving Kindness');
     act(() => session.expire());
 
     const dialog = await screen.findByRole('dialog', { name: 'Sign in again' });
-    expect(screen.getByText('It arrives with build phase P3.')).toBeInTheDocument(); // the page behind is still mounted
+    expect(screen.getByText('Loving Kindness')).toBeInTheDocument(); // the page behind is still mounted
     const email = within(dialog).getByLabelText('Email');
     expect(email).toHaveValue('editor@wehum.app');
     expect(email).toHaveAttribute('readonly');

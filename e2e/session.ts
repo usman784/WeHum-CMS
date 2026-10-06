@@ -24,7 +24,7 @@ const json = (route: Route, status: number, body: unknown) =>
  * Answer the API for this page. With a role, the silent refresh on page load signs that admin in
  * (as if a valid refresh cookie were there). With `null` nobody is signed in.
  */
-export async function mockApi(page: Page, role: Role | null) {
+export async function mockApi(page: Page, role: Role | null, answers?: (url: URL, method: string) => unknown) {
   let current = role;
   await page.route(`${API_ORIGIN}/**`, (route) => {
     const req = route.request();
@@ -49,12 +49,14 @@ export async function mockApi(page: Page, role: Role | null) {
       return route.fulfill({ status: 204, headers: cors });
     }
     if (path === '/v1/admin/public/live') return json(route, 200, { data: { meditatedToday: 3180, meditatingNow: 214, at: Date.now() } });
+    const answer = answers?.(new URL(req.url()), req.method());
+    if (answer !== undefined) return json(route, 200, answer);
     return route.abort(); // nothing else exists yet (the socket simply stays offline)
   });
 }
 
 /** Open a page as a signed-in admin of that role. */
-export async function openAs(page: Page, role: Role, path = '/') {
-  await mockApi(page, role);
+export async function openAs(page: Page, role: Role, path = '/', answers?: Parameters<typeof mockApi>[2]) {
+  await mockApi(page, role, answers);
   await page.goto(path);
 }

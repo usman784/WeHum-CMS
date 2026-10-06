@@ -8,7 +8,14 @@ import {
   type Announcements,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { GripVertical } from 'lucide-react';
 import { useRef, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
@@ -30,6 +37,10 @@ type Props<T> = {
   /** Receives the full new order. Do the optimistic update and the `PUT …/order` call here. */
   onReorder: (items: T[]) => void;
   disabled?: boolean;
+  /** `grid`: items flow in columns (set the columns with `className`, e.g. "grid grid-cols-2 gap-3.5"). */
+  layout?: 'list' | 'grid';
+  /** Classes for each item. Default: a row with a top border. */
+  itemClassName?: string;
   className?: string;
 };
 
@@ -37,7 +48,18 @@ type Props<T> = {
  * Drag-to-reorder list (themes, SoS tiles, program days, MOTD dates, sound blocks).
  * Keyboard: focus the handle, Space to pick up, arrow keys to move, Space to drop, Esc to cancel.
  */
-export function DragList<T>({ label, items, itemKey, itemLabel, renderItem, onReorder, disabled, className }: Props<T>) {
+export function DragList<T>({
+  label,
+  items,
+  itemKey,
+  itemLabel,
+  renderItem,
+  onReorder,
+  disabled,
+  layout = 'list',
+  itemClassName,
+  className,
+}: Props<T>) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -86,10 +108,10 @@ export function DragList<T>({ label, items, itemKey, itemLabel, renderItem, onRe
         },
       }}
     >
-      <SortableContext items={ids} strategy={verticalListSortingStrategy} disabled={disabled}>
-        <ol aria-label={label} className={cn('flex flex-col', className)}>
+      <SortableContext items={ids} strategy={layout === 'grid' ? rectSortingStrategy : verticalListSortingStrategy} disabled={disabled}>
+        <ol aria-label={label} className={cn(layout === 'list' && 'flex flex-col', className)}>
           {items.map((item, i) => (
-            <Row key={ids[i]} id={ids[i]!} label={itemLabel(item)} disabled={disabled}>
+            <Row key={ids[i]} id={ids[i]!} label={itemLabel(item)} disabled={disabled} className={itemClassName}>
               {renderItem(item, i)}
             </Row>
           ))}
@@ -99,14 +121,30 @@ export function DragList<T>({ label, items, itemKey, itemLabel, renderItem, onRe
   );
 }
 
-function Row({ id, label, disabled, children }: { id: string; label: string; disabled?: boolean; children: ReactNode }) {
+function Row({
+  id,
+  label,
+  disabled,
+  className,
+  children,
+}: {
+  id: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id });
   return (
     <li
       ref={setNodeRef}
-      style={{ transform: transform ? `translate3d(0, ${Math.round(transform.y)}px, 0)` : undefined, transition }}
+      style={{
+        transform: transform ? `translate3d(${Math.round(transform.x)}px, ${Math.round(transform.y)}px, 0)` : undefined,
+        transition,
+      }}
       className={cn(
-        'flex min-h-14 items-center gap-2 border-t border-border bg-surface first:border-t-0',
+        'flex min-h-14 items-center gap-2',
+        className ?? 'border-t border-border bg-surface first:border-t-0',
         isDragging && 'relative z-10 rounded-tile border border-ember shadow-xl',
       )}
     >

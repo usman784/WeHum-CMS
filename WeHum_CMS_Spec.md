@@ -653,3 +653,44 @@ Open issues / risks:
 Evidence: `test-results/login-dark.png`, `login-light.png`, `shell-dark.png`, `shell-light.png`; real-backend log `test-results/backend.log`.
 
 Status: ✅ done
+
+### Phase P3 — Content
+Date: 2026-10-06
+
+Built:
+- Themes (09): grid in app order, drag and keyboard reorder saved with `PUT …/order`, editor with icon picker, visibility, counts; delete of a theme in use asks where to move its meditations.
+- Teachers (10), Sounds & blocks (11, tabs with counts, loudness card, upload of a block), Programs (05, day drag list), Challenges (06, behind the `challenges` flag; "Make live" and "End challenge" use `PATCH status`).
+- Sessions list (03): virtual rows, tabs, filters kept in the address, search that waits until typing stops, next page on scroll, row menu, bulk upload / publish / archive.
+- Session editor (04): audio, video and YouTube (link resolved by the API), schedule, presence banner, "This session changed" banner, 409 dialog.
+- Shared: `lib/upload.ts` (multipart upload with progress, pause, resume, cancel, retry of a failed part, checksum in a worker), `features/media`, `ui/ConflictDialog`, `hooks/useVersionedSave`, `hooks/useEntity` (editing presence, changed-by-others, row highlight), `mocks/content.ts` (in-memory content API).
+- Backend (commits `07815bf`, `2e0b368`): list `meta.total` and `sos` filter; `sessionCount` on themes and teachers; program days carry a session summary; challenge `finished`; `POST /v1/admin/media/uploads/:id/parts` (resume) and `DELETE …/uploads/:id` (cancel); CORS now allows PUT, PATCH, DELETE.
+
+Tests run:
+- `pnpm test` → 379 passed, 0 failed (21 files). New in P3: upload engine, sessions, themes, teachers, library (sounds, programs, challenges), conflict dialog, hooks.
+- `pnpm e2e` (Chrome, production build, mocked API) → 42 passed. New: `e2e/content.spec.ts` (16): /themes, /teachers, /sessions, /sessions/new, /sounds, /programs, /challenges in dark and light with axe (no serious or critical violations), no horizontal scroll, sessions tabs in the address, moderator gets "No permission" on all seven.
+- `pnpm e2e:backend` (Chrome, **real backend, worker and MinIO**) → 21 passed (14 from P2 + 7 new in `e2e/backend/content.spec.ts`): publish flow (upload → processing → publish → the app catalog lists it); YouTube link resolved for real; upload resume after a part is dropped; pause and cancel removes the asset on the server; 409 between two admins (both versions shown, nothing overwritten, "Keep my changes" keeps their other fields); themes drag order saved and visible in the app catalog, delete-in-use asks for a target; roles (editor cannot delete drafts, moderator has no content screens).
+- `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm build` → clean. `pnpm size` → 200.8 KB gzip initial load (budget 250 KB).
+- Backend `npm test` → 226 passed (225 + the new CORS preflight test).
+
+Bugs found → fixed:
+- **Backend CORS blocked every browser PATCH, PUT and DELETE** (found by the real-backend 409 test): `@fastify/cors` allows only GET, HEAD and POST by default. Fixed in `app.factory.ts`, with a preflight test; `ETag` and request id headers are now exposed.
+- **A save could silently overwrite someone else's change** (same test): the editor sent the version of the freshly re-fetched row, so the 409 never came. It now sends the version the form was loaded from.
+- **"Keep my changes" overwrote their other fields**: the session editor sent the whole form. It now sends only the fields this admin changed, and the conflict dialog lists only those.
+- Light theme: `text-faint` on the ember tint was 4.43:1 → token darkened to `#60656A` (tokens, not tests).
+- Test-only: race in "upload pause and cancel" (waits for the server row), stale two-step secrets after `resetAdmins()` (new `forgetTwoStep()`), the 409 test now uses a second admin (own saves never warn the person who made them), grid keyboard drag uses ArrowRight, exact match for the toast.
+
+Decisions / deviations from spec:
+- Sounds, Programs, Challenges and Teachers are single-page editors (the tabs and drag lists of the design are there). Program details and the day list are saved in two steps; a 409 on programs shows a "load their version" dialog, not a field diff.
+- Not built: "Preview in app" on Programs (no API); theme "Upload your own icon (SVG)" and icon colour (the backend refuses SVG and has no colour field); teacher "Has CMS login" checkbox (no API for it).
+- Only the session editor sends changed fields; themes, teachers, sounds and challenges reset their form to the new row when it changes under them, so their 409 uses the full row.
+- Unit tests have a 5 s limit per test. On a very busy machine (load average over 100) the heavy screens time out; with `--maxWorkers=4` all 379 pass. Nothing was loosened.
+
+Open issues / risks:
+- `wh_csrf` cookie has no `Domain` (open since P0): needs a backend cookie-domain setting before staging with different subdomains.
+- No Sentry DSN; backend `openapi.yaml` is still a hand-written outline; real-backend CMS tests are not in GitHub CI.
+- `/sessions` loads 30 rows per page; the 1,000+ row case is covered by the unit test and the P1 table test, not against 1,000 real rows.
+- Initial load is 200.8 KB of 250 KB.
+
+Evidence: `test-results/content-*-dark.png` and `-light.png`; real-backend log `test-results/backend.log`; traces of failed runs were kept in `test-results/` while fixing.
+
+Status: ✅ done

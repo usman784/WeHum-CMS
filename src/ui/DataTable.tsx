@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowDown, ArrowUp, ChevronsUpDown, Columns3 } from 'lucide-react';
-import { useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import { Button } from './Button';
 import { Checkbox } from './Checkbox';
@@ -58,6 +58,8 @@ type Props<T> = {
   /** Render only the visible rows inside a scroll area of this height (px). Use for long lists (1,000+ rows). */
   virtualHeight?: number;
   rowHeight?: number;
+  /** Virtual mode: called when the last rows scroll into view, to load the next page. */
+  onEndReached?: () => void;
   /** Footer: summary text and cursor pagination. */
   summary?: ReactNode;
   onPrevious?: () => void;
@@ -86,6 +88,7 @@ export function DataTable<T>({
   columnMenu,
   virtualHeight,
   rowHeight = 64,
+  onEndReached,
   summary,
   onPrevious,
   onNext,
@@ -141,6 +144,13 @@ export function DataTable<T>({
     overscan: 8,
     initialRect: { width: 0, height: virtualHeight ?? 0 },
   });
+  // Near the end of what is loaded: ask for more (the parent ignores it while a page is already loading).
+  const lastVisible = virtualizer.getVirtualItems().at(-1)?.index ?? -1;
+  const endReached = useRef(onEndReached);
+  endReached.current = onEndReached;
+  useEffect(() => {
+    if (virtualHeight && model.length > 0 && lastVisible >= model.length - 5) endReached.current?.();
+  }, [virtualHeight, lastVisible, model.length]);
 
   const allSelected = !!selected && model.length > 0 && model.every((r) => selected.has(r.id));
   const toggleAll = () => onSelectedChange?.(allSelected ? new Set() : new Set(model.map((r) => r.id)));

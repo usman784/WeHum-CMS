@@ -1,4 +1,4 @@
-import { RotateCw, Upload, X } from 'lucide-react';
+import { Pause, Play, RotateCw, Upload, X } from 'lucide-react';
 import { useId, useRef, useState, type DragEvent, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import { formatBytes } from '../lib/format';
@@ -25,6 +25,8 @@ export function checkFile(file: File, rule: FileRule): string | null {
 export type UploadState =
   | { status: 'idle' }
   | { status: 'uploading' | 'processing'; fileName: string; progress: number }
+  /** Stopped by the admin or by a lost connection. Parts already sent are kept. */
+  | { status: 'paused'; fileName: string; progress: number; reason?: string }
   | { status: 'done'; fileName: string; meta?: string }
   | { status: 'error'; fileName: string; message: string };
 
@@ -40,6 +42,8 @@ type Props = {
   onReject?: (messages: string[]) => void;
   onCancel?: () => void;
   onRetry?: () => void;
+  onPause?: () => void;
+  onResume?: () => void;
   icon?: ReactNode;
   disabled?: boolean;
   className?: string;
@@ -56,6 +60,8 @@ export function FileDrop({
   onReject,
   onCancel,
   onRetry,
+  onPause,
+  onResume,
   icon,
   disabled,
   className,
@@ -81,7 +87,9 @@ export function FileDrop({
   };
 
   const busy = state.status === 'uploading' || state.status === 'processing';
-  const pct = busy ? Math.round(Math.min(1, Math.max(0, state.progress)) * 100) : 0;
+  const paused = state.status === 'paused';
+  const pct = busy || paused ? Math.round(Math.min(1, Math.max(0, state.progress)) * 100) : 0;
+  const verb = state.status === 'uploading' ? 'Uploading' : state.status === 'paused' ? 'Paused' : 'Processing';
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
@@ -104,20 +112,23 @@ export function FileDrop({
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="truncate text-body font-semibold">{state.status === 'idle' ? label : state.fileName}</span>
           {state.status === 'idle' ? <span className="text-xs text-text-muted">{hint ?? 'Drop a file here, or choose one.'}</span> : null}
-          {busy ? (
+          {busy || paused ? (
             <>
               <div
                 role="progressbar"
-                aria-label={`${state.status === 'uploading' ? 'Uploading' : 'Processing'} ${state.fileName}`}
+                aria-label={`${verb} ${state.fileName}`}
                 aria-valuenow={pct}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 className="h-1.5 rounded-full bg-border-strong"
               >
-                <div className="h-1.5 rounded-full bg-ember transition-[width]" style={{ width: `${pct}%` }} />
+                <div
+                  className={cn('h-1.5 rounded-full transition-[width]', paused ? 'bg-text-faint' : 'bg-ember')}
+                  style={{ width: `${pct}%` }}
+                />
               </div>
-              <span className="tabular text-xs text-text-muted">
-                {state.status === 'uploading' ? 'Uploading' : 'Processing'} · {pct}%
+              <span className="tabular text-xs text-text-muted" role={paused ? 'status' : undefined}>
+                {verb} · {pct}%{paused && state.reason ? ` · ${state.reason}` : ''}
               </span>
             </>
           ) : null}
@@ -128,7 +139,18 @@ export function FileDrop({
             </span>
           ) : null}
         </div>
-        {busy && onCancel ? (
+        {state.status === 'uploading' && onPause ? (
+          <IconButton label="Pause upload" onClick={onPause}>
+            <Pause size={18} aria-hidden />
+          </IconButton>
+        ) : null}
+        {paused && onResume ? (
+          <Button variant="outline" size="sm" onClick={onResume}>
+            <Play size={14} aria-hidden />
+            Resume
+          </Button>
+        ) : null}
+        {(busy || paused) && onCancel ? (
           <IconButton label="Cancel upload" onClick={onCancel}>
             <X size={18} aria-hidden />
           </IconButton>
@@ -139,7 +161,7 @@ export function FileDrop({
             Retry
           </Button>
         ) : null}
-        {!busy ? (
+        {!busy && !paused ? (
           <Button variant="outline" size="sm" disabled={disabled} onClick={() => input.current?.click()}>
             {state.status === 'idle' ? 'Choose file' : 'Replace'}
           </Button>

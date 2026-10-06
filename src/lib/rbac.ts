@@ -3,6 +3,7 @@ export type Action =
   | 'dashboard.view'
   | 'analytics.view'
   | 'content.edit'
+  | 'content.delete'
   | 'moderation.act'
   | 'revenue.view'
   | 'users.view'
@@ -19,6 +20,7 @@ const matrix: Record<Action, Role[]> = {
   'dashboard.view': ['owner', 'admin', 'editor', 'moderator'],
   'analytics.view': ['owner', 'admin', 'editor'],
   'content.edit': ['owner', 'admin', 'editor'],
+  'content.delete': ['owner', 'admin'],
   'moderation.act': ['owner', 'admin', 'moderator'],
   'revenue.view': ['owner', 'admin', 'editor'],
   'users.view': ['owner', 'admin', 'editor'],

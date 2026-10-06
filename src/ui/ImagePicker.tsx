@@ -44,11 +44,13 @@ type Props = {
   /** Small note on the image, e.g. "Uses the YouTube thumbnail (you can replace it)". */
   note?: string;
   disabled?: boolean;
+  /** `avatar`: a round picture with only a short "Replace" strip (teacher photo). */
+  variant?: 'cover' | 'avatar';
   className?: string;
 };
 
 /** Square cover picker: click or drop, centre-crops to 1:1, rejects images that are too small (design: SessionEditor.dc.html "Cover image"). */
-export function ImagePicker({ label, value, onChange, minSize = 1200, note, disabled, className }: Props) {
+export function ImagePicker({ label, value, onChange, minSize = 1200, note, disabled, variant = 'cover', className }: Props) {
   const inputId = useId();
   const input = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -90,7 +92,8 @@ export function ImagePicker({ label, value, onChange, minSize = 1200, note, disa
         }}
         aria-label={shown ? `${label}: replace image` : `${label}: choose image`}
         className={cn(
-          'relative flex aspect-square w-full flex-col items-start justify-end gap-1 overflow-hidden rounded-[14px] border bg-teal p-3 text-left disabled:cursor-not-allowed disabled:opacity-60',
+          'relative flex aspect-square w-full flex-col overflow-hidden border bg-teal disabled:cursor-not-allowed disabled:opacity-60',
+          variant === 'avatar' ? 'items-stretch justify-end rounded-full' : 'items-start justify-end gap-1 rounded-[14px] p-3 text-left',
           over ? 'border-ember' : error ? 'border-danger-border' : 'border-border-strong',
         )}
       >
@@ -101,12 +104,21 @@ export function ImagePicker({ label, value, onChange, minSize = 1200, note, disa
           </span>
         ) : null}
         {/* Captions sit on a dark scrim over a photo, so they keep the dark tokens in both themes. */}
-        <span data-theme="dark" className="relative flex flex-col items-start gap-1">
-          {note ? <span className="rounded-lg bg-bg/70 px-2 py-1 text-xs font-semibold text-text">{note}</span> : null}
-          <span className="rounded-lg bg-bg/70 px-2 py-1 text-overline font-normal normal-case tracking-normal text-text">
-            1:1, min {minSize} px · drop to replace
+        {variant === 'avatar' ? (
+          <span
+            data-theme="dark"
+            className="relative bg-bg/70 py-1 text-center text-overline font-semibold normal-case tracking-normal text-text"
+          >
+            {shown ? 'Replace' : 'Add photo'}
           </span>
-        </span>
+        ) : (
+          <span data-theme="dark" className="relative flex flex-col items-start gap-1">
+            {note ? <span className="rounded-lg bg-bg/70 px-2 py-1 text-xs font-semibold text-text">{note}</span> : null}
+            <span className="rounded-lg bg-bg/70 px-2 py-1 text-overline font-normal normal-case tracking-normal text-text">
+              1:1, min {minSize} px · drop to replace
+            </span>
+          </span>
+        )}
       </button>
       <label htmlFor={inputId} className="sr-only">
         {label}

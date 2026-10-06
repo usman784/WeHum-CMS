@@ -36,10 +36,10 @@
   --c-bg: 247 245 242; --c-sidebar: 255 255 255; --c-surface: 255 255 255; --c-surface-alt: 241 238 234; --c-input: 244 241 237;
   --c-border: 228 224 218; --c-border-strong: 214 209 202; --c-outline: 189 182 174;
   /* WCAG AA (spec §3 "verify"): these derived light values failed 4.5:1 in axe and were darkened:
-     text-faint #8A8F94 → #666B70, ember-text #C2471A → #A63A12, on-ember #FFFFFF → #2A0E02 (same as dark),
+     text-faint #8A8F94 → #60656A (#666B70 gave 4.43:1 on the ember tint), ember-text #C2471A → #A63A12, on-ember #FFFFFF → #2A0E02 (same as dark),
      warning #B45309 → #92400E, danger-text #C53030 → #9B2C2C (both fail on their own 10–15 % tint),
      and green text uses the new success-text #166534 (success #16A34A stays for dots and bars). */
-  --c-text: 20 22 24; --c-text-body: 43 47 51; --c-text-soft: 62 67 72; --c-text-muted: 92 97 102; --c-text-faint: 102 107 112;
+  --c-text: 20 22 24; --c-text-body: 43 47 51; --c-text-soft: 62 67 72; --c-text-muted: 92 97 102; --c-text-faint: 96 101 106;
   --c-ember: 232 98 44; --c-ember-text: 166 58 18; --c-ember-soft: 217 105 58; --c-on-ember: 42 14 2;
   --c-teal: 221 243 239; --c-teal-text: 15 94 85; --c-success: 22 163 74; --c-success-text: 22 101 52; --c-warning: 146 64 14;
   --c-danger: 197 48 48; --c-danger-text: 155 44 44; --c-danger-border: 245 181 174;

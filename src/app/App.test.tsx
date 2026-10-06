@@ -81,8 +81,8 @@ describe('routes', () => {
     open('/', 'owner');
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Dashboard');
     await userEvent.click(within(nav()).getByRole('link', { name: 'Themes' }));
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Themes');
-    expect(screen.getByText('It arrives with build phase P3.')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Themes' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Loving Kindness/, pressed: false })).toBeInTheDocument(); // the real screen, loaded on demand
   });
 
   it('a page outside the role shows "No permission" instead of the page', () => {

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, type ComponentType, type LazyExoticComponent } from 'react';
 import { Navigate, Outlet, useLocation, type RouteObject } from 'react-router';
 import { signOut } from '../features/auth/api';
 import { IdleWarning } from '../features/auth/components/SessionDialogs';
@@ -9,6 +9,7 @@ import { env } from '../lib/env';
 import type { Admin } from '../lib/session';
 import { Card } from '../ui/Card';
 import { PageHeader } from '../ui/PageHeader';
+import { Skeleton } from '../ui/Skeleton';
 import { EmptyState } from '../ui/States';
 import { RequireRole } from './guards/RequireRole';
 import { AppShell } from './layout/AppShell';
@@ -98,6 +99,40 @@ function NotFound() {
   );
 }
 
+/**
+ * Built screens, each in its own chunk (spec §6.1 route-level code splitting). A nav key that is not here yet
+ * shows the "not built yet" placeholder.
+ */
+const pages: Record<string, LazyExoticComponent<ComponentType>> = {
+  themes: lazy(async () => ({ default: (await import('../features/themes/Page')).ThemesPage })),
+  challenges: lazy(async () => ({ default: (await import('../features/challenges/Page')).ChallengesPage })),
+  programs: lazy(async () => ({ default: (await import('../features/programs/Page')).ProgramsPage })),
+  sounds: lazy(async () => ({ default: (await import('../features/sounds/Page')).SoundsPage })),
+  sessions: lazy(async () => ({ default: (await import('../features/sessions/Page')).SessionsPage })),
+  teachers: lazy(async () => ({ default: (await import('../features/teachers/Page')).TeachersPage })),
+};
+
+function PageLoading() {
+  return (
+    <div role="status" aria-label="Loading" className="flex flex-col gap-5">
+      <Skeleton className="h-9 w-60" />
+      <Skeleton className="h-[420px] rounded-card" />
+    </div>
+  );
+}
+
+function screen(key: string, label: string) {
+  const Page = pages[key];
+  if (!Page) return <ComingSoon title={label} itemKey={key} />;
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <Page />
+    </Suspense>
+  );
+}
+
+const SessionEditor = lazy(async () => ({ default: (await import('../features/sessions/Editor')).SessionEditorPage }));
+
 const auth = () => import('../features/auth/Page');
 
 export const routes: RouteObject[] = [
@@ -112,12 +147,18 @@ export const routes: RouteObject[] = [
         .flatMap((s) => s.items)
         .map((i) => ({
           path: i.path,
-          element: (
-            <RequireRole need={i.need}>
-              <ComingSoon title={i.label} itemKey={i.key} />
-            </RequireRole>
-          ),
+          element: <RequireRole need={i.need}>{screen(i.key, i.label)}</RequireRole>,
         })),
+      {
+        path: '/sessions/:id',
+        element: (
+          <RequireRole need="content.edit">
+            <Suspense fallback={<PageLoading />}>
+              <SessionEditor />
+            </Suspense>
+          </RequireRole>
+        ),
+      },
       // Living style guide: every UI primitive in both themes. Not shipped to production.
       ...(env.name !== 'prod' ? [{ path: '/kit', lazy: async () => ({ Component: (await import('../features/kit/Page')).KitPage }) }] : []),
       { path: '*', element: <NotFound /> },

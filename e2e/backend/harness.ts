@@ -28,8 +28,30 @@ export const roleEmail = (role: string) => (role === 'owner' ? OWNER.email : `${
  */
 export const ACCESS_TTL_SEC = 65;
 
+/** Storage for uploads. Defaults match the backend's docker compose (MinIO on :9000); set E2E_S3_ENDPOINT if yours differs. */
+export const S3_ENDPOINT = process.env.E2E_S3_ENDPOINT ?? 'http://localhost:9000';
+export const S3_BUCKET = 'wehum-e2e';
+
+/** ffmpeg / ffprobe from the backend's own dev dependencies, so nothing needs installing system-wide. */
+const tool = (code: string) => {
+  try {
+    return backendNode(code).trim();
+  } catch {
+    return undefined;
+  }
+};
+
 const env = () => ({
   ...process.env,
+  S3_ENDPOINT,
+  S3_BUCKET,
+  S3_REGION: 'us-east-1',
+  S3_ACCESS_KEY: process.env.E2E_S3_ACCESS_KEY ?? 'minio',
+  S3_SECRET_KEY: process.env.E2E_S3_SECRET_KEY ?? 'minio12345',
+  S3_FORCE_PATH_STYLE: 'true',
+  CDN_BASE_URL: `${S3_ENDPOINT}/${S3_BUCKET}`,
+  FFMPEG_PATH: process.env.FFMPEG_PATH ?? tool("console.log(require('ffmpeg-static'))") ?? 'ffmpeg',
+  FFPROBE_PATH: process.env.FFPROBE_PATH ?? tool("console.log(require('@ffprobe-installer/ffprobe').path)") ?? 'ffprobe',
   NODE_ENV: 'development',
   APP_ROLE: 'api',
   PORT: '3000',
@@ -107,14 +129,19 @@ export async function startBackend() {
 
   writeFileSync(LOG, '');
   const out = openSync(LOG, 'a');
-  const child = spawn(process.execPath, ['-r', '@swc-node/register', 'src/main.ts'], {
-    cwd: BACKEND_DIR,
-    env: e,
-    stdio: ['ignore', out, out],
-    detached: true,
+  await createBucket();
+  // The API and the media worker are separate processes in the backend (APP_ROLE), like in production.
+  const pids = (['api', 'worker'] as const).map((role) => {
+    const child = spawn(process.execPath, ['-r', '@swc-node/register', 'src/main.ts'], {
+      cwd: BACKEND_DIR,
+      env: { ...e, APP_ROLE: role, ...(role === 'worker' && { PORT: '3001' }) },
+      stdio: ['ignore', out, out],
+      detached: true,
+    });
+    child.unref();
+    return child.pid;
   });
-  child.unref();
-  writeFileSync(PID, String(child.pid));
+  writeFileSync(PID, pids.join(','));
 
   const deadline = Date.now() + 60_000;
   for (;;) {
@@ -130,11 +157,24 @@ export async function startBackend() {
 
 export function stopBackend() {
   if (!existsSync(PID)) return;
-  try {
-    process.kill(-Number(readFileSync(PID, 'utf8')), 'SIGTERM'); // the whole process group
-  } catch {
-    // already gone
+  for (const pid of readFileSync(PID, 'utf8').split(',')) {
+    try {
+      process.kill(-Number(pid), 'SIGTERM'); // the whole process group
+    } catch {
+      // already gone
+    }
   }
+}
+
+/** Create the test bucket (dev convenience, like the backend's own tests do). */
+async function createBucket() {
+  backendNode(
+    `const {S3Client,CreateBucketCommand,HeadBucketCommand}=require('@aws-sdk/client-s3');(async()=>{
+       const c=new S3Client({region:'us-east-1',endpoint:process.env.EP,forcePathStyle:true,credentials:{accessKeyId:process.env.AK,secretAccessKey:process.env.SK}});
+       try{await c.send(new HeadBucketCommand({Bucket:process.env.B}))}catch{await c.send(new CreateBucketCommand({Bucket:process.env.B}))}
+     })().catch(e=>{console.error(e.message);process.exit(1)})`,
+    { EP: S3_ENDPOINT, AK: env().S3_ACCESS_KEY, SK: env().S3_SECRET_KEY, B: S3_BUCKET },
+  );
 }
 
 /** The newest link of that kind that the backend "emailed" to this address (printed to its log). */

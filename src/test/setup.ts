@@ -3,8 +3,10 @@ import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 import { auth } from '../lib/api';
 import { session } from '../lib/session';
+import { resetContent } from '../mocks/content';
 import { mockAuth } from '../mocks/handlers';
 import { server } from '../mocks/server';
+import { toast } from '../ui/Toast';
 
 // Node 25 ships its own half-working global `localStorage`, which hides the jsdom one. Use a plain in-memory store.
 if (typeof globalThis.localStorage?.clear !== 'function') {
@@ -50,6 +52,8 @@ afterEach(() => {
   cleanup();
   server.resetHandlers();
   mockAuth.role = null;
+  resetContent();
+  toast.clear(); // toasts live in a store outside React: do not let one test's toast show in the next
   auth.set(null);
   session.reset();
   document.cookie = 'wh_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
