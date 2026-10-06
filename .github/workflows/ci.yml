@@ -40,6 +40,14 @@ jobs:
       - run: pnpm size
       - run: pnpm stories:build
 
+      # The browser tests answer the API themselves at http://localhost:3000 (e2e/session.ts), so the app they open
+      # must be built for that address, not for staging.
+      - name: Build for the browser tests
+        run: pnpm build
+        env:
+          VITE_API_URL: http://localhost:3000
+          VITE_SOCKET_URL: http://localhost:3000
+
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
       - uses: actions/upload-artifact@v4

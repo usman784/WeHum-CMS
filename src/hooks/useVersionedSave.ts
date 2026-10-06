@@ -5,8 +5,11 @@ import { isConflict } from '../lib/api';
 type Versioned = { version: number };
 
 type Options<T extends Versioned, V> = {
-  /** The request. `version` goes into `If-Match`. */
-  save: (values: V, version: number) => Promise<T>;
+  /**
+   * The request. `version` goes into `If-Match`. `theirs` is set only for "Keep my changes": the row the server has now,
+   * for saves that replace a whole document and must merge my changes onto it.
+   */
+  save: (values: V, version: number, theirs?: T) => Promise<T>;
   onSaved?: (row: T, values: V) => void;
   /** Every error except the version conflict (which this hook handles). */
   onError?: (e: unknown, values: V) => void;
@@ -19,7 +22,7 @@ type Options<T extends Versioned, V> = {
 export function useVersionedSave<T extends Versioned, V>({ save, onSaved, onError }: Options<T, V>) {
   const [conflict, setConflict] = useState<{ mine: V; theirs: T } | null>(null);
   const m = useMutation({
-    mutationFn: ({ values, version }: { values: V; version: number }) => save(values, version),
+    mutationFn: ({ values, version, theirs }: { values: V; version: number; theirs?: T }) => save(values, version, theirs),
     onSuccess: (row, { values }) => {
       setConflict(null);
       onSaved?.(row, values);
@@ -36,7 +39,7 @@ export function useVersionedSave<T extends Versioned, V>({ save, onSaved, onErro
     saving: m.isPending,
     conflict,
     /** "Keep my changes": send my values again, based on their version. */
-    keepMine: () => conflict && m.mutate({ values: conflict.mine, version: conflict.theirs.version }),
+    keepMine: () => conflict && m.mutate({ values: conflict.mine, version: conflict.theirs.version, theirs: conflict.theirs }),
     /** "Use their version": forget the conflict and hand their row to the caller (to reset the form). */
     takeTheirs: (apply: (theirs: T) => void) => {
       if (!conflict) return;

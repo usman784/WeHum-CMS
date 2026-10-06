@@ -25,9 +25,11 @@ export async function proxyS3(page: Page): Promise<S3Control> {
       dropping.set(part, dropping.get(part)! - 1);
       return route.abort('connectionfailed');
     }
-    const res = await route.fetch();
+    // A request still in flight when its test ends cannot be answered any more: that is not a failure of the next test.
+    const res = await route.fetch().catch(() => null);
+    if (!res) return;
     if (req.method() === 'PUT') sent.push(part);
-    return route.fulfill({ response: res, headers: { ...res.headers(), ...cors } });
+    return route.fulfill({ response: res, headers: { ...res.headers(), ...cors } }).catch(() => {});
   });
   return { drop: (part, times) => void dropping.set(part, times), puts: () => sent };
 }
@@ -70,4 +72,21 @@ export async function appCatalog(request: import('@playwright/test').APIRequestC
     sessions: { id: string; title: string; access: string; durationSec: number }[];
     themes: { id: string; name: string }[];
   };
+}
+
+/** A guest account like a phone has, and a GET as that guest: what the app would see right now. */
+export async function appGet<T>(
+  request: import('@playwright/test').APIRequestContext,
+  path: string,
+  guestHeaders?: Record<string, string>,
+) {
+  let headers = guestHeaders;
+  if (!headers) {
+    const guest = await request.post(`${API}/v1/auth/guest`, {
+      data: { installId: `e2e-${Math.random().toString(36).slice(2, 12)}`, platform: 'ios', appVersion: '1.0.0', timezone: 'UTC' },
+    });
+    headers = { Authorization: `Bearer ${(await guest.json()).data.accessToken as string}`, 'x-platform': 'ios', 'x-app-version': '1.0.0' };
+  }
+  const res = await request.get(`${API}${path}`, { headers });
+  return { status: res.status(), data: (await res.json()).data as T };
 }

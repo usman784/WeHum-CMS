@@ -694,3 +694,43 @@ Open issues / risks:
 Evidence: `test-results/content-*-dark.png` and `-light.png`; real-backend log `test-results/backend.log`; traces of failed runs were kept in `test-results/` while fixing.
 
 Status: ✅ done
+
+### Phase P4 — Daily experience
+Date: 2026-10-06
+
+Built:
+- Today screen (08): Meditation of the Day for a Monday–Sunday week (week buttons), drag a row onto another to swap two days, "Choose/Change" (published, non-SoS, non-YouTube only), "Move date" (swap with any later day that has a meditation), past days locked; "Three lengths" card for the selected day (10 / 30 / 45 min, upload with progress, set on the day when processing is done, "Missing 45 min" shown in the list); rules (Daily Message line, sections, empty-room threshold, "Free for you" pick) saved as one document; live phone preview.
+- Daily messages (07): month calendar (Monday first) with Published / Live today / Scheduled / Draft / Missing, warning for days in the next week without a message, day editor (audio / video / text, optional image, title, theme chips + new theme), Save draft / Schedule / Publish now / Save changes / Back to draft, copy to another day (never replaces), delete.
+- SoS (12): tiles (drag order, remove, add from published meditations, max 8), header texts and the "Need more help?" card with the API's limits.
+- Group meditation (13): start time (UTC) with the four local times, length, lobby and reminder, history of past days.
+- Shared: `features/config/useConfigForm` (settings documents: only my changes are kept, whole value sent with the version, 409 dialog, "Keep my changes" merges onto their value); `useVersionedSave` passes their row to the save on "Keep my changes"; `mocks/daily.ts` (in-memory API).
+- Backend: scheduled daily messages now go live on their day (`PublishDueService.publishMessages`, part of the every-minute job); before this a scheduled message never reached the app.
+
+Tests run:
+- `pnpm test` → 425 passed (25 files). New: group 6, SoS 8, daily messages 15, Today 17.
+- `pnpm e2e` (Chrome, production build, mocked API) → 53 passed. New: `e2e/daily.spec.ts` (11): the four screens in dark and light with axe, no horizontal scroll, week/legend checks, moderator gets "No permission".
+- `pnpm e2e:backend` (Chrome, real backend, worker, storage) → 28 passed (21 earlier + 7 in `e2e/backend/daily.spec.ts`): choose the Meditation of the Day and add its three lengths one by one with real uploads (the app's `GET /v1/motd/:date` lists each length as it becomes ready; the admin range says `complete`); swap two days (lengths move with the meditation, the app sees it at once, past days refused); Today rules 409 between two admins; daily messages (publish today, schedule tomorrow, delete, audit); SoS add / keyboard reorder / texts / remove (app `GET /v1/sos` follows); group start time reaches the app, 409 between two admins; roles.
+- `pnpm lint`, `format:check`, `typecheck`, `build` → clean. `pnpm size` → 201.6 KB gzip initial load (budget 250 KB).
+- Backend `npm test` → 227 passed (226 + scheduled daily messages).
+
+Bugs found → fixed:
+- **Scheduled daily messages never went live** (found while writing the screen): no job handled them. Added to the publish-due job, with a test.
+- **CI ran the mocked browser tests against a build for the staging API address**, so they never saw their fixtures (this made the CI browser step fail since P2). CI now builds once more for `http://localhost:3000` before `pnpm e2e`.
+- A plain save of a live daily message said "Published"; now "Saved". Out-of-month calendar days were faded with opacity (failed contrast in both themes); they use a flat cell and muted text.
+- Test-only: the S3 test proxy no longer reports requests still in flight when a test ends; keyboard drag waits for the announcement and for the socket-driven refresh.
+
+Decisions / deviations from spec:
+- Not built, with the reason: "Follow-up meditation" and "Free for everyone this day" on daily messages (spec §9 says no meditation link and the API has no such fields); the "Raphael's note" checkbox under Sections (the same setting as the switch in "One decision on Today", so it exists once); "Today · N in the lobby" row in the group history (the API lists only past days); per-row Edit of tile feeling and subtitle (they are fields of the meditation, the tile links to it).
+- "Move date" swaps with a day that has a meditation. Moving to an empty day is not possible because the API has no way to clear a day; "Choose" on the empty day first.
+- Dragging in the Today list always swaps the dragged day with the day it is dropped on (not an insert), as the design text says.
+- "Add SoS session" picks an existing published meditation instead of creating one; the tile text is edited in the meditation.
+- "Missing day" in the calendar means no live or scheduled message for today and the next six days (a draft does not count).
+- Dashboard "Needs attention" (missing variant, missing daily message) cannot be tested yet: the dashboard screen and its API come in P5 / backend P6. The Today list and the calendar show the same warnings.
+
+Open issues / risks:
+- `wh_csrf` cookie has no `Domain` (open since P0); no Sentry DSN; hand-written `openapi.yaml`; real-backend CMS tests are not in GitHub CI.
+- Daily message dates and the MOTD day are UTC, like the backend; a user near midnight in another zone may see yesterday's or tomorrow's message (backend serves up to tomorrow).
+
+Evidence: `test-results/daily-*.png` (four screens, dark and light), real-backend log `test-results/backend.log`.
+
+Status: ✅ done

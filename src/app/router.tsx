@@ -110,6 +110,10 @@ const pages: Record<string, LazyExoticComponent<ComponentType>> = {
   sounds: lazy(async () => ({ default: (await import('../features/sounds/Page')).SoundsPage })),
   sessions: lazy(async () => ({ default: (await import('../features/sessions/Page')).SessionsPage })),
   teachers: lazy(async () => ({ default: (await import('../features/teachers/Page')).TeachersPage })),
+  today: lazy(async () => ({ default: (await import('../features/today/Page')).TodayPage })),
+  daily: lazy(async () => ({ default: (await import('../features/daily/Page')).DailyMessagesPage })),
+  sos: lazy(async () => ({ default: (await import('../features/sos/Page')).SosPage })),
+  group: lazy(async () => ({ default: (await import('../features/group/Page')).GroupMeditationPage })),
 };
 
 function PageLoading() {

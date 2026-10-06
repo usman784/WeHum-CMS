@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import type { LiveAgg } from '../lib/socket-events';
 import type { Role } from '../lib/rbac';
 import { contentHandlers } from './content';
+import { dailyHandlers } from './daily';
 
 /**
  * MSW handlers shared by Vitest (`server.ts`) and the browser worker (`browser.ts`).
@@ -121,4 +122,5 @@ export const handlers = [
     request.headers.get('authorization') ? ok(mockAdmin(mockAuth.role ?? 'owner')) : fail(401, 'AUTH_REQUIRED', 'Sign in to continue'),
   ),
   ...contentHandlers,
+  ...dailyHandlers,
 ];
