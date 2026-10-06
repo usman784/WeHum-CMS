@@ -64,9 +64,15 @@ describe('useLiveInvalidation', () => {
 
   it('patches dashboard KPIs and job progress straight into the cache', async () => {
     renderHook(() => useLiveInvalidation(), { wrapper });
-    await act(() => lastSocket().fire('dashboard:kpis', { liveNow: 12 }));
+    await act(() => lastSocket().fire('dashboard:kpis', { liveNow: 5 }));
+    expect(qc.getQueryData(qk.dashboard)).toBeUndefined(); // nothing to patch before the page has loaded
+    qc.setQueryData(qk.dashboard, { kpis: { liveNow: 1, library: { sessions: 3 } }, moderationOpen: 0 });
+    await act(() => lastSocket().fire('dashboard:kpis', { liveNow: 12, moderationOpen: 2 }));
     await act(() => lastSocket().fire('job:progress', { id: 'j1', type: 'media', status: 'active', progress: 40 }));
-    expect(qc.getQueryData(qk.dashboard)).toEqual({ kpis: { liveNow: 12 } });
+    expect(qc.getQueryData(qk.dashboard)).toEqual({
+      kpis: { liveNow: 12, moderationOpen: 2, library: { sessions: 3 } },
+      moderationOpen: 2,
+    }); // merged: the library count stays
     expect(qc.getQueryData(qk.job('j1'))).toMatchObject({ progress: 40 });
   });
 

@@ -82,6 +82,25 @@ describe('status', () => {
     expect(getStatus()).toBe('live');
   });
 
+  it('connects again by itself when the server closes the socket (token ran out, server shutting down)', async () => {
+    connectSocket();
+    const s = lastSocket();
+    await s.fire('connect');
+    await s.fire('disconnect', 'transport close'); // socket.io retries this one itself
+    expect(s.connect).not.toHaveBeenCalled();
+    await s.fire('disconnect', 'io server disconnect'); // but not this one
+    expect(s.connect).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not connect again after signing out', async () => {
+    connectSocket();
+    const s = lastSocket();
+    await s.fire('connect');
+    disconnectSocket();
+    await s.fire('disconnect', 'io server disconnect');
+    expect(s.connect).not.toHaveBeenCalled();
+  });
+
   it('disconnectSocket closes the socket and reports offline', async () => {
     connectSocket();
     const s = lastSocket();
@@ -147,6 +166,22 @@ describe('auth', () => {
     await s.fire('connect_error', Object.assign(new Error('unauthorized'), { data: { code: 'TOKEN_EXPIRED' } }));
     expect(s.connect).toHaveBeenCalledTimes(1);
     expect(s.handshake()).toEqual({ token: 'fresh' });
+  });
+
+  it('on TOKEN_INVALID (new signing key after a server restart): refreshes once, then connects again', async () => {
+    server.use(http.post(url('/v1/admin/auth/refresh'), () => ok({ ...mockSession(), accessToken: 'fresh' })));
+    connectSocket();
+    const s = lastSocket();
+    const invalid = () => Object.assign(new Error('unauthorized'), { data: { code: 'TOKEN_INVALID' } });
+    await s.fire('connect_error', invalid());
+    expect(s.connect).toHaveBeenCalledTimes(1);
+    expect(s.handshake()).toEqual({ token: 'fresh' });
+    // the fresh token is refused too: no second refresh until a connect has worked
+    await s.fire('connect_error', invalid());
+    expect(s.connect).toHaveBeenCalledTimes(1);
+    await s.fire('connect');
+    await s.fire('connect_error', invalid());
+    expect(s.connect).toHaveBeenCalledTimes(2);
   });
 
   it('on TOKEN_EXPIRED with a dead session: does not loop', async () => {

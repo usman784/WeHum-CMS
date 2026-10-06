@@ -43,15 +43,34 @@ export function useLiveInvalidation() {
       );
       qc.invalidateQueries({ queryKey: [type, 'detail', id] });
     };
-    const onKpis: AdminServerToClient['dashboard:kpis'] = (k) =>
-      qc.setQueryData(qk.dashboard, (old: object | undefined) => ({ ...(old ?? {}), kpis: k }));
+    // Merge, never replace: the page also holds numbers the socket does not carry (library, change against last week).
+    const onKpis: AdminServerToClient['dashboard:kpis'] = ({ at: _at, ...k }) => {
+      void _at;
+      qc.setQueryData(qk.dashboard, (old: { kpis?: object; moderationOpen?: number } | undefined) =>
+        old
+          ? { ...old, ...(old.kpis ? { kpis: { ...old.kpis, ...k } } : {}), moderationOpen: k.moderationOpen ?? old.moderationOpen }
+          : old,
+      );
+    };
+    const onLive: AdminServerToClient['live:agg'] = (p) =>
+      qc.setQueryData(qk.dashboard, (old: { kpis?: object } | undefined) =>
+        old?.kpis ? { ...old, kpis: { ...old.kpis, liveNow: p.total, liveCountries: p.countries } } : old,
+      );
+    const onModeration: AdminServerToClient['moderation:count'] = ({ open }) =>
+      qc.setQueryData(qk.dashboard, (old: { kpis?: object; moderationOpen?: number } | undefined) =>
+        old ? { ...old, moderationOpen: open, ...(old.kpis ? { kpis: { ...old.kpis, moderationOpen: open } } : {}) } : old,
+      );
     const onJob: AdminServerToClient['job:progress'] = (j) => qc.setQueryData(qk.job(j.id), j);
     s.on('entity:changed', onEntity);
     s.on('dashboard:kpis', onKpis);
+    s.on('live:agg', onLive);
+    s.on('moderation:count', onModeration);
     s.on('job:progress', onJob);
     return () => {
       s.off('entity:changed', onEntity);
       s.off('dashboard:kpis', onKpis);
+      s.off('live:agg', onLive);
+      s.off('moderation:count', onModeration);
       s.off('job:progress', onJob);
       timers.forEach(clearTimeout);
     };

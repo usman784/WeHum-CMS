@@ -5,6 +5,7 @@ import { auth } from '../lib/api';
 import { session } from '../lib/session';
 import { resetContent } from '../mocks/content';
 import { resetDaily } from '../mocks/daily';
+import { resetOverview } from '../mocks/overview';
 import { mockAuth } from '../mocks/handlers';
 import { server } from '../mocks/server';
 import { toast } from '../ui/Toast';
@@ -55,6 +56,7 @@ afterEach(() => {
   mockAuth.role = null;
   resetContent();
   resetDaily();
+  resetOverview();
   toast.clear(); // toasts live in a store outside React: do not let one test's toast show in the next
   auth.set(null);
   session.reset();

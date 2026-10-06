@@ -41,6 +41,13 @@ const tool = (code: string) => {
   }
 };
 
+/** One key per run, kept on disk: a restarted API must still read the two-step secrets it stored (tests restart it). */
+const KEY = resolve('test-results/backend.key');
+const totpKey = () => {
+  if (!existsSync(KEY)) writeFileSync(KEY, randomBytes(32).toString('base64'));
+  return readFileSync(KEY, 'utf8');
+};
+
 const env = () => ({
   ...process.env,
   S3_ENDPOINT,
@@ -63,7 +70,7 @@ const env = () => ({
   LOG_LEVEL: 'info',
   SMTP_URL: '', // no mail server: the backend prints each email to its log, where the tests read the links
   ADMIN_ACCESS_TTL_SEC: String(ACCESS_TTL_SEC),
-  TOTP_ENC_KEY_BASE64: randomBytes(32).toString('base64'),
+  TOTP_ENC_KEY_BASE64: totpKey(),
   SEED_OWNER_EMAIL: OWNER.email,
   SEED_OWNER_PASSWORD: OWNER.password,
 });
@@ -87,6 +94,17 @@ export function sql<T = Record<string, unknown>>(text: string, params: unknown[]
 export function flushRedis() {
   backendNode(`const R=require('ioredis');const r=new R(process.env.U);r.flushdb().then(()=>r.quit())`, { U: REDIS_URL });
 }
+
+/** Run one Redis command on the e2e Redis DB, e.g. `redis('set', 'k', 'v')`. */
+export function redis(...args: string[]) {
+  backendNode(`const R=require('ioredis');const r=new R(process.env.U);r.call(...JSON.parse(process.env.A)).then(()=>r.quit())`, {
+    U: REDIS_URL,
+    A: JSON.stringify(args),
+  });
+}
+
+/** Put one event on the realtime bus (the backend's `events` channel), as the scheduler would. */
+export const publish = (topic: string, payload: unknown) => redis('publish', 'events', JSON.stringify({ topic, payload }));
 
 function createDatabase() {
   const u = new URL(DATABASE_URL);
@@ -120,6 +138,7 @@ export function resetAdmins() {
 export async function startBackend() {
   if (!existsSync(resolve(BACKEND_DIR, 'package.json'))) throw new Error(`Backend repo not found at ${BACKEND_DIR}. Set E2E_BACKEND_DIR.`);
   mkdirSync(resolve('test-results'), { recursive: true });
+  writeFileSync(KEY, randomBytes(32).toString('base64')); // a new key for every run
   createDatabase();
   const e = env();
   execFileSync('npm', ['run', 'db:migrate'], { cwd: BACKEND_DIR, env: e, stdio: 'pipe' });
@@ -128,42 +147,85 @@ export async function startBackend() {
   resetAdmins();
 
   writeFileSync(LOG, '');
-  const out = openSync(LOG, 'a');
   await createBucket();
   // The API and the media worker are separate processes in the backend (APP_ROLE), like in production.
-  const pids = (['api', 'worker'] as const).map((role) => {
-    const child = spawn(process.execPath, ['-r', '@swc-node/register', 'src/main.ts'], {
-      cwd: BACKEND_DIR,
-      env: { ...e, APP_ROLE: role, ...(role === 'worker' && { PORT: '3001' }) },
-      stdio: ['ignore', out, out],
-      detached: true,
-    });
-    child.unref();
-    return child.pid;
-  });
-  writeFileSync(PID, pids.join(','));
+  writeFileSync(PID, JSON.stringify({ api: spawnRole('api'), worker: spawnRole('worker') }));
+  await waitForApi(true);
+}
 
+function spawnRole(role: 'api' | 'worker') {
+  const out = openSync(LOG, 'a');
+  const child = spawn(process.execPath, ['-r', '@swc-node/register', 'src/main.ts'], {
+    cwd: BACKEND_DIR,
+    env: { ...env(), APP_ROLE: role, ...(role === 'worker' && { PORT: '3001' }) },
+    stdio: ['ignore', out, out],
+    detached: true,
+  });
+  child.unref();
+  return child.pid!;
+}
+
+async function waitForApi(up: boolean) {
   const deadline = Date.now() + 60_000;
   for (;;) {
-    try {
-      if ((await fetch(`${API}/healthz`)).ok) return;
-    } catch {
-      // not up yet
-    }
-    if (Date.now() > deadline) throw new Error(`Backend did not start within 60 s. See ${LOG}:\n${readFileSync(LOG, 'utf8').slice(-2000)}`);
+    const ok = await fetch(`${API}/healthz`).then(
+      (r) => r.ok,
+      () => false,
+    );
+    if (ok === up) return;
+    if (Date.now() > deadline)
+      throw new Error(`Backend did not ${up ? 'start' : 'stop'} within 60 s. See ${LOG}:\n${readFileSync(LOG, 'utf8').slice(-2000)}`);
     await new Promise((r) => setTimeout(r, 500));
   }
 }
 
-export function stopBackend() {
-  if (!existsSync(PID)) return;
-  for (const pid of readFileSync(PID, 'utf8').split(',')) {
-    try {
-      process.kill(-Number(pid), 'SIGTERM'); // the whole process group
-    } catch {
-      // already gone
-    }
+function pids(): Record<string, number> {
+  if (!existsSync(PID)) return {};
+  const text = readFileSync(PID, 'utf8');
+  if (text.startsWith('{')) return JSON.parse(text) as Record<string, number>;
+  return Object.fromEntries(text.split(',').map((p, i) => [`old${i}`, Number(p)])); // "api,worker" from older runs
+}
+function kill(pid: number | undefined) {
+  if (!pid) return;
+  try {
+    process.kill(-pid, 'SIGTERM'); // the whole process group
+  } catch {
+    // already gone
   }
+}
+
+const alive = (pid: number) => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Stop only the API process (the worker keeps running), and wait until it has exited. Not just until /healthz
+ * fails: while shutting down it still answers on open keep-alive connections, with its own (old) signing key.
+ */
+export async function stopApi() {
+  const pid = pids().api;
+  kill(pid);
+  await waitForApi(false);
+  const deadline = Date.now() + 30_000;
+  while (pid && alive(pid)) {
+    if (Date.now() > deadline) process.kill(-pid, 'SIGKILL');
+    await new Promise((r) => setTimeout(r, 200));
+  }
+}
+
+/** Start the API process again with the same settings, and wait until it answers. */
+export async function startApi() {
+  writeFileSync(PID, JSON.stringify({ ...pids(), api: spawnRole('api') }));
+  await waitForApi(true);
+}
+
+export function stopBackend() {
+  for (const pid of Object.values(pids())) kill(pid);
 }
 
 /** Create the test bucket (dev convenience, like the backend's own tests do). */

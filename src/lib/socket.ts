@@ -20,6 +20,8 @@ const statusListeners = new Set<(s: SocketStatus) => void>();
 let status: SocketStatus = 'offline';
 let graceTimer: ReturnType<typeof setTimeout> | undefined;
 let failures = 0;
+/** A token refresh was already tried since the last successful connect (no refresh loop on a token that keeps failing). */
+let renewed = false;
 
 const setStatus = (s: SocketStatus) => {
   if (s === status) return;
@@ -62,17 +64,28 @@ export function connectSocket(): AdminSocket {
   s.on('connect', () => {
     stopGrace();
     failures = 0;
+    renewed = false;
     setStatus('live');
     // After a reconnect the server has forgotten our rooms: join them again.
     if (channels.size) s.emit('subscribe', { channels: [...channels.keys()] }, () => {});
   });
-  s.on('disconnect', () => {
-    if (socket === s) startGrace();
+  s.on('disconnect', (reason) => {
+    if (socket !== s) return; // we closed it (sign out)
+    startGrace();
+    // The server closed it (token ran out while the laptop slept, server shutting down): socket.io does not retry
+    // that by itself. Connect again; an old token then gets a refresh in `connect_error`. (Sign-outs never get here.)
+    if (reason === 'io server disconnect') s.connect();
   });
   s.on('connect_error', async (err: Error & { data?: { code?: string } }) => {
-    if (err.data?.code === 'TOKEN_EXPIRED' && (await refresh())) {
-      s.connect();
-      return;
+    // Expired, or no longer valid (signing key rotated; a dev server makes a new key at every start): renew once with
+    // the refresh cookie and try again. socket.io does not retry a refused handshake by itself.
+    const code = err.data?.code;
+    if ((code === 'TOKEN_EXPIRED' || code === 'TOKEN_INVALID') && !renewed) {
+      renewed = true;
+      if (await refresh()) {
+        s.connect();
+        return;
+      }
     }
     failures += 1;
     if (failures >= OFFLINE_AFTER) {
@@ -124,6 +137,7 @@ export function disconnectSocket() {
   socket = null;
   stopGrace();
   failures = 0;
+  renewed = false;
   channels.clear();
   s?.disconnect();
   setStatus('offline');

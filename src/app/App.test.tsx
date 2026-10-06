@@ -157,7 +157,7 @@ describe('shell', () => {
     open('/', 'owner');
     expect(screen.getByRole('link', { name: 'Skip to content' })).toHaveAttribute('href', '#main');
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
-    expect(screen.getByRole('status')).toHaveTextContent('Offline');
+    expect(screen.getAllByRole('status').some((el) => el.textContent?.includes('Offline'))).toBe(true); // the connection pill (the page may show a loading status too)
     expect(await a11yViolations()).toEqual([]);
   });
 

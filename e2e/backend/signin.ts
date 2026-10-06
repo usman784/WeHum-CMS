@@ -59,11 +59,17 @@ export async function setUpTwoStep(page: Page, email: string) {
   return codes;
 }
 
+/**
+ * Signs in and waits until the CMS shell is there: the code submits itself, so without the wait a test's next
+ * `page.goto` could cut off the sign-in still in flight and land on the sign-in page.
+ */
 export async function signIn(page: Page, email: string, password = PASSWORD) {
   await enterPassword(page, email, password);
-  if (!secrets.has(email)) return setUpTwoStep(page, email);
-  await page.getByLabel('6-digit code').fill(await freshCode(email)); // submits itself at 6 digits
-  return [];
+  let codes: string[] = [];
+  if (!secrets.has(email)) codes = await setUpTwoStep(page, email);
+  else await page.getByLabel('6-digit code').fill(await freshCode(email)); // submits itself at 6 digits
+  await expect(nav(page)).toBeVisible({ timeout: 15_000 });
+  return codes;
 }
 
 export const signOut = (page: Page) => nav(page).getByRole('button', { name: 'Sign out' }).first().click();

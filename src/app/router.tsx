@@ -104,6 +104,7 @@ function NotFound() {
  * shows the "not built yet" placeholder.
  */
 const pages: Record<string, LazyExoticComponent<ComponentType>> = {
+  dashboard: lazy(async () => ({ default: (await import('../features/dashboard/Page')).DashboardPage })),
   themes: lazy(async () => ({ default: (await import('../features/themes/Page')).ThemesPage })),
   challenges: lazy(async () => ({ default: (await import('../features/challenges/Page')).ChallengesPage })),
   programs: lazy(async () => ({ default: (await import('../features/programs/Page')).ProgramsPage })),

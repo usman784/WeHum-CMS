@@ -3,6 +3,7 @@ import type { LiveAgg } from '../lib/socket-events';
 import type { Role } from '../lib/rbac';
 import { contentHandlers } from './content';
 import { dailyHandlers } from './daily';
+import { overviewHandlers } from './overview';
 
 /**
  * MSW handlers shared by Vitest (`server.ts`) and the browser worker (`browser.ts`).
@@ -123,4 +124,5 @@ export const handlers = [
   ),
   ...contentHandlers,
   ...dailyHandlers,
+  ...overviewHandlers,
 ];
