@@ -4,6 +4,7 @@ import type { Role } from '../lib/rbac';
 import { contentHandlers } from './content';
 import { dailyHandlers } from './daily';
 import { audienceHandlers } from './audience';
+import { communityHandlers } from './community';
 import { overviewHandlers } from './overview';
 
 /**
@@ -127,4 +128,5 @@ export const handlers = [
   ...dailyHandlers,
   ...overviewHandlers,
   ...audienceHandlers,
+  ...communityHandlers,
 ];

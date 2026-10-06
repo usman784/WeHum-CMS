@@ -45,6 +45,25 @@ const detail = {
   membership: { plan: 'founding', label: 'Annual · Founding', status: 'active', productId: 'wehum_annual_founding', store: 'app_store', startedAt: ago(40000), expiresAt: ago(-400000), willRenew: true, billingIssue: false, revenueCatId: U1 },
 }; // prettier-ignore
 
+const posts = [
+  { id: 'p4', sessionId: 's1', sessionTitle: 'Pre-Competition Dial-In', userId: 'u4', firstName: 'Sam', country: null, text: 'For myself. I don’t know how much longer I can keep going like this.', status: 'flagged', autoFlags: ['crisis'], reportCount: 0, reasons: [], crisis: true, holdingCount: 0, userMuted: false, createdAt: ago(120), moderatedAt: null },
+  { id: 'p1', sessionId: 's2', sessionTitle: 'Steady Under Pressure', userId: 'u1', firstName: 'Elena', country: 'GB', text: 'For hospital night shift workers finding quiet before dawn.', status: 'hidden', autoFlags: [], reportCount: 2, reasons: ['spam'], crisis: false, holdingCount: 12, userMuted: false, createdAt: ago(12), moderatedAt: null },
+]; // prettier-ignore
+const rules = {
+  key: 'moderation',
+  version: 3,
+  updatedAt: ago(600),
+  value: { dailyLimit: 3, autoHideReports: 3, blockLinks: true, profanity: true, crisisWords: ['end it'], muteAfterHides: 3 },
+};
+const announcements = [
+  { id: 'n1', title: 'New: 7-Day Autonomic Reset', body: 'Seven days.', audience: 'all', countries: [], deepLink: null, sendMode: 'now', sendAt: ago(20000), status: 'sent', targeted: 14800, delivered: 14210, opened: 2558, failed: 3, createdAt: ago(20000), version: 3 },
+  { id: 'n3', title: 'Draft idea', body: 'Not sure yet.', audience: 'members', countries: [], deepLink: null, sendMode: 'now', sendAt: null, status: 'draft', targeted: 0, delivered: 0, opened: 0, failed: 0, createdAt: ago(10), version: 1 },
+]; // prettier-ignore
+const automatic = [
+  { key: 'daily_nudge', enabled: true, title: 'WeHum', body: 'Time to meditate, {firstName}.', delivered: 1000, opened: 250 },
+  { key: 'trial_ending', enabled: true, title: 'Your trial ends in 2 days', body: 'Keep meditating with everyone.', delivered: 0, opened: 0 },
+]; // prettier-ignore
+
 function answers(url: URL, method: string): unknown {
   if (method !== 'GET') return undefined;
   const path = url.pathname.replace('/v1/admin', '');
@@ -56,6 +75,12 @@ function answers(url: URL, method: string): unknown {
   if (path === '/users')
     return { data: users, meta: { nextCursor: null, counts: { all: 4860, guests: 2550, accounts: 2310, paying: 600, trial: 112 } } };
   if (path === `/users/${U1}`) return { data: detail };
+  if (path === '/moderation') return { data: posts, meta: { nextCursor: null, open: 2 } };
+  if (path === '/moderation/stats') return { data: { posts: 612, flagged: 1, hidden: 4, kept: 9, open: 2 } };
+  if (path === '/moderation/rules') return { data: rules };
+  if (path === '/notifications') return { data: announcements };
+  if (path === '/notifications/automatic') return { data: automatic };
+  if (path === '/notifications/audience') return { data: { targeted: 14820, quiet: 0, quietHours: { start: '22:00', end: '07:00' } } };
   return undefined;
 }
 

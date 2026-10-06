@@ -117,6 +117,8 @@ const pages: Record<string, LazyExoticComponent<ComponentType>> = {
   group: lazy(async () => ({ default: (await import('../features/group/Page')).GroupMeditationPage })),
   subscriptions: lazy(async () => ({ default: (await import('../features/subscriptions/Page')).SubscriptionsPage })),
   users: lazy(async () => ({ default: (await import('../features/users/Page')).UsersPage })),
+  moderation: lazy(async () => ({ default: (await import('../features/moderation/Page')).ModerationPage })),
+  notifications: lazy(async () => ({ default: (await import('../features/notifications/Page')).NotificationsPage })),
 };
 
 function PageLoading() {
