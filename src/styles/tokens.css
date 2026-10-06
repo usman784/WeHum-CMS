@@ -31,6 +31,9 @@
   --c-lilac: 42 31 51;         /* #2A1F33 */
   --c-lilac-text: 205 182 230; /* #CDB6E6 */
   color-scheme: dark;
+  /* Chart series (Analytics "Solo · Group"). Validated for colour-blind separation on the surface (dataviz validator), not the design's orange + green. */
+  --c-chart-solo: 232 98 44;   /* #E8622C */
+  --c-chart-group: 59 130 246; /* #3B82F6 */
 }
 [data-theme="light"] {
   --c-bg: 247 245 242; --c-sidebar: 255 255 255; --c-surface: 255 255 255; --c-surface-alt: 241 238 234; --c-input: 244 241 237;
@@ -45,6 +48,7 @@
   --c-danger: 197 48 48; --c-danger-text: 155 44 44; --c-danger-border: 245 181 174;
   --c-info: 227 236 247; --c-info-text: 44 82 130; --c-lilac: 238 230 245; --c-lilac-text: 91 62 122;
   color-scheme: light;
+  --c-chart-solo: 232 98 44; --c-chart-group: 37 99 235;
 }
 /* Inter is self-hosted: the woff2 files come from @fontsource-variable/inter and are bundled by Vite (see globals.css). */
 html, body { background: rgb(var(--c-bg)); color: rgb(var(--c-text)); font-family: 'Inter Variable', Inter, system-ui, sans-serif; }

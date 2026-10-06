@@ -50,6 +50,8 @@ jobs:
 
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
+      - name: Lighthouse budgets (performance ≥ 90, accessibility ≥ 95)
+        run: pnpm lighthouse
       - uses: actions/upload-artifact@v4
         if: always()
         with:

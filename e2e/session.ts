@@ -1,4 +1,4 @@
-import type { Page, Route } from '@playwright/test';
+import type { BrowserContext, Page, Route } from '@playwright/test';
 
 /**
  * The tests in this folder run WITHOUT a backend: every call to the API origin is answered here.
@@ -21,10 +21,10 @@ const json = (route: Route, status: number, body: unknown) =>
   route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(body) });
 
 /**
- * Answer the API for this page. With a role, the silent refresh on page load signs that admin in
+ * Answer the API for this page (or every page of a context). With a role, the silent refresh on page load signs that admin in
  * (as if a valid refresh cookie were there). With `null` nobody is signed in.
  */
-export async function mockApi(page: Page, role: Role | null, answers?: (url: URL, method: string) => unknown) {
+export async function mockApi(page: Page | BrowserContext, role: Role | null, answers?: (url: URL, method: string) => unknown) {
   let current = role;
   await page.route(`${API_ORIGIN}/**`, (route) => {
     const req = route.request();

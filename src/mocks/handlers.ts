@@ -5,6 +5,7 @@ import { contentHandlers } from './content';
 import { dailyHandlers } from './daily';
 import { audienceHandlers } from './audience';
 import { communityHandlers } from './community';
+import { insightsHandlers } from './insights';
 import { overviewHandlers } from './overview';
 
 /**
@@ -129,4 +130,5 @@ export const handlers = [
   ...overviewHandlers,
   ...audienceHandlers,
   ...communityHandlers,
+  ...insightsHandlers,
 ];

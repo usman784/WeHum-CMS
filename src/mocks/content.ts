@@ -501,5 +501,4 @@ export const contentHandlers = [
     Object.assign(row, await body(request), { version: row.version + 1 });
     return ok(row);
   }),
-  http.get(u('/config'), () => ok({ main: { value: { features: { challenges: db.flags.challenges } }, version: 1 } })),
 ];

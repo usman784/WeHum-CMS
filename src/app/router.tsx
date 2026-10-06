@@ -8,44 +8,11 @@ import { useSessionState } from '../hooks/useRole';
 import { env } from '../lib/env';
 import type { Admin } from '../lib/session';
 import { Card } from '../ui/Card';
-import { PageHeader } from '../ui/PageHeader';
 import { Skeleton } from '../ui/Skeleton';
 import { EmptyState } from '../ui/States';
 import { RequireRole } from './guards/RequireRole';
 import { AppShell } from './layout/AppShell';
 import { nav } from './routes';
-
-/** The build phase that delivers each screen (spec §15). Used only by the placeholder pages below. */
-const phase: Record<string, string> = {
-  dashboard: 'P5',
-  analytics: 'P8',
-  sessions: 'P3',
-  programs: 'P3',
-  challenges: 'P3',
-  daily: 'P4',
-  today: 'P4',
-  themes: 'P3',
-  teachers: 'P3',
-  sounds: 'P3',
-  sos: 'P4',
-  group: 'P4',
-  moderation: 'P7',
-  subscriptions: 'P6',
-  users: 'P6',
-  notifications: 'P7',
-  settings: 'P8',
-};
-
-function ComingSoon({ title, itemKey }: { title: string; itemKey: string }) {
-  return (
-    <>
-      <PageHeader title={title} />
-      <Card className="flex flex-1 items-center justify-center">
-        <EmptyState title="This screen is not built yet" description={`It arrives with build phase ${phase[itemKey] ?? 'later'}.`} />
-      </Card>
-    </>
-  );
-}
 
 /** First paint while the silent refresh runs: nothing to read, so only say that it is loading. */
 function Splash() {
@@ -100,11 +67,11 @@ function NotFound() {
 }
 
 /**
- * Built screens, each in its own chunk (spec §6.1 route-level code splitting). A nav key that is not here yet
- * shows the "not built yet" placeholder.
+ * The screens, each in its own chunk (spec §6.1 route-level code splitting). Every nav key has one.
  */
 const pages: Record<string, LazyExoticComponent<ComponentType>> = {
   dashboard: lazy(async () => ({ default: (await import('../features/dashboard/Page')).DashboardPage })),
+  analytics: lazy(async () => ({ default: (await import('../features/analytics/Page')).AnalyticsPage })),
   themes: lazy(async () => ({ default: (await import('../features/themes/Page')).ThemesPage })),
   challenges: lazy(async () => ({ default: (await import('../features/challenges/Page')).ChallengesPage })),
   programs: lazy(async () => ({ default: (await import('../features/programs/Page')).ProgramsPage })),
@@ -119,6 +86,7 @@ const pages: Record<string, LazyExoticComponent<ComponentType>> = {
   users: lazy(async () => ({ default: (await import('../features/users/Page')).UsersPage })),
   moderation: lazy(async () => ({ default: (await import('../features/moderation/Page')).ModerationPage })),
   notifications: lazy(async () => ({ default: (await import('../features/notifications/Page')).NotificationsPage })),
+  settings: lazy(async () => ({ default: (await import('../features/settings/Page')).SettingsPage })),
 };
 
 function PageLoading() {
@@ -130,9 +98,8 @@ function PageLoading() {
   );
 }
 
-function screen(key: string, label: string) {
-  const Page = pages[key];
-  if (!Page) return <ComingSoon title={label} itemKey={key} />;
+function screen(key: string) {
+  const Page = pages[key]!;
   return (
     <Suspense fallback={<PageLoading />}>
       <Page />
@@ -157,7 +124,7 @@ export const routes: RouteObject[] = [
         .flatMap((s) => s.items)
         .map((i) => ({
           path: i.path,
-          element: <RequireRole need={i.need}>{screen(i.key, i.label)}</RequireRole>,
+          element: <RequireRole need={i.need}>{screen(i.key)}</RequireRole>,
         })),
       {
         path: '/sessions/:id',

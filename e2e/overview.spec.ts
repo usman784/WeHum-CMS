@@ -64,6 +64,33 @@ const automatic = [
   { key: 'trial_ending', enabled: true, title: 'Your trial ends in 2 days', body: 'Keep meditating with everyone.', delivered: 0, opened: 0 },
 ]; // prettier-ignore
 
+const perDay = Array.from({ length: 14 }, (_, i) => ({
+  date: day(i - 13),
+  solo: 2000 + ((i * 137) % 900),
+  group: 300 + ((i * 53) % 200),
+  minutes: 30000,
+  activeUsers: 1200,
+  newUsers: 40,
+}));
+const k = (value: number, previous: number) => ({ value, previous, deltaPct: Math.round(((value - previous) / previous) * 1000) / 10 });
+const trends = {
+  period: 14, from: perDay[0]!.date, to: perDay.at(-1)!.date, tz: 'UTC', peakLive: 412, perDay,
+  kpis: { activeUsers: k(8940, 8200), meditations: k(39900, 35600), minutes: k(512000, 478000), avgLengthMin: k(12.8, 13.2), newPaying: k(171, 141) },
+  byTheme: [{ theme: 'Sleep', minutes: 158000, share: 0.31 }, { theme: 'Breathing', minutes: 112000, share: 0.22 }],
+  countries: [{ country: 'DE', members: 4210, share: 0.23 }, { country: 'US', members: 3880, share: 0.21 }],
+}; // prettier-ignore
+const funnel = { period: 14, from: perDay[0]!.date, to: perDay.at(-1)!.date, steps: [['installed', 6420, 1], ['introDone', 5130, 0.8], ['firstMeditation', 4410, 0.69], ['continuedFree', 3940, 0.61], ['trialStarted', 920, 0.14], ['savedAccount', 2310, 0.36], ['paid', 300, 0.047]].map(([key, count, share]) => ({ key, count, share })) }; // prettier-ignore
+const retention = { retention: [{ day: 1, cohort: 1000, retained: 580, rate: 0.58 }, { day: 7, cohort: 900, retained: 306, rate: 0.34 }, { day: 30, cohort: 800, retained: 152, rate: 0.19 }], at: ago(0) }; // prettier-ignore
+const config = {
+  main: { key: 'main', version: 2, updatedAt: null, value: { minVersion: { ios: '1.0.0', android: '1.0.0' }, maintenance: false, features: { challenges: false, gratitude: false, breathwork: false, milestones: false, intent: true }, supportEmail: 'support@wehum.app', defaultReminderTime: '07:00', languages: ['en'] } },
+  legal: { key: 'legal', version: 1, updatedAt: null, value: { privacyUrl: 'https://wehum.app/privacy', termsUrl: 'https://wehum.app/terms', healthDisclaimer: 'Not medical advice.', deleteInactiveGuestsMonths: 12 } },
+}; // prettier-ignore
+const team = [
+  { id: '0190a1b2-0000-7000-8000-000000000001', email: 'raphael@wehum.app', name: 'Raphael Reiter', role: 'owner', status: 'active', mfaEnabled: true, lastSignInAt: ago(5), createdAt: ago(90000) },
+  { id: 't2', email: 'lena@wehum.app', name: 'Lena Fischer', role: 'editor', status: 'active', mfaEnabled: false, lastSignInAt: ago(9000), createdAt: ago(80000) },
+  { id: 't3', email: 'jonas@wehum.app', name: 'Jonas Weber', role: 'moderator', status: 'invited', mfaEnabled: false, lastSignInAt: null, createdAt: ago(100) },
+]; // prettier-ignore
+
 function answers(url: URL, method: string): unknown {
   if (method !== 'GET') return undefined;
   const path = url.pathname.replace('/v1/admin', '');
@@ -75,6 +102,11 @@ function answers(url: URL, method: string): unknown {
   if (path === '/users')
     return { data: users, meta: { nextCursor: null, counts: { all: 4860, guests: 2550, accounts: 2310, paying: 600, trial: 112 } } };
   if (path === `/users/${U1}`) return { data: detail };
+  if (path === '/analytics') return { data: trends };
+  if (path === '/analytics/funnel') return { data: funnel };
+  if (path === '/analytics/retention') return { data: retention };
+  if (path === '/config') return { data: config };
+  if (path === '/team') return { data: team };
   if (path === '/moderation') return { data: posts, meta: { nextCursor: null, open: 2 } };
   if (path === '/moderation/stats') return { data: { posts: 612, flagged: 1, hidden: 4, kept: 9, open: 2 } };
   if (path === '/moderation/rules') return { data: rules };

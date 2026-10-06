@@ -6,7 +6,7 @@ import { defineConfig } from '@playwright/test';
  */
 export default defineConfig({
   testDir: 'e2e',
-  testIgnore: 'backend/**', // real-backend tests have their own config: playwright.backend.config.ts
+  testIgnore: ['backend/**', 'lighthouse/**'], // these have their own configs: playwright.backend.config.ts, playwright.lighthouse.config.ts
   outputDir: 'test-results',
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   forbidOnly: !!process.env.CI,
