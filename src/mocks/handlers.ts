@@ -3,6 +3,7 @@ import type { LiveAgg } from '../lib/socket-events';
 import type { Role } from '../lib/rbac';
 import { contentHandlers } from './content';
 import { dailyHandlers } from './daily';
+import { audienceHandlers } from './audience';
 import { overviewHandlers } from './overview';
 
 /**
@@ -125,4 +126,5 @@ export const handlers = [
   ...contentHandlers,
   ...dailyHandlers,
   ...overviewHandlers,
+  ...audienceHandlers,
 ];

@@ -1,6 +1,7 @@
 import { execFileSync, spawn } from 'node:child_process';
 import { createHmac, randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
+import { createServer, type Server } from 'node:http';
 import { resolve } from 'node:path';
 
 /**
@@ -41,6 +42,54 @@ const tool = (code: string) => {
   }
 };
 
+/** A stand-in for RevenueCat's REST API (offerings, promotional grants, subscriber reads and deletes). */
+export const RC_URL = 'http://127.0.0.1:3999';
+export const RC_WEBHOOK_SECRET = 'e2e-webhook-secret';
+let rcServer: Server | undefined;
+function startFakeRevenueCat() {
+  if (rcServer) return Promise.resolve();
+  const grants = new Map<string, number>(); // app user id → promotional end (ms)
+  rcServer = createServer((req, res) => {
+    const send = (status: number, body: unknown) => {
+      res.writeHead(status, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(body));
+    };
+    let raw = '';
+    req.on('data', (c) => (raw += c));
+    req.on('end', () => {
+      const path = decodeURIComponent(new URL(req.url ?? '/', RC_URL).pathname);
+      const promo = path.match(/^\/v1\/subscribers\/([^/]+)\/entitlements\/premium\/promotional$/);
+      const sub = path.match(/^\/v1\/subscribers\/([^/]+)$/);
+      if (req.method === 'POST' && promo) {
+        grants.set(promo[1]!, (JSON.parse(raw || '{}') as { end_time_ms: number }).end_time_ms);
+        return send(201, {});
+      }
+      if (req.method === 'GET' && sub) {
+        const end = grants.get(sub[1]!);
+        if (!end) return send(404, {});
+        const product = 'rc_promo_premium_custom';
+        return send(200, {
+          subscriber: {
+            entitlements: {
+              premium: { product_identifier: product, expires_date: new Date(end).toISOString(), purchase_date: new Date().toISOString() },
+            },
+            subscriptions: {
+              [product]: { period_type: 'normal', store: 'promotional', unsubscribe_detected_at: null, billing_issues_detected_at: null },
+            },
+          },
+        });
+      }
+      if (req.method === 'DELETE' && sub) {
+        grants.delete(sub[1]!);
+        return send(200, { deleted: true });
+      }
+      if (req.method === 'POST' && path.startsWith('/v2/projects/')) return send(200, { is_current: true });
+      send(404, {});
+    });
+  });
+  return new Promise<void>((done) => rcServer!.listen(3999, '127.0.0.1', () => done()));
+}
+
 /** One key per run, kept on disk: a restarted API must still read the two-step secrets it stored (tests restart it). */
 const KEY = resolve('test-results/backend.key');
 const totpKey = () => {
@@ -71,6 +120,10 @@ const env = () => ({
   SMTP_URL: '', // no mail server: the backend prints each email to its log, where the tests read the links
   ADMIN_ACCESS_TTL_SEC: String(ACCESS_TTL_SEC),
   TOTP_ENC_KEY_BASE64: totpKey(),
+  REVENUECAT_API_KEY_V2: 'e2e-rc-key',
+  REVENUECAT_PROJECT_ID: 'e2e',
+  REVENUECAT_BASE_URL: RC_URL,
+  REVENUECAT_WEBHOOK_SECRET: RC_WEBHOOK_SECRET,
   SEED_OWNER_EMAIL: OWNER.email,
   SEED_OWNER_PASSWORD: OWNER.password,
 });
@@ -148,6 +201,7 @@ export async function startBackend() {
 
   writeFileSync(LOG, '');
   await createBucket();
+  await startFakeRevenueCat();
   // The API and the media worker are separate processes in the backend (APP_ROLE), like in production.
   writeFileSync(PID, JSON.stringify({ api: spawnRole('api'), worker: spawnRole('worker') }));
   await waitForApi(true);
@@ -226,6 +280,8 @@ export async function startApi() {
 
 export function stopBackend() {
   for (const pid of Object.values(pids())) kill(pid);
+  rcServer?.close();
+  rcServer = undefined;
 }
 
 /** Create the test bucket (dev convenience, like the backend's own tests do). */

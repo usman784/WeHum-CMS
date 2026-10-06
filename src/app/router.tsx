@@ -115,6 +115,8 @@ const pages: Record<string, LazyExoticComponent<ComponentType>> = {
   daily: lazy(async () => ({ default: (await import('../features/daily/Page')).DailyMessagesPage })),
   sos: lazy(async () => ({ default: (await import('../features/sos/Page')).SosPage })),
   group: lazy(async () => ({ default: (await import('../features/group/Page')).GroupMeditationPage })),
+  subscriptions: lazy(async () => ({ default: (await import('../features/subscriptions/Page')).SubscriptionsPage })),
+  users: lazy(async () => ({ default: (await import('../features/users/Page')).UsersPage })),
 };
 
 function PageLoading() {
@@ -137,6 +139,7 @@ function screen(key: string, label: string) {
 }
 
 const SessionEditor = lazy(async () => ({ default: (await import('../features/sessions/Editor')).SessionEditorPage }));
+const UserDetail = lazy(async () => ({ default: (await import('../features/users/Detail')).UserDetailPage }));
 
 const auth = () => import('../features/auth/Page');
 
@@ -160,6 +163,16 @@ export const routes: RouteObject[] = [
           <RequireRole need="content.edit">
             <Suspense fallback={<PageLoading />}>
               <SessionEditor />
+            </Suspense>
+          </RequireRole>
+        ),
+      },
+      {
+        path: '/users/:id',
+        element: (
+          <RequireRole need="users.view">
+            <Suspense fallback={<PageLoading />}>
+              <UserDetail />
             </Suspense>
           </RequireRole>
         ),

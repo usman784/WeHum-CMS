@@ -182,3 +182,37 @@ export async function api<T>(path: string, opts: Opts = {}, retried = false): Pr
   if (renewable && !retried && (await refresh())) return api<T>(path, opts, true);
   throw new ApiError(e.code, res.status, e.message, e.details, e.traceId ?? res.headers.get('x-trace-id') ?? undefined);
 }
+
+/**
+ * Download a file the API builds (CSV exports): same token, refresh and error rules as `api()`, then the browser
+ * saves it under `filename`. Small exports only; per-user data exports run as jobs and arrive as links (spec §6.1).
+ */
+export async function download(path: string, filename: string, query: Opts['query'] = {}, retried = false): Promise<void> {
+  const url = new URL(BASE + path);
+  Object.entries(query ?? {}).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
+  });
+  let res: Response;
+  try {
+    res = await fetch(url, { headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {}, credentials: 'include' });
+  } catch {
+    throw new ApiError('NETWORK', 0, 'Cannot reach the server. Check your connection.');
+  }
+  if (!res.ok) {
+    const e = ((await res.json().catch(() => ({}))) as { error?: { code: string; message: string; traceId?: string } }).error ?? {
+      code: 'INTERNAL',
+      message: res.statusText || 'Something went wrong',
+    };
+    if ((e.code === 'TOKEN_EXPIRED' || e.code === 'TOKEN_INVALID') && !retried && (await refresh()))
+      return download(path, filename, query, true);
+    throw new ApiError(e.code, res.status, e.message, undefined, e.traceId);
+  }
+  const href = URL.createObjectURL(await res.blob());
+  const a = document.createElement('a');
+  a.href = href;
+  a.download = filename;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(href), 1000);
+}
