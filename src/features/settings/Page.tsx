@@ -155,6 +155,21 @@ function Releases({ form }: { form: MainForm }) {
         onCheckedChange={(c) => form.edit({ maintenance: c })}
       />
       <h3 className="mt-2 text-h3">Feature flags</h3>
+      <p className="text-sm text-text-muted">
+        Prepare the content first:{' '}
+        <Link to="/challenges" className="font-semibold underline underline-offset-2">
+          Challenges
+        </Link>
+        ,{' '}
+        <Link to="/coming-soon" className="font-semibold underline underline-offset-2">
+          Breathwork &amp; milestones
+        </Link>
+        , and the gratitude feed is moderated in{' '}
+        <Link to="/moderation" className="font-semibold underline underline-offset-2">
+          Dedications &amp; gratitude
+        </Link>
+        .
+      </p>
       <div className="flex flex-col gap-3">
         {FEATURES.map((f) => (
           <Switch

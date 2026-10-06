@@ -1,7 +1,9 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { comingSoon } from '../../mocks/comingsoon';
 import { community } from '../../mocks/community';
+import { insights } from '../../mocks/insights';
 import { disconnectSocket } from '../../lib/socket';
 import { connectFakeSocket, findToast, h1, openApp } from '../../test/app';
 import { a11yViolations } from '../../test/render';
@@ -115,10 +117,29 @@ describe('Moderation', () => {
     expect(await screen.findByRole('listitem', { name: 'Post by Nina' })).toBeInTheDocument();
   });
 
-  it('the gratitude tab says it is coming soon', async () => {
+  it('gratitude tab: flag off → banner, the queue still works; hide a post', async () => {
     openApp('/moderation');
     await userEvent.click(await screen.findByRole('tab', { name: 'Gratitude feed' }));
-    expect(screen.getByText('Gratitude feed is coming soon')).toBeInTheDocument();
+    expect(await screen.findByText(/The gratitude feed is switched off in the app/)).toBeInTheDocument();
+    const list = await screen.findByRole('list', { name: 'Posts' });
+    const hannah = within(list).getByRole('listitem', { name: 'Post by Hannah' });
+    expect(hannah).toHaveTextContent('Gratitude');
+    expect(hannah).toHaveTextContent('Reported ×3 · spam');
+    expect(hannah).toHaveTextContent('Shared in the feed');
+    await userEvent.click(within(hannah).getByRole('button', { name: 'Show again' }));
+    expect(await findToast('Post kept')).toBeInTheDocument();
+    expect(comingSoon.calls).toContainEqual({ method: 'POST', path: '/gratitude/g1/keep' });
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Feed' }), 'affirmation');
+    await waitFor(() => expect(within(screen.getByRole('list', { name: 'Posts' })).getAllByRole('listitem')).toHaveLength(1));
+    expect(screen.getByRole('listitem', { name: 'Post by Lukas' })).toBeInTheDocument();
+  });
+
+  it('gratitude tab: flag on → no banner', async () => {
+    insights.main = { ...insights.main, value: { ...insights.main.value, features: { ...insights.main.value.features, gratitude: true } } };
+    openApp('/moderation');
+    await userEvent.click(await screen.findByRole('tab', { name: 'Gratitude feed' }));
+    await screen.findByRole('list', { name: 'Posts' });
+    expect(screen.queryByText(/The gratitude feed is switched off/)).not.toBeInTheDocument();
   });
 });
 

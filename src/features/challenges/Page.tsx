@@ -194,10 +194,15 @@ export function ChallengesPage() {
         badge={<Badge caps>Coming soon</Badge>}
         subtitle="Habit challenges: any meditation counts, once a day. Unlike programs, they need no new content."
         actions={
-          <Button onClick={() => setSelected('new')}>
-            <Plus size={16} aria-hidden />
-            New challenge
-          </Button>
+          <>
+            <Link to="/coming-soon" className="text-sm font-semibold text-text-muted underline underline-offset-2 hover:text-text">
+              Breathwork &amp; milestones
+            </Link>
+            <Button onClick={() => setSelected('new')}>
+              <Plus size={16} aria-hidden />
+              New challenge
+            </Button>
+          </>
         }
       />
       <p role="status" className="rounded-btn bg-info px-4 py-2.5 text-body text-info-text">
@@ -255,7 +260,7 @@ export function ChallengesPage() {
                       <span className="truncate font-semibold">{c.name}</span>
                       <span className="tabular">{c.days}</span>
                       <span className="truncate text-text-muted">{COUNTS.find((x) => x.value === c.counts)?.short}</span>
-                      <span className="tabular">{c.participants ? formatNumber(c.participants) : '—'}</span>
+                      <span className="tabular">{c.participants - c.finished > 0 ? formatNumber(c.participants - c.finished) : '—'}</span>
                       <span className="tabular">{rate === null ? '—' : formatPercent(rate)}</span>
                       <StatusText tone={STATUS[c.status].tone} className="text-xs font-bold">
                         {STATUS[c.status].label}

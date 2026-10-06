@@ -107,6 +107,9 @@ function answers(url: URL, method: string): unknown {
   if (path === '/analytics/retention') return { data: retention };
   if (path === '/config') return { data: config };
   if (path === '/team') return { data: team };
+  if (path === '/breath-patterns') return { data: [{ id: 'bp1', name: 'Calming', subtitle: 'Longer out-breath', inhaleSec: 4, hold1Sec: 7, exhaleSec: 8, hold2Sec: 0, rounds: 10, sort: 0, status: 'live', version: 1 }, { id: 'bp2', name: 'Coherent', subtitle: '', inhaleSec: 5, hold1Sec: 0, exhaleSec: 5, hold2Sec: 0, rounds: 10, sort: 1, status: 'draft', version: 1 }] }; // prettier-ignore
+  if (path === '/breathwork') return { data: { key: 'breathwork', version: 1, updatedAt: null, value: { lessons: [] } } };
+  if (path === '/milestones') return { data: [{ key: 'first', label: 'First meditation', badge: '1', metric: 'meditations', target: 1, reached: 4210 }, { key: 'minutes1000', label: '1,000 minutes', badge: '1k', metric: 'minutes', target: 1000, reached: 12 }] }; // prettier-ignore
   if (path === '/moderation') return { data: posts, meta: { nextCursor: null, open: 2 } };
   if (path === '/moderation/stats') return { data: { posts: 612, flagged: 1, hidden: 4, kept: 9, open: 2 } };
   if (path === '/moderation/rules') return { data: rules };

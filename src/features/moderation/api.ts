@@ -44,8 +44,9 @@ export const FILTERS = [
 export type ModFilter = (typeof FILTERS)[number]['value'];
 export type QueueFilters = { filter: ModFilter; sessionId: string };
 
-export function useQueue(f: QueueFilters) {
+export function useQueue(f: QueueFilters, enabled = true) {
   return useInfiniteQuery({
+    enabled,
     queryKey: qk.moderation(f),
     queryFn: ({ pageParam }) =>
       api<Post[]>('/v1/admin/moderation', {
@@ -65,8 +66,9 @@ export function useModStats() {
 }
 
 /** Sessions for the "Session" filter: the published ones, by title. */
-export function useSessionOptions() {
+export function useSessionOptions(enabled = true) {
   return useQuery({
+    enabled,
     queryKey: qk.session.list({ pick: 'moderation' }),
     queryFn: () =>
       api<{ id: string; title: string }[]>('/v1/admin/sessions', { query: { status: 'live', limit: 100, sort: 'title' } }).then(
@@ -99,7 +101,10 @@ export function useModCache() {
   const qc = useQueryClient();
   return {
     /** Something changed in the queue (a decision, a new post): re-read lists and today's numbers. */
-    refresh: () => void qc.invalidateQueries({ queryKey: ['moderation'] }),
+    refresh: () => {
+      void qc.invalidateQueries({ queryKey: ['moderation'] });
+      void qc.invalidateQueries({ queryKey: qk.gratitude.all });
+    },
     rulesSaved: (doc: ConfigDoc<ModRules>) => qc.setQueryData(RULES_KEY, doc),
   };
 }
@@ -123,4 +128,65 @@ export function reasonChips(p: Pick<Post, 'reportCount' | 'reasons' | 'autoFlags
     });
   for (const f of p.autoFlags) out.push({ text: `Auto · ${FLAG[f] ?? f}`, tone: 'teal' });
   return out;
+}
+
+// ───────────── gratitude feed (P9, behind the `gratitude` flag)
+export type GratitudeKind = 'gratitude' | 'affirmation' | 'love';
+export const KINDS: { value: '' | GratitudeKind; label: string }[] = [
+  { value: '', label: 'All feeds' },
+  { value: 'gratitude', label: 'Gratitude' },
+  { value: 'affirmation', label: 'Affirmations' },
+  { value: 'love', label: 'Sending love' },
+];
+type GratitudeRow = Omit<Post, 'sessionId' | 'sessionTitle' | 'holdingCount'> & { kind: GratitudeKind };
+
+/** The gratitude queue, in the same shape as the dedications queue (the feed name stands where the session would). */
+export function useGratitudeQueue(f: { filter: ModFilter; kind: '' | GratitudeKind }, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: qk.gratitude.list(f),
+    queryFn: ({ pageParam }) =>
+      api<GratitudeRow[]>('/v1/admin/gratitude', {
+        query: { filter: f.filter, kind: f.kind || undefined, limit: 30, cursor: pageParam },
+      }).then((r) => ({
+        ...r,
+        data: r.data.map((g): Post => ({
+          ...g,
+          sessionId: '',
+          sessionTitle: KINDS.find((k) => k.value === g.kind)?.label ?? g.kind,
+          holdingCount: 0,
+        })),
+      })),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.meta?.nextCursor ?? undefined,
+    placeholderData: keepPreviousData,
+    enabled,
+  });
+}
+
+export type QueueActions = {
+  hide: (id: string) => Promise<{ id: string; status: string; autoMuted?: boolean }>;
+  keep: (id: string) => Promise<unknown>;
+  bulk: (action: 'hide' | 'keep', ids: string[]) => Promise<{ results: { id: string; ok: boolean; error?: string }[] }>;
+};
+export const dedicationActions: QueueActions = { hide: modApi.hide, keep: modApi.keep, bulk: modApi.bulk };
+export const gratitudeActions: QueueActions = {
+  hide: (id) => api<{ id: string; status: string }>(`/v1/admin/gratitude/${id}/hide`, { method: 'POST' }).then((r) => r.data),
+  keep: (id) => api<{ id: string; status: string }>(`/v1/admin/gratitude/${id}/keep`, { method: 'POST' }).then((r) => r.data),
+  bulk: (action, ids) =>
+    api<{ results: { id: string; ok: boolean; error?: string }[] }>('/v1/admin/gratitude/bulk', {
+      method: 'POST',
+      body: { action, ids },
+    }).then((r) => r.data),
+};
+
+/** Whether the app shows the gratitude feed (owners and admins can read the settings; others see the tab anyway). */
+export function useGratitudeFlag(enabled: boolean) {
+  return useQuery({
+    queryKey: [...qk.config.all, 'main', 'features', 'gratitude'],
+    queryFn: () =>
+      api<{ main?: { value?: { features?: { gratitude?: boolean } } } }>('/v1/admin/config').then(
+        (r) => r.data.main?.value?.features?.gratitude ?? false,
+      ),
+    enabled,
+  });
 }

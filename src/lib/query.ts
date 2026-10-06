@@ -54,6 +54,8 @@ export const qk = {
   notification: entity('notification'),
   admin: entity('admin'),
   user: entity('user'),
+  breathPattern: entity('breathPattern'),
+  gratitude: entity('gratitude'),
   moderation: (f: object = {}) => ['moderation', f] as const,
   subscriptions: {
     summary: ['subs', 'summary'] as const,

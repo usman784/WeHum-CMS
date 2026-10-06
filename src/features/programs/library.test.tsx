@@ -381,7 +381,7 @@ describe('Challenges screen', () => {
     openApp('/challenges');
     expect(await h1('Challenges')).toBeInTheDocument();
     await screen.findByRole('list', { name: 'Challenges' });
-    expect(rows().map((r) => r.textContent)).toEqual(['7 days of calm7Any meditation1,90462%Live', 'Sleep week7Sleep meditations——Draft']);
+    expect(rows().map((r) => r.textContent)).toEqual(['7 days of calm7Any meditation72462%Live', 'Sleep week7Sleep meditations——Draft']);
     expect(await screen.findByText(/hidden in the app while the “Challenges” feature is switched off/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open Settings' })).toHaveAttribute('href', '/settings');
     expect(within(editor()).getByLabelText('Name')).toHaveValue('7 days of calm');

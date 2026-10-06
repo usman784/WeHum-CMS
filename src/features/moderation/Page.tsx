@@ -22,19 +22,38 @@ import { useConfigForm } from '../config/useConfigForm';
 import { countryName } from '../users/api';
 import {
   FILTERS,
+  type GratitudeKind,
+  KINDS,
+  type ModFilter,
+  type ModRules,
+  type Post,
+  type QueueActions,
+  dedicationActions,
+  gratitudeActions,
   modApi,
   reasonChips,
+  useGratitudeFlag,
+  useGratitudeQueue,
   useModCache,
   useModStats,
   useQueue,
   useRules,
   useSessionOptions,
-  type ModFilter,
-  type ModRules,
-  type Post,
 } from './api';
 
-function PostCard({ p, selected, onSelect, onDone }: { p: Post; selected: boolean; onSelect: (on: boolean) => void; onDone: () => void }) {
+function PostCard({
+  p,
+  actions,
+  selected,
+  onSelect,
+  onDone,
+}: {
+  p: Post;
+  actions: QueueActions;
+  selected: boolean;
+  onSelect: (on: boolean) => void;
+  onDone: () => void;
+}) {
   const [busy, setBusy] = useState<'hide' | 'keep' | 'mute' | null>(null);
   const act = async (kind: 'hide' | 'keep' | 'mute') => {
     setBusy(kind);
@@ -46,10 +65,10 @@ function PostCard({ p, selected, onSelect, onDone }: { p: Post; selected: boolea
           p.userMuted ? undefined : 'New posts stay hidden.',
         );
       } else {
-        const r = await (kind === 'hide' ? modApi.hide(p.id) : modApi.keep(p.id));
+        const r = (await (kind === 'hide' ? actions.hide(p.id) : actions.keep(p.id))) as { autoMuted?: boolean };
         toast.success(
           kind === 'hide' ? 'Post hidden' : 'Post kept',
-          'autoMuted' in r && r.autoMuted ? `${p.firstName} is now muted (too many hidden posts).` : undefined,
+          r?.autoMuted ? `${p.firstName} is now muted (too many hidden posts).` : undefined,
         );
       }
       onDone();
@@ -93,7 +112,7 @@ function PostCard({ p, selected, onSelect, onDone }: { p: Post; selected: boolea
       <p className="text-h3 font-normal">“{p.text}”</p>
       <div className="flex flex-wrap items-center gap-2.5">
         <span className="flex-1 text-sm text-text-muted">
-          {p.crisis ? 'SoS screen was shown to the writer' : 'Written after the meditation'}
+          {p.crisis ? 'SoS screen was shown to the writer' : p.sessionId ? 'Written after the meditation' : 'Shared in the feed'}
           {p.holdingCount ? ` · ${formatCompact(p.holdingCount)} holding` : ''}
         </span>
         {p.status !== 'hidden' ? (
@@ -127,23 +146,28 @@ function PostCard({ p, selected, onSelect, onDone }: { p: Post; selected: boolea
   );
 }
 
-function Queue() {
+function Queue({ source }: { source: 'dedications' | 'gratitude' }) {
+  const gratitude = source === 'gratitude';
   const [filter, setFilter] = useState<ModFilter>('review');
   const [sessionId, setSessionId] = useState('');
+  const [kind, setKind] = useState<'' | GratitudeKind>('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
-  const queue = useQueue({ filter, sessionId });
+  const dedQueue = useQueue({ filter, sessionId }, !gratitude);
+  const gratQueue = useGratitudeQueue({ filter, kind }, gratitude);
+  const queue = gratitude ? gratQueue : dedQueue;
+  const actions = gratitude ? gratitudeActions : dedicationActions;
   const stats = useModStats();
-  const sessions = useSessionOptions();
+  const sessions = useSessionOptions(!gratitude);
   const cache = useModCache();
   const rows = queue.data?.pages.flatMap((p) => p.data) ?? [];
-  const open = (queue.data?.pages[0]?.meta as { open?: number } | undefined)?.open ?? stats.data?.open;
-  const flagged = stats.data?.flagged;
+  const open = (queue.data?.pages[0]?.meta as { open?: number } | undefined)?.open ?? (gratitude ? undefined : stats.data?.open);
+  const flagged = gratitude ? undefined : stats.data?.flagged;
 
   const bulk = async (action: 'hide' | 'keep') => {
     setBulkBusy(true);
     try {
-      const r = await modApi.bulk(action, [...selected]);
+      const r = await actions.bulk(action, [...selected]);
       const failed = r.results.filter((x) => !x.ok).length;
       toast.success(
         `${r.results.length - failed} ${action === 'hide' ? 'hidden' : 'kept'}`,
@@ -180,14 +204,25 @@ function Queue() {
           }}
         />
         <span className="flex-1" />
-        <Select
-          inline
-          size="sm"
-          label="Session"
-          value={sessionId}
-          onChange={(e) => setSessionId(e.target.value)}
-          options={[{ value: '', label: 'All sessions' }, ...(sessions.data ?? []).map((s) => ({ value: s.id, label: s.title }))]}
-        />
+        {gratitude ? (
+          <Select
+            inline
+            size="sm"
+            label="Feed"
+            value={kind}
+            onChange={(e) => setKind(e.target.value as '' | GratitudeKind)}
+            options={KINDS}
+          />
+        ) : (
+          <Select
+            inline
+            size="sm"
+            label="Session"
+            value={sessionId}
+            onChange={(e) => setSessionId(e.target.value)}
+            options={[{ value: '', label: 'All sessions' }, ...(sessions.data ?? []).map((s) => ({ value: s.id, label: s.title }))]}
+          />
+        )}
       </div>
       {selected.size ? (
         <div
@@ -216,7 +251,9 @@ function Queue() {
         <EmptyState
           title={filter === 'review' ? 'Nothing to review' : 'No posts here'}
           description={
-            filter === 'review' ? 'Reported and auto-flagged posts show here as they come in.' : 'Pick another filter or session.'
+            filter === 'review'
+              ? 'Reported and auto-flagged posts show here as they come in.'
+              : `Pick another filter or ${gratitude ? 'feed' : 'session'}.`
           }
         />
       ) : (
@@ -225,6 +262,7 @@ function Queue() {
             <PostCard
               key={p.id}
               p={p}
+              actions={actions}
               selected={selected.has(p.id)}
               onSelect={(on) =>
                 setSelected((s) => {
@@ -408,6 +446,22 @@ function Rules() {
   );
 }
 
+function GratitudeTab() {
+  const canSettings = useCan('settings.manage');
+  const flag = useGratitudeFlag(canSettings);
+  return (
+    <div className="flex flex-col gap-4">
+      {flag.data === false ? (
+        <p role="status" className="rounded-btn bg-info px-4 py-2.5 text-sm text-info-text">
+          The gratitude feed is switched off in the app (coming soon). Turn it on in Settings → App &amp; releases. Posts written while it
+          was on can still be moderated here.
+        </p>
+      ) : null}
+      <Queue source="gratitude" />
+    </div>
+  );
+}
+
 /** 14 Dedications & gratitude: the moderation queue (live), today's numbers and the rules. */
 export function ModerationPage() {
   const cache = useModCache();
@@ -427,10 +481,10 @@ export function ModerationPage() {
             <TabsTrigger value="gratitude">Gratitude feed</TabsTrigger>
           </TabsList>
           <TabsContent value="dedications" className="pt-4">
-            <Queue />
+            <Queue source="dedications" />
           </TabsContent>
           <TabsContent value="gratitude" className="pt-4">
-            <EmptyState title="Gratitude feed is coming soon" description="It is switched on in Settings → App & releases when it ships." />
+            <GratitudeTab />
           </TabsContent>
         </Tabs>
         <div className="flex flex-col gap-5">

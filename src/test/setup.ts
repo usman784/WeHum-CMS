@@ -9,6 +9,7 @@ import { resetOverview } from '../mocks/overview';
 import { resetAudience } from '../mocks/audience';
 import { resetCommunity } from '../mocks/community';
 import { resetInsights } from '../mocks/insights';
+import { resetComingSoon } from '../mocks/comingsoon';
 import { mockAuth } from '../mocks/handlers';
 import { server } from '../mocks/server';
 import { toast } from '../ui/Toast';
@@ -63,6 +64,7 @@ afterEach(() => {
   resetAudience();
   resetCommunity();
   resetInsights();
+  resetComingSoon();
   toast.clear(); // toasts live in a store outside React: do not let one test's toast show in the next
   auth.set(null);
   session.reset();

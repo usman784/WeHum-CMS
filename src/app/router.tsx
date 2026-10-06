@@ -108,6 +108,7 @@ function screen(key: string) {
 }
 
 const SessionEditor = lazy(async () => ({ default: (await import('../features/sessions/Editor')).SessionEditorPage }));
+const ComingSoon = lazy(async () => ({ default: (await import('../features/coming-soon/Page')).ComingSoonPage }));
 const UserDetail = lazy(async () => ({ default: (await import('../features/users/Detail')).UserDetailPage }));
 
 const auth = () => import('../features/auth/Page');
@@ -142,6 +143,16 @@ export const routes: RouteObject[] = [
           <RequireRole need="users.view">
             <Suspense fallback={<PageLoading />}>
               <UserDetail />
+            </Suspense>
+          </RequireRole>
+        ),
+      },
+      {
+        path: '/coming-soon',
+        element: (
+          <RequireRole need="content.edit">
+            <Suspense fallback={<PageLoading />}>
+              <ComingSoon />
             </Suspense>
           </RequireRole>
         ),
