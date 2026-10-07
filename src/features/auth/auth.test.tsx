@@ -569,6 +569,6 @@ describe('session start and end', () => {
     const { authApi } = await import('./api');
     await act(() => authApi.me().catch(() => {}));
     expect(await screen.findByRole('dialog', { name: 'Sign in again' })).toBeInTheDocument();
-    expect(screen.getByRole('searchbox', { name: 'Search users' })).toBeInTheDocument(); // the page is still there behind the dialog
+    expect(screen.getByRole('searchbox', { name: 'Search users', hidden: true })).toBeInTheDocument(); // the page is still there behind the dialog (hidden from assistive tech while it is open)
   });
 });

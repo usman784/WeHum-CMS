@@ -185,7 +185,12 @@ export function UsersPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <TabPills label="Filter users" options={[...USER_TABS]} value={filters.tab} onChange={(tab) => setFilters({ tab })} />
+        <TabPills
+          label="Filter users"
+          options={[...USER_TABS]}
+          value={filters.tab}
+          onChange={(tab) => setFilters({ tab, q: search.trim() })}
+        />
       </div>
       <p className="rounded-card border border-dashed border-border-strong px-4 py-3 text-sm text-text-muted">
         A <strong className="text-text">guest</strong> uses the app without an account (Apple allows this, and they can still subscribe). If

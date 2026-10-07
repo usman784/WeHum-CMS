@@ -39,6 +39,8 @@ export interface LiveServerToClient {
   'dedication:new': (p: { sessionId: string; items: unknown[] }) => void;
   'dedication:holding': (p: { id: string; holdingCount: number }) => void;
   'dedication:removed': (p: { id: string }) => void;
+  'gratitude:new': (p: { kind: 'gratitude' | 'affirmation' | 'love'; item: unknown }) => void;   // room gratitude:{kind} (P11)
+  'gratitude:removed': (p: { kind: 'gratitude' | 'affirmation' | 'love'; id: string }) => void;
   'entitlement:changed': (p: { active: boolean; productId: string | null; periodType: string | null; expiresAt: string | null; billingIssue: boolean }) => void;
   'inbox:new': (p: { item: unknown }) => void;
   'config:changed': (p: { key: string; version: number }) => void;
