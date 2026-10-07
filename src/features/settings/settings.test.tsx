@@ -90,9 +90,9 @@ describe('Settings', () => {
     expect(await findToast('Invitation sent')).toBeInTheDocument();
     expect(insights.calls).toContainEqual({ method: 'POST', path: '/team/invite', body: { email: 'new@wehum.app', role: 'moderator' } });
 
-    await userEvent.click(screen.getByRole('button', { name: 'More actions for Usman' }));
+    await userEvent.click(screen.getByRole('button', { name: 'More actions for Lena Fischer' }));
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Disable' }));
-    expect(await findToast('Usman is signed out and disabled')).toBeInTheDocument();
+    expect(await findToast('Lena Fischer is signed out and disabled')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'More actions for Jonas Weber' }));
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Remove from team' }));
@@ -113,7 +113,7 @@ describe('Settings', () => {
   it('membership tab: guests always on, link to Subscriptions', async () => {
     openApp('/settings?tab=membership');
     expect(await screen.findByRole('switch', { name: /Guests can use the app without an account/ })).toBeDisabled();
-    expect(screen.getByRole('link', { name: 'Subscriptions' })).toHaveAttribute('href', '/subscriptions');
+    expect(within(screen.getByRole('tabpanel')).getByRole('link', { name: 'Subscriptions' })).toHaveAttribute('href', '/subscriptions');
   });
 
   it('audit log: newest first, with who; filters by type', async () => {

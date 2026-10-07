@@ -44,7 +44,7 @@ describe('Breathwork & milestones', () => {
   it('edit a template; someone else saved first → told, list reloads', async () => {
     openApp('/coming-soon');
     const templates = await screen.findByRole('list', { name: 'Breathing templates' });
-    await userEvent.click(within(templates).getByRole('button', { name: /Calming/ }));
+    await userEvent.click(within(templates).getByRole('button', { name: /^Edit Calming/ }));
     const dialog = screen.getByRole('dialog', { name: 'Edit “Calming”' });
     comingSoon.patterns[0]!.version = 5;
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));

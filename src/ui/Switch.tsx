@@ -17,12 +17,21 @@ export function Switch({ checked, onCheckedChange, label, description, disabled,
   const id = useId();
   return (
     <div className={cn('flex items-center justify-between gap-3', className)}>
+      {/* the label names the switch; the second line describes it (not part of the name) */}
       <label htmlFor={id} className={cn('flex min-w-0 flex-col text-body', disabled && 'opacity-60')}>
-        <span className="font-semibold">{label}</span>
-        {description ? <span className="text-xs font-normal text-text-muted">{description}</span> : null}
+        <span id={`${id}-label`} className="font-semibold">
+          {label}
+        </span>
+        {description ? (
+          <span id={`${id}-desc`} className="text-xs font-normal text-text-muted">
+            {description}
+          </span>
+        ) : null}
       </label>
       <RadixSwitch.Root
         id={id}
+        aria-labelledby={`${id}-label`}
+        aria-describedby={description ? `${id}-desc` : undefined}
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}

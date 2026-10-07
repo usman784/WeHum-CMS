@@ -565,10 +565,10 @@ describe('session start and end', () => {
     session.signIn(mockSession('owner').admin);
     auth.set('stale');
     open('/users');
-    await heading('Users');
+    await heading('Users & Members');
     const { authApi } = await import('./api');
     await act(() => authApi.me().catch(() => {}));
     expect(await screen.findByRole('dialog', { name: 'Sign in again' })).toBeInTheDocument();
-    expect(screen.getByText('It arrives with build phase P6.')).toBeInTheDocument();
+    expect(screen.getByRole('searchbox', { name: 'Search users' })).toBeInTheDocument(); // the page is still there behind the dialog
   });
 });

@@ -28,10 +28,12 @@ describe('Users', () => {
     expect(within(t).getByText('marcus.v@gmail.com · Apple')).toBeInTheDocument();
     expect(within(t).getByText('Annual · Founding')).toBeInTheDocument();
     expect(within(t).getByText('Trial · day 4 of 7')).toBeInTheDocument();
-    expect(within(t).getByText('Guest · no account yet', { exact: false })).toBeInTheDocument();
+    expect(within(t).getAllByText('Guest · no account yet', { exact: false })).toHaveLength(2);
     expect(within(t).getByText('United Kingdom')).toBeInTheDocument();
     expect(screen.getByText(/4 people · 2 with an account · 2 guests · 2 paying · 1 in trial/)).toBeInTheDocument();
-    expect(screen.getByText(/A guest/)).toBeInTheDocument();
+    expect(
+      screen.getByText((_, el) => el?.tagName === 'P' && !!el.textContent?.startsWith('A guest uses the app without an account')),
+    ).toBeInTheDocument();
     expect(await a11yViolations()).toEqual([]);
   });
 

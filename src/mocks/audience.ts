@@ -6,7 +6,7 @@ import { body, fail, ok } from './overview';
 
 /**
  * In-memory API for Subscriptions (15), Users (16) and User detail (17), for tests and `VITE_MOCKS=1 pnpm dev`.
- * `resetAudience()` puts the seed data back. Jobs finish on the next `GET /jobs/:id` (or at once with `audience.instantJobs`).
+ * `resetAudience()` puts the seed data back. A job is done by its first `GET /jobs/:id`.
  */
 const API = import.meta.env.VITE_API_URL as string;
 const u = (path: string) => `${API}/v1/admin${path}`;
@@ -338,7 +338,8 @@ export const audienceHandlers = [
   http.get(u('/jobs/:id'), ({ params }) => {
     const j = audience.jobs.get(String(params.id));
     if (!j) return fail(404, 'NOT_FOUND', 'Job not found');
-    if (j.status === 'running') audience.jobs.set(j.id, { ...j, status: 'done', progress: 100 });
-    return ok(j);
+    const done = { ...j, status: 'done', progress: 100 }; // the worker is quick here: done by the first poll
+    audience.jobs.set(j.id, done);
+    return ok(done);
   }),
 ];

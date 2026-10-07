@@ -159,7 +159,12 @@ function Templates() {
         <ul aria-label="Breathing templates" className="grid gap-3 sm:grid-cols-2">
           {list.data.map((p) => (
             <li key={p.id} className="flex items-start gap-3 rounded-tile border border-border bg-input p-3.5">
-              <button type="button" className="flex min-w-0 flex-1 flex-col items-start gap-1 text-left" onClick={() => setEditing(p)}>
+              <button
+                type="button"
+                aria-label={`Edit ${p.name}: ${patternLabel(p)}, ${STATUS[p.status].label}`}
+                className="flex min-w-0 flex-1 flex-col items-start gap-1 text-left"
+                onClick={() => setEditing(p)}
+              >
                 <Badge tone="teal" size="sm">
                   {patternLabel(p)}
                 </Badge>

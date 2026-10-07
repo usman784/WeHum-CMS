@@ -79,7 +79,7 @@ describe('sidebar by role (spec §6.2)', () => {
 describe('routes', () => {
   it('a link opens its page inside the shell', async () => {
     open('/', 'owner');
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Dashboard');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument(); // lazy page
     await userEvent.click(within(nav()).getByRole('link', { name: 'Themes' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Themes' })).toBeInTheDocument();
     expect(await screen.findByRole('button', { name: /Loving Kindness/, pressed: false })).toBeInTheDocument(); // the real screen, loaded on demand

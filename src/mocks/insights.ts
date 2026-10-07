@@ -111,7 +111,7 @@ export function resetInsights() {
   };
   insights.team = [
     {
-      id: 'admin-owner',
+      id: '0190a1b2-0000-7000-8000-000000000001',
       email: 'raphael@wehum.app',
       name: 'Raphael Reiter',
       role: 'owner',
@@ -121,7 +121,7 @@ export function resetInsights() {
       createdAt: '2026-01-01T00:00:00Z',
     },
     {
-      id: 'admin-admin',
+      id: '0190a1b2-0000-7000-8000-000000000002',
       email: 'admin@wehum.app',
       name: 'Usman',
       role: 'admin',
@@ -154,7 +154,7 @@ export function resetInsights() {
   insights.audit = [
     {
       id: 3,
-      actorId: 'admin-owner',
+      actorId: '0190a1b2-0000-7000-8000-000000000001',
       actorRole: 'owner',
       action: 'config.update',
       targetType: 'config',
