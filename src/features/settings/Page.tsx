@@ -55,6 +55,12 @@ const MAIN_FIELDS: ConflictField<MainConfig>[] = [
     label: 'Minimum app version',
     format: (v) => `iOS ${(v as MainConfig['minVersion']).ios} · Android ${(v as MainConfig['minVersion']).android}`,
   },
+  {
+    key: 'latestVersion',
+    label: 'Latest app version',
+    format: (v) => (v ? `iOS ${(v as NonNullable<MainConfig['latestVersion']>).ios} · Android ${(v as NonNullable<MainConfig['latestVersion']>).android}` : 'not set'),
+  },
+  { key: 'storeUrls', label: 'Store links', format: (v) => (v ? 'set' : 'default') },
   { key: 'maintenance', label: 'Maintenance mode' },
   {
     key: 'features',
@@ -131,6 +137,8 @@ function General({ form }: { form: MainForm }) {
 
 function Releases({ form }: { form: MainForm }) {
   const v = form.value!;
+  const latest = v.latestVersion ?? v.minVersion;
+  const stores = v.storeUrls ?? { ios: '', android: '' };
   return (
     <SectionCard title="App & releases" size="h2" description="Takes effect in the app within a minute (config changes are pushed live).">
       <Row>
@@ -148,6 +156,25 @@ function Releases({ form }: { form: MainForm }) {
         />
       </Row>
       <p className="text-sm text-text-muted">Older apps are asked to update before they continue (the API answers 426).</p>
+      <Row>
+        <Input
+          label="Latest iOS version"
+          value={latest.ios}
+          error={semverOk(latest.ios) ? undefined : 'Use x.y.z, e.g. 1.3.0'}
+          onChange={(e) => form.edit({ latestVersion: { ...latest, ios: e.target.value.trim() } })}
+        />
+        <Input
+          label="Latest Android version"
+          value={latest.android}
+          error={semverOk(latest.android) ? undefined : 'Use x.y.z, e.g. 1.3.0'}
+          onChange={(e) => form.edit({ latestVersion: { ...latest, android: e.target.value.trim() } })}
+        />
+      </Row>
+      <Row>
+        <Input label="App Store link" value={stores.ios} onChange={(e) => form.edit({ storeUrls: { ...stores, ios: e.target.value.trim() } })} />
+        <Input label="Play Store link" value={stores.android} onChange={(e) => form.edit({ storeUrls: { ...stores, android: e.target.value.trim() } })} />
+      </Row>
+      <p className="text-sm text-text-muted">Apps older than the latest version (but not below the minimum) see a “new version” prompt once, with a Later button.</p>
       <Switch
         label="Maintenance mode"
         description="The app shows a short “back soon” screen. Use only during planned work."
@@ -596,7 +623,7 @@ export function SettingsPage() {
   const mv = main.value;
   const lv = legal.value;
   const invalid =
-    (!!mv && (!semverOk(mv.minVersion.ios) || !semverOk(mv.minVersion.android) || !/^\S+@\S+\.\S+$/.test(mv.supportEmail))) ||
+    (!!mv && (!semverOk(mv.minVersion.ios) || !semverOk(mv.minVersion.android) || (!!mv.latestVersion && (!semverOk(mv.latestVersion.ios) || !semverOk(mv.latestVersion.android))) || !/^\S+@\S+\.\S+$/.test(mv.supportEmail))) ||
     (!!lv && (!/^https:\/\/\S+$/.test(lv.privacyUrl) || !/^https:\/\/\S+$/.test(lv.termsUrl)));
   const dirty = main.dirty || legal.dirty;
   const usesForms = tab === 'general' || tab === 'releases' || tab === 'legal';

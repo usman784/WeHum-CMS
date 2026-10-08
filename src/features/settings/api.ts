@@ -7,6 +7,9 @@ import type { ConfigDoc } from '../config/useConfigForm';
 /** `app_config.main` (backend `CONFIG_SCHEMAS.main`). */
 export type MainConfig = {
   minVersion: { ios: string; android: string };
+  /** Newest release per store; apps below it (but above minVersion) get a dismissible prompt. */
+  latestVersion?: { ios: string; android: string };
+  storeUrls?: { ios: string; android: string };
   maintenance: boolean;
   features: { challenges: boolean; gratitude: boolean; breathwork: boolean; milestones: boolean; intent: boolean };
   supportEmail: string;
