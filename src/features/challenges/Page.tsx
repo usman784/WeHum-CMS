@@ -9,7 +9,7 @@ import { cn } from '../../lib/cn';
 import { applyFieldErrors } from '../../lib/form-errors';
 import { formatNumber, formatPercent } from '../../lib/format';
 import { zodForm } from '../../lib/zod-form';
-import { Badge, StatusText } from '../../ui/Badge';
+import { StatusText } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
 import { ConflictDialog, type ConflictField } from '../../ui/ConflictDialog';
@@ -241,7 +241,7 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
   );
 }
 
-/** 06 Challenges (coming soon): habit challenges. The app shows them only while the feature flag is on. */
+/** 06 Challenges: cohort sprints with unlock times and a grace day. The app shows them only while the feature flag is on. */
 export function ChallengesPage() {
   const { data, isPending, error, refetch } = useChallenges();
   const canSettings = useCan('settings.manage');
@@ -259,7 +259,6 @@ export function ChallengesPage() {
     <>
       <PageHeader
         title="Challenges"
-        badge={<Badge caps>Coming soon</Badge>}
         subtitle="Habit challenges: any meditation counts, once a day. Unlike programs, they need no new content."
         actions={
           <>
