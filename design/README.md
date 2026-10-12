@@ -13,6 +13,8 @@
 | `S13_GroupSits` | Group sits | cadence (daily / hourly), intentions, focus card, doors-open time |
 | `S14_Moderation` | Dedications & gratitude | place (city / worldwide), anonymize |
 | `S16_Users` | Users | streak and export (zip) |
-| `S19_Settings` | Settings | silence room, downloads quota, sit-time blocks, crisis, feature flags |
+| `S17_UserDetail` | User detail | username, photo, streak, last pushes |
+| `S18_Notifications` | Push notifications | delivery per day (sent, opened, people at the limit) |
+| `S19_Settings` | Settings → App content | branding (name, logo), notification limit, silence room, downloads quota, sit-time blocks, crisis |
 
-Regenerate with `VITE_MOCKS=1 VITE_API_URL=http://localhost:3000 pnpm dev`, sign in as `owner@wehum.app` / `correct-horse-battery` / `123456`.
+Regenerate with `VITE_MOCKS=1 VITE_API_URL=http://localhost:3000 pnpm dev`, sign in as `owner@wehum.app` / `correct-horse-battery` / `123456`. The current renders were taken against the real local backend with the demo audience (`npm run seed:demo`).
