@@ -151,6 +151,17 @@ function FullDashboard({ d }: { d: Dashboard }) {
           value={formatNumber(k.library.sessions)}
           hint={`sessions · ${k.library.programs} programs · ${k.library.themes} themes`}
         />
+        <KpiTile
+          label="Sitting in silence now"
+          value={formatNumber(k.silenceNow ?? 0)}
+          live
+          hint="in the Silence Room"
+        />
+        <KpiTile
+          label="7-day runs"
+          value={formatNumber(k.streaks7 ?? 0)}
+          hint="people who sat on each of the last 7 days"
+        />
       </div>
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="flex min-w-0 flex-col gap-5">

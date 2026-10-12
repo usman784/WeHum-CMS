@@ -54,7 +54,7 @@ const theme = (name: string, subtitle: string, iconKey: string, order: number): 
 
 const readyMedia = (kind: Media['kind'], name: string, durationSec: number | null, lufs: number | null = -16.1): Media => ({
   id: mockId('c'), kind, name, mime: kind === 'image' ? 'image/webp' : 'audio/mp4', bytes: 14 * 1024 * 1024, status: 'ready', error: null, durationSec,
-  loudnessLufs: kind === 'image' ? null : lufs, width: kind === 'image' ? 1200 : null, height: kind === 'image' ? 1200 : null, blurhash: null,
+  loudnessLufs: kind === 'image' ? null : lufs, width: kind === 'image' ? 1200 : null, height: kind === 'image' ? 1200 : null, blurhash: null, hasPreview: kind === 'audio',
   createdAt: now(), previewUrl: `https://cdn.test/${kind}/${encodeURIComponent(name)}`,
   job: { id: mockId('d'), status: 'done', progress: 100, result: { durationSec: durationSec ?? undefined, lufs, loudnessWarning: null, loop: { seamless: true, diffDb: 0.4 } }, error: null },
 }); // prettier-ignore
@@ -63,7 +63,7 @@ function session(p: Partial<Session> & { title: string }): Session {
   return {
     id: mockId('e'), slug: p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'), description: null, type: 'audio', access: 'premium', themeId: null, teacherId: null,
     tags: [], durationSec: 900, mediaId: null, youtubeId: null, coverMediaId: null, coverUrl: null, cover: null, downloadable: true, isSos: false, sosFeeling: null,
-    sosSubtitle: null, status: 'draft', publishAt: null, plays: 0, completions: 0, version: 1, createdAt: now(), updatedAt: now(), updatedBy: null, ...p,
+    sosSubtitle: null, phases: [], status: 'draft', publishAt: null, plays: 0, completions: 0, version: 1, createdAt: now(), updatedAt: now(), updatedBy: null, ...p,
   }; // prettier-ignore
 }
 
@@ -161,8 +161,8 @@ export function resetContent() {
     },
   ]; // prettier-ignore
   db.challenges = [
-    { id: mockId('3'), name: '7 days of calm', days: 7, counts: 'any', minMinutes: 3, membersOnly: true, showOnYou: true, startsAt: null, status: 'live', version: 2, createdAt: now(), participants: 1904, finished: 1180 },
-    { id: mockId('3'), name: 'Sleep week', days: 7, counts: 'sleep', minMinutes: 3, membersOnly: true, showOnYou: true, startsAt: null, status: 'draft', version: 1, createdAt: now(), participants: 0, finished: 0 },
+    { id: mockId('3'), name: '7 days of calm', days: 7, counts: 'any', minMinutes: 3, membersOnly: true, showOnYou: true, startsAt: null, blurb: null, leadTeacherId: null, badgeName: null, graceDays: 1, unlockTime: '07:00', schedule: [], status: 'live', version: 2, createdAt: now(), participants: 1904, finished: 1180 },
+    { id: mockId('3'), name: 'Sleep week', days: 7, counts: 'sleep', minMinutes: 3, membersOnly: true, showOnYou: true, startsAt: null, blurb: null, leadTeacherId: null, badgeName: null, graceDays: 1, unlockTime: '07:00', schedule: [], status: 'draft', version: 1, createdAt: now(), participants: 0, finished: 0 },
   ]; // prettier-ignore
 }
 resetContent();

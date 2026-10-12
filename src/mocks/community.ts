@@ -206,6 +206,11 @@ export const communityHandlers = [
     community.calls.push({ method: 'PUT', path: '/moderation/rules', body: value });
     return ok(community.rules);
   }),
+  http.post(u('/dedications/teacher'), async ({ request }) => {
+    const b = (await request.json()) as { text?: string };
+    if (!b.text?.trim() || b.text.length > 200) return fail(400, 'VALIDATION_FAILED', 'Between 1 and 200 characters');
+    return ok({ id: 'teacher-post', firstName: 'Raphael', text: b.text.trim() }, undefined, { status: 201 });
+  }),
   http.post(u('/moderation/bulk'), async ({ request }) => {
     if (!is('owner', 'admin', 'moderator')) return denied();
     const b = (await body(request)) as { ids: string[]; action: 'hide' | 'keep' };

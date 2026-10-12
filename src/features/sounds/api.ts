@@ -15,6 +15,8 @@ export type SoundBlock = {
   /** Postgres numeric: arrives as text, e.g. "-16.10". Null when it could not be measured. */
   loudnessLufs: string | null;
   access: 'free' | 'premium';
+  /** Bells only: where the Silence Room offers it (empty = everywhere). */
+  bellRole?: 'opening' | 'interval' | 'closing' | null;
   order: number;
   visible: boolean;
   version: number;
@@ -102,8 +104,15 @@ export const blockSchema = z.object({
   access: z.enum(['free', 'premium']),
   loopable: z.boolean(),
   visible: z.boolean(),
+  bellRole: z.enum(['opening', 'interval', 'closing']).nullable().optional(),
 });
 export type BlockValues = z.infer<typeof blockSchema>;
+export const BELL_ROLES = [
+  { value: '', label: 'Any (opening, interval and closing)' },
+  { value: 'opening', label: 'Opening bell' },
+  { value: 'interval', label: 'Interval marker' },
+  { value: 'closing', label: 'Closing sequence' },
+] as const;
 
 const LIST = qk.soundBlock.list();
 

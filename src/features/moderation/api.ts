@@ -83,6 +83,10 @@ export function useRules() {
   return useQuery({ queryKey: RULES_KEY, queryFn: () => api<ConfigDoc<ModRules>>('/v1/admin/moderation/rules').then((r) => r.data) });
 }
 
+export const teacherPostApi = {
+  post: (b: { text: string; sessionId?: string }) => api('/v1/admin/dedications/teacher', { method: 'POST', body: b }).then((r) => r.data),
+};
+
 export const modApi = {
   hide: (id: string) =>
     api<{ id: string; status: string; autoMuted: boolean }>(`/v1/admin/moderation/${id}/hide`, { method: 'POST' }).then((r) => r.data),

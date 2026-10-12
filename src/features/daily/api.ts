@@ -15,10 +15,17 @@ export type DailyMessage = {
   imageMediaId: string | null;
   durationSec: number | null;
   themeTag: string | null;
+  /** Timed lines of the interactive transcript. */
+  transcript: TranscriptLine[];
+  /** Optional video version of an audio message ("Video mode" in the app). */
+  videoMediaId: string | null;
+  /** Free messages open for everyone; premium ones for members. */
+  access: 'free' | 'premium';
   status: MessageStatus;
   version: number;
   updatedAt: string;
 };
+export type TranscriptLine = { t: number; text: string; section?: string };
 
 /** What the API stores for a day; it replaces the whole message. */
 export type MessageBody = {
@@ -29,8 +36,37 @@ export type MessageBody = {
   imageMediaId: string | null;
   durationSec: number | null;
   themeTag: string | null;
+  transcript: TranscriptLine[];
+  videoMediaId: string | null;
+  access: 'free' | 'premium';
   status: MessageStatus;
 };
+
+/** "01:15 text" per line → lines; a line starting with "# " names the section of the lines after it. */
+export function parseTranscript(src: string): { lines: TranscriptLine[]; bad: number[] } {
+  const lines: TranscriptLine[] = [];
+  const bad: number[] = [];
+  let section: string | undefined;
+  src.split('\n').forEach((raw, i) => {
+    const l = raw.trim();
+    if (!l) return;
+    if (l.startsWith('# ')) { section = l.slice(2).trim().slice(0, 40) || undefined; return; }
+    const m = /^(\d{1,2}):([0-5]\d)\s+(.+)$/.exec(l);
+    if (!m) { bad.push(i + 1); return; }
+    lines.push({ t: Number(m[1]) * 60 + Number(m[2]), text: m[3]!.slice(0, 400), ...(section ? { section } : {}) });
+  });
+  return { lines, bad };
+}
+export function formatTranscript(lines: TranscriptLine[]): string {
+  let cur: string | undefined;
+  return lines
+    .map((l) => {
+      const head = l.section && l.section !== cur ? `# ${l.section}\n` : '';
+      cur = l.section;
+      return `${head}${String(Math.floor(l.t / 60)).padStart(2, '0')}:${String(l.t % 60).padStart(2, '0')} ${l.text}`;
+    })
+    .join('\n');
+}
 
 export const TYPES: { value: MessageType; label: string }[] = [
   { value: 'audio', label: 'Audio' },
@@ -115,6 +151,9 @@ export const toBody = (m: DailyMessage, status: MessageStatus = m.status): Messa
   imageMediaId: m.imageMediaId,
   durationSec: m.durationSec,
   themeTag: m.themeTag,
+  transcript: m.transcript ?? [],
+  videoMediaId: m.videoMediaId ?? null,
+  access: m.access ?? 'premium',
   status,
 });
 

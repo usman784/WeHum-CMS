@@ -9,6 +9,7 @@ import { ConflictDialog, type ConflictField } from '../../ui/ConflictDialog';
 import { DragList } from '../../ui/DragList';
 import { IconButton } from '../../ui/IconButton';
 import { Input, Textarea } from '../../ui/Input';
+import { ListEditor } from '../../ui/ListEditor';
 import { PageHeader } from '../../ui/PageHeader';
 import { SkeletonRows } from '../../ui/Skeleton';
 import { EmptyState, ErrorState } from '../../ui/States';
@@ -181,6 +182,15 @@ export function SosPage() {
                 value={v.subtitle}
                 error={errors.subtitle}
                 onChange={(e) => form.edit({ subtitle: e.target.value })}
+              />
+              <ListEditor
+                label="Sound bed choices"
+                items={v.soundBeds ?? []}
+                max={6}
+                maxLength={30}
+                placeholder="Low brown noise"
+                addLabel="Add a sound bed"
+                onChange={(soundBeds) => form.edit({ soundBeds })}
               />
             </SectionCard>
             <SectionCard

@@ -21,7 +21,7 @@ import { toast } from '../../ui/Toast';
 import { DatePicker } from '../../ui/TimeInput';
 import { FILE_RULES, useMediaUpload } from '../media/api';
 import {
-  addDays, addMonths, dailyApi, dayState, dayTitle, daysWithoutMessage, messageBlocker, monthGrid, monthLabel, monthOf, toBody, TYPES,
+  addDays, addMonths, dailyApi, dayState, dayTitle, daysWithoutMessage, formatTranscript, messageBlocker, monthGrid, monthLabel, monthOf, parseTranscript, toBody, TYPES,
   useDailyCache, useDailyMessages,
   type DailyMessage, type MessageBody, type MessageStatus, type MessageType,
 } from './api'; // prettier-ignore
@@ -52,10 +52,13 @@ const FIELDS: ConflictField<DailyMessage>[] = [
   { key: 'status', label: 'Status' },
   { key: 'mediaId', label: 'Audio or video file', format: (v) => (v ? 'A file is attached' : 'No file') },
   { key: 'imageMediaId', label: 'Image', format: (v) => (v ? 'An image is attached' : 'No image') },
+  { key: 'access', label: 'Who can open it' },
+  { key: 'videoMediaId', label: 'Video version', format: (v) => (v ? 'A file is attached' : 'No file') },
+  { key: 'transcript', label: 'Transcript', format: (v) => `${(v as unknown[]).length} lines` },
 ];
 
 type Draft = Omit<MessageBody, 'status'>;
-const blank: Draft = { type: 'audio', title: '', text: null, mediaId: null, imageMediaId: null, durationSec: null, themeTag: null };
+const blank: Draft = { type: 'audio', title: '', text: null, mediaId: null, imageMediaId: null, durationSec: null, themeTag: null, transcript: [], videoMediaId: null, access: 'premium' };
 const draftOf = (m: DailyMessage | undefined): Draft =>
   m
     ? {
@@ -66,6 +69,9 @@ const draftOf = (m: DailyMessage | undefined): Draft =>
         imageMediaId: m.imageMediaId,
         durationSec: m.durationSec,
         themeTag: m.themeTag,
+        transcript: m.transcript ?? [],
+        videoMediaId: m.videoMediaId ?? null,
+        access: m.access ?? 'premium',
       }
     : blank;
 const sameDraft = (a: Draft, b: Draft) => JSON.stringify(a) === JSON.stringify(b);
@@ -101,6 +107,10 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
     onReady: (m) => m.durationSec && set({ durationSec: Math.round(m.durationSec) }),
   });
   const image = useMediaUpload({ kind: 'image', mediaId: draft.imageMediaId, onUploaded: (id) => set({ imageMediaId: id }) });
+  const video = useMediaUpload({ kind: 'video', mediaId: draft.videoMediaId, onUploaded: (id) => set({ videoMediaId: id }) });
+  const [tText, setTText] = useState(() => formatTranscript(draftOf(message).transcript));
+  const parsed = useMemo(() => parseTranscript(tText), [tText]);
+  useEffect(() => { setTText(formatTranscript(draftOf(message).transcript)); }, [message?.version]); // eslint-disable-line react-hooks/exhaustive-deps
   const uploading = draft.type !== 'text' && media.busy;
 
   // The saved message changed under this form (my own save, or someone else's): follow it unless there are unsaved edits.
@@ -137,6 +147,7 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
       status,
     };
     if (draft.type === 'text') body.mediaId = null;
+    if (draft.type !== 'audio') body.videoMediaId = null;
     if (!body.title) return setErrorShown(true);
     if (status !== 'draft') {
       const blocked = messageBlocker(body, uploading);
@@ -255,6 +266,19 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
           onRetry={media.retry}
         />
       )}
+      {draft.type === 'audio' ? (
+        <FileDrop
+          label="Video version (optional)"
+          hint="Shown when the person switches to Video mode"
+          rule={FILE_RULES.video}
+          state={video.state}
+          onFiles={([f]) => f && video.start(f)}
+          onPause={video.pause}
+          onResume={video.resume}
+          onCancel={video.cancel}
+          onRetry={video.retry}
+        />
+      ) : null}
       <ImagePicker
         label="Image (optional)"
         minSize={600}
@@ -263,6 +287,12 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
         onChange={image.start}
         disabled={image.busy}
         note={draft.type === 'text' ? 'Shown above the text' : 'Shown above the player'}
+      />
+      <Segmented
+        label="Who can open it"
+        value={draft.access}
+        onChange={(access: 'free' | 'premium') => set({ access })}
+        options={[{ value: 'premium', label: 'Members' }, { value: 'free', label: 'Everyone (free)' }]}
       />
       <Input
         label="Title"
@@ -318,6 +348,21 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
           </Button>
         </div>
       </fieldset>
+      {draft.type !== 'text' ? (
+        <Textarea
+          label="Transcript"
+          hint="one line per moment: 01:15 text · “# Name” starts a section"
+          rows={6}
+          value={tText}
+          error={parsed.bad.length ? `Line ${parsed.bad.join(', ')} needs a time first (mm:ss)` : undefined}
+          onChange={(e) => {
+            setTText(e.target.value);
+            const p = parseTranscript(e.target.value);
+            set({ transcript: p.lines });
+          }}
+          help={`${parsed.lines.length} lines`}
+        />
+      ) : null}
       <p className="text-xs text-text-faint">
         After its day, every message stays in the app’s “Past messages”, searchable by date and word. It does not link to a meditation.
       </p>
@@ -328,7 +373,7 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
             <Button variant="outline" className="flex-1" disabled={save.saving} onClick={() => submit('draft')}>
               Back to draft
             </Button>
-            <Button className="flex-1" loading={save.saving} disabled={!dirty || textTooLong} onClick={() => submit(status)}>
+            <Button className="flex-1" loading={save.saving} disabled={!dirty || textTooLong || parsed.bad.length > 0} onClick={() => submit(status)}>
               Save changes
             </Button>
           </>

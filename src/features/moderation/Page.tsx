@@ -8,7 +8,8 @@ import { Button } from '../../ui/Button';
 import { SectionCard } from '../../ui/Card';
 import { Checkbox } from '../../ui/Checkbox';
 import { ConflictDialog, type ConflictField } from '../../ui/ConflictDialog';
-import { Input } from '../../ui/Input';
+import { Dialog } from '../../ui/Dialog';
+import { Input, Textarea } from '../../ui/Input';
 import { NumberInput } from '../../ui/NumberInput';
 import { PageHeader } from '../../ui/PageHeader';
 import { Select } from '../../ui/Select';
@@ -21,6 +22,7 @@ import { toast } from '../../ui/Toast';
 import { useConfigForm } from '../config/useConfigForm';
 import { countryName } from '../users/api';
 import {
+  teacherPostApi,
   FILTERS,
   type GratitudeKind,
   KINDS,
@@ -462,6 +464,51 @@ function GratitudeTab() {
   );
 }
 
+/** "Post as Raphael": a dedication under his name, shown as “Raphael · Teacher” in Together. */
+function TeacherPost() {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const send = async () => {
+    setBusy(true);
+    try {
+      await teacherPostApi.post({ text: text.trim() });
+      toast.success('Posted as Raphael');
+      setText('');
+      setOpen(false);
+    } catch (e) {
+      toast.apiError(e, 'Could not post.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)}>
+        Post as Raphael
+      </Button>
+      <Dialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Post as Raphael"
+        description="Shown in the Together feed as “Raphael · Teacher”. Text only, up to 200 characters, no links."
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button loading={busy} disabled={!text.trim() || text.length > 200} onClick={() => void send()}>
+              Post
+            </Button>
+          </>
+        }
+      >
+        <Textarea label="Text" rows={4} maxLength={200} value={text} onChange={(e) => setText(e.target.value)} />
+      </Dialog>
+    </>
+  );
+}
+
 /** 14 Dedications & gratitude: the moderation queue (live), today's numbers and the rules. */
 export function ModerationPage() {
   const cache = useModCache();
@@ -473,6 +520,7 @@ export function ModerationPage() {
       <PageHeader
         title="Dedications & gratitude"
         subtitle="Written after a finished meditation and shown under each session. Text only, 200 characters, no links. Read free, post as a member."
+        actions={<TeacherPost />}
       />
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <Tabs defaultValue="dedications">

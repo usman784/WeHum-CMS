@@ -19,12 +19,14 @@ import { FileDrop } from '../../ui/FileDrop';
 import { Input } from '../../ui/Input';
 import { PageHeader } from '../../ui/PageHeader';
 import { Segmented } from '../../ui/Segmented';
+import { Select } from '../../ui/Select';
 import { SkeletonRows } from '../../ui/Skeleton';
 import { EmptyState, ErrorState } from '../../ui/States';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/Tabs';
 import { toast } from '../../ui/Toast';
 import { FILE_RULES, useMedia, useMediaUpload } from '../media/api';
 import {
+  BELL_ROLES,
   blockApi, blockLength, blockSchema, KINDS, loudness, useBlockCache, useReorderBlocks, useSoundBlocks,
   type BlockKind, type BlockValues, type SoundBlock,
 } from './api'; // prettier-ignore
@@ -54,8 +56,8 @@ function BlockDialog({ kind, block, onClose }: EditorProps) {
   const { register, handleSubmit, setValue, watch, reset, setError, formState } = useForm<BlockValues>({
     resolver: zodResolver(blockSchema),
     defaultValues: block
-      ? { name: block.name, access: block.access, loopable: block.loopable, visible: block.visible }
-      : { name: '', access: 'premium', loopable: loops, visible: true },
+      ? { name: block.name, access: block.access, loopable: block.loopable, visible: block.visible, bellRole: block.bellRole ?? null }
+      : { name: '', access: 'premium', loopable: loops, visible: true, bellRole: null },
   });
   const [newMediaId, setNewMediaId] = useState<string | null>(null);
   const file = useMediaUpload({ kind: 'audio', mediaId: newMediaId ?? block?.mediaId, onUploaded: setNewMediaId });
@@ -155,6 +157,15 @@ function BlockDialog({ kind, block, onClose }: EditorProps) {
             { value: 'premium', label: 'Premium' },
           ]}
         />
+        {kind === 'bell' ? (
+          <Select
+            label="Used as"
+            hint="in the Silence Room"
+            value={watch('bellRole') ?? ''}
+            onChange={(e) => setValue('bellRole', (e.target.value || null) as BlockValues['bellRole'], { shouldDirty: true })}
+            options={BELL_ROLES.map((r) => ({ value: r.value, label: r.label }))}
+          />
+        ) : null}
         <div className="flex flex-wrap gap-6">
           <Checkbox label="Repeats as a loop" description="The app plays it again and again without a gap." {...register('loopable')} />
           <Checkbox label="Visible in app" {...register('visible')} />
@@ -171,7 +182,7 @@ function BlockDialog({ kind, block, onClose }: EditorProps) {
           onTakeTheirs={() =>
             edit.takeTheirs((theirs) => {
               cache.saved(theirs);
-              reset({ name: theirs.name, access: theirs.access, loopable: theirs.loopable, visible: theirs.visible });
+              reset({ name: theirs.name, access: theirs.access, loopable: theirs.loopable, visible: theirs.visible, bellRole: theirs.bellRole ?? null });
               setNewMediaId(null);
             })
           }

@@ -388,6 +388,17 @@ export function UserDetailPage() {
               hint={`${u.reminder.enabled ? 'Reminder on' : 'Reminder off'} · ${u.reminder.timezone.split('/').pop()?.replace(/_/g, ' ')}`}
             />
           </div>
+          {u.streak ? (
+            <SectionCard title="Streak" description="One grace day a week keeps the run alive; a second miss in the same week resets it.">
+              <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div><dt className="text-xs text-text-muted">Current run</dt><dd className="tabular text-h3">{formatNumber(u.streak.current)} {u.streak.current === 1 ? 'day' : 'days'}</dd></div>
+                <div><dt className="text-xs text-text-muted">Record</dt><dd className="tabular text-h3">{formatNumber(u.streak.record)} {u.streak.record === 1 ? 'day' : 'days'}</dd></div>
+                <div><dt className="text-xs text-text-muted">Grace left this week</dt><dd className="tabular text-h3">{u.streak.graceLeft}</dd></div>
+                <div><dt className="text-xs text-text-muted">Weekly goal</dt><dd className="tabular text-h3">{u.streak.goalDaysDone} of {u.streak.weeklyGoal}</dd></div>
+              </dl>
+              {u.heartRateReadings ? <p className="text-sm text-text-muted">{formatNumber(u.heartRateReadings)} sits have a heart-rate reading from the phone.</p> : null}
+            </SectionCard>
+          ) : null}
           <SectionCard title="Recent meditations">
             {u.recentMeditations.length === 0 ? (
               <p className="text-sm text-text-muted">No meditations yet.</p>

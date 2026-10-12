@@ -11,14 +11,50 @@ export type MainConfig = {
   latestVersion?: { ios: string; android: string };
   storeUrls?: { ios: string; android: string };
   maintenance: boolean;
-  features: { challenges: boolean; gratitude: boolean; breathwork: boolean; milestones: boolean; intent: boolean };
+  features: {
+    challenges: boolean;
+    gratitude: boolean;
+    breathwork: boolean;
+    milestones: boolean;
+    intent: boolean;
+    /** Forgiving streaks on Today, You and the payoff. */
+    streaks: boolean;
+    /** Group sits every hour (Group meditation → cadence). */
+    hourlySits: boolean;
+    /** Heart-rate shift from Apple Health / Health Connect (device only). */
+    heartRate: boolean;
+  };
   supportEmail: string;
   defaultReminderTime: string;
   languages: string[];
 };
 /** `app_config.legal`. */
 export type LegalConfig = { privacyUrl: string; termsUrl: string; healthDisclaimer: string; deleteInactiveGuestsMonths: number };
-export type AllConfig = { main: ConfigDoc<MainConfig>; legal: ConfigDoc<LegalConfig> } & Record<string, ConfigDoc<unknown>>;
+/** `app_config.sitTimes` — the suggested blocks on the sit-time screen. */
+export type SitTimesConfig = { blocks: { time: string; label: string }[] };
+/** `app_config.downloads`. */
+export type DownloadsConfig = { quotaMb: number };
+/** `app_config.silence` — Silence Room durations (0 = open-ended), breathing cadence, "extend" minutes. */
+export type SilenceConfig = { durations: number[]; cadence: { inhaleSec: number; exhaleSec: number }; extendMin: number };
+export type CrisisAction = { type: 'call' | 'sms'; label: string; value: string };
+export type CrisisLine = { id: string; name: string; kind: string; description: string; actions: CrisisAction[] };
+export type CrisisRegion = { code: string; name: string; countries: string[]; lines: CrisisLine[] };
+/** `app_config.crisis` — the Crisis support directory, by region. */
+export type CrisisConfig = {
+  defaultRegion: string;
+  tip: string;
+  regions: CrisisRegion[];
+  international: { country: string; line: string; value: string }[];
+};
+export type ConfigKey = 'main' | 'legal' | 'sitTimes' | 'downloads' | 'silence' | 'crisis';
+export type AllConfig = {
+  main: ConfigDoc<MainConfig>;
+  legal: ConfigDoc<LegalConfig>;
+  sitTimes: ConfigDoc<SitTimesConfig>;
+  downloads: ConfigDoc<DownloadsConfig>;
+  silence: ConfigDoc<SilenceConfig>;
+  crisis: ConfigDoc<CrisisConfig>;
+} & Record<string, ConfigDoc<unknown>>;
 
 export type TeamMember = {
   id: string;
@@ -75,7 +111,7 @@ export function useAudit(f: AuditFilters) {
 }
 
 export const settingsApi = {
-  saveConfig: <T>(key: 'main' | 'legal', value: T, version: number) =>
+  saveConfig: <T>(key: ConfigKey, value: T, version: number) =>
     api<ConfigDoc<T>>(`/v1/admin/config/${key}`, { method: 'PUT', body: value, ifMatch: version }).then((r) => r.data),
   invite: (b: { email: string; name?: string; role: Role }) =>
     api<TeamMember>('/v1/admin/team/invite', { method: 'POST', body: b }).then((r) => r.data),
@@ -87,7 +123,7 @@ export const settingsApi = {
 export function useSettingsCache() {
   const qc = useQueryClient();
   return {
-    configSaved: <T>(key: 'main' | 'legal', doc: ConfigDoc<T>) =>
+    configSaved: <T>(key: ConfigKey, doc: ConfigDoc<T>) =>
       qc.setQueryData<AllConfig>(CONFIG_KEY, (old) => (old ? ({ ...old, [key]: doc } as AllConfig) : old)),
     teamChanged: () => void qc.invalidateQueries({ queryKey: qk.admin.all }),
   };

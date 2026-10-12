@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import type { Funnel, Retention, Trends } from '../features/analytics/api';
 import type { ConfigDoc } from '../features/config/useConfigForm';
-import type { AuditEntry, LegalConfig, MainConfig, TeamMember } from '../features/settings/api';
+import type { AuditEntry, ConfigKey, CrisisConfig, DownloadsConfig, LegalConfig, MainConfig, SilenceConfig, SitTimesConfig, TeamMember } from '../features/settings/api';
 import { session } from '../lib/session';
 import { db } from './content';
 import { body, fail, ok } from './overview';
@@ -21,6 +21,10 @@ const versionOf = (h: string | null) => Number(h?.match(/\d+/)?.[0] ?? NaN);
 export const insights = {
   main: null as unknown as ConfigDoc<MainConfig>,
   legal: null as unknown as ConfigDoc<LegalConfig>,
+  sitTimes: null as unknown as ConfigDoc<SitTimesConfig>,
+  downloads: null as unknown as ConfigDoc<DownloadsConfig>,
+  silence: null as unknown as ConfigDoc<SilenceConfig>,
+  crisis: null as unknown as ConfigDoc<CrisisConfig>,
   team: [] as TeamMember[],
   audit: [] as AuditEntry[],
   calls: [] as { method: string; path: string; body?: unknown }[],
@@ -92,7 +96,7 @@ export function resetInsights() {
     value: {
       minVersion: { ios: '1.0.0', android: '1.0.0' },
       maintenance: false,
-      features: { challenges: false, gratitude: false, breathwork: false, milestones: false, intent: true },
+      features: { challenges: false, gratitude: false, breathwork: false, milestones: false, intent: true, streaks: true, hourlySits: false, heartRate: false },
       supportEmail: 'support@wehum.app',
       defaultReminderTime: '07:00',
       languages: ['en'],
@@ -107,6 +111,23 @@ export function resetInsights() {
       termsUrl: 'https://wehum.app/terms',
       healthDisclaimer: 'Not medical advice.',
       deleteInactiveGuestsMonths: 12,
+    },
+  };
+  insights.sitTimes = {
+    key: 'sitTimes', version: 1, updatedAt: null,
+    value: { blocks: [{ time: '06:30', label: 'Dawn Stillness' }, { time: '07:00', label: 'Morning Prime' }, { time: '12:30', label: 'Midday Reset' }, { time: '21:00', label: 'Night Decompress' }] },
+  };
+  insights.downloads = { key: 'downloads', version: 1, updatedAt: null, value: { quotaMb: 2400 } };
+  insights.silence = { key: 'silence', version: 1, updatedAt: null, value: { durations: [5, 10, 15, 20, 30, 45, 60, 0], cadence: { inhaleSec: 4, exhaleSec: 6 }, extendMin: 5 } };
+  insights.crisis = {
+    key: 'crisis', version: 1, updatedAt: null,
+    value: {
+      defaultRegion: 'US', tip: 'Place both feet flat on the floor and take slow, extended exhales.',
+      regions: [{
+        code: 'US', name: 'United States & Canada', countries: ['US', 'CA'],
+        lines: [{ id: '988', name: '988 Suicide & Crisis Lifeline', kind: 'Voice & SMS', description: 'Confidential support, free, 24/7.', actions: [{ type: 'call', label: 'Call 988', value: '988' }, { type: 'sms', label: 'Text 988', value: '988' }] }],
+      }],
+      international: [{ country: 'European Union', line: 'Universal emergency services', value: '112' }],
     },
   };
   insights.team = [
@@ -200,7 +221,7 @@ const periodOf = (request: Request) => {
   const p = Number(new URL(request.url).searchParams.get('period') ?? 14);
   return [7, 14, 30, 90].includes(p) ? p : null;
 };
-const putConfig = (key: 'main' | 'legal') =>
+const putConfig = (key: ConfigKey) =>
   http.put(u(`/config/${key}`), async ({ request }) => {
     if (!is('owner', 'admin')) return denied();
     const doc = insights[key] as ConfigDoc<unknown>;
@@ -236,10 +257,14 @@ export const insightsHandlers = [
       ...insights.main,
       value: { ...insights.main.value, features: { ...insights.main.value.features, challenges: db.flags.challenges } },
     };
-    return ok({ main, legal: insights.legal });
+    return ok({ main, legal: insights.legal, sitTimes: insights.sitTimes, downloads: insights.downloads, silence: insights.silence, crisis: insights.crisis });
   }),
   putConfig('main'),
   putConfig('legal'),
+  putConfig('sitTimes'),
+  putConfig('downloads'),
+  putConfig('silence'),
+  putConfig('crisis'),
   http.get(u('/team'), () => (is('owner', 'admin') ? ok(insights.team) : denied())),
   http.post(u('/team/invite'), async ({ request }) => {
     const b = (await body(request)) as { email: string; name?: string; role: TeamMember['role'] };

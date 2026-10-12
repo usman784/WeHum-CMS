@@ -19,6 +19,10 @@ export type DashboardKpis = {
   inTrial: number;
   mrrUsd: number;
   library: { sessions: number; programs: number; themes: number };
+  /** People sitting in the Silence Room right now. */
+  silenceNow?: number;
+  /** People who sat on each of the last 7 days. */
+  streaks7?: number;
   founding?: { taken: number; cap: number; open: boolean };
   moderationOpen?: number;
 };

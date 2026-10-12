@@ -359,7 +359,10 @@ describe('Programs screen', () => {
 
 describe('challenge helpers', () => {
   it('schema: numbers typed as text are accepted, limits are explained', () => {
-    const base = { name: 'Calm', days: '7', counts: 'any', minMinutes: '3', membersOnly: true, showOnYou: true };
+    const base = {
+      name: 'Calm', days: '7', counts: 'any', minMinutes: '3', membersOnly: true, showOnYou: true,
+      blurb: '', leadTeacherId: '', badgeName: '', graceDays: '1', unlockTime: '07:00', schedule: [],
+    };
     expect(challengeSchema.parse(base)).toMatchObject({ days: 7, minMinutes: 3 });
     expect(challengeSchema.safeParse({ ...base, days: '0' }).error?.issues[0]?.message).toBe('At least 1 day');
     expect(challengeSchema.safeParse({ ...base, days: '400' }).error?.issues[0]?.message).toBe('At most 365 days');
@@ -385,7 +388,7 @@ describe('Challenges screen', () => {
     expect(await screen.findByText(/hidden in the app while the “Challenges” feature is switched off/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open Settings' })).toHaveAttribute('href', '/settings');
     expect(within(editor()).getByLabelText('Name')).toHaveValue('7 days of calm');
-    expect(within(editor()).getByText('Missing a day never resets progress. No streaks, no grace days.')).toBeInTheDocument();
+    expect(within(editor()).getByText(/Missing a day never resets progress: a grace day is used first/)).toBeInTheDocument();
     expect(await a11yViolations()).toEqual([]);
   });
 

@@ -5,7 +5,7 @@ import { disconnectSocket } from '../../lib/socket';
 import { daily } from '../../mocks/daily';
 import { connectFakeSocket, findToast, h1, openApp } from '../../test/app';
 import { a11yViolations } from '../../test/render';
-import { dayLabel, groupProblem } from './api';
+import { dayLabel, groupProblem, withDefaults } from './api';
 
 vi.mock('socket.io-client', async () => ({ io: (await import('../../test/fake-socket')).fakeIo }));
 afterEach(() => disconnectSocket());
@@ -16,8 +16,8 @@ const time = () => screen.getByLabelText(/Start time/);
 describe('group helpers', () => {
   it('dayLabel names the UTC day; groupProblem checks the time', () => {
     expect(dayLabel('2026-10-05')).toBe('Mon, Oct 5');
-    expect(groupProblem({ startUtc: '16:00', lengthMin: 30, lobbyOpenMin: 15, reminderMin: 10 })).toBeNull();
-    expect(groupProblem({ startUtc: '', lengthMin: 30, lobbyOpenMin: 15, reminderMin: 10 })).toMatch(/hours and minutes/);
+    expect(groupProblem(withDefaults({ startUtc: '16:00', lengthMin: 30, lobbyOpenMin: 15, reminderMin: 10 }))).toBeNull();
+    expect(groupProblem(withDefaults({ startUtc: '', lengthMin: 30, lobbyOpenMin: 15, reminderMin: 10 }))).toMatch(/hours and minutes/);
   });
 });
 
@@ -49,6 +49,35 @@ describe('Group meditation screen', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
     expect(await findToast('Group meditation saved')).toBeInTheDocument();
     expect(daily.group).toMatchObject({ version: 2, value: { startUtc: '18:30', lengthMin: 45, lobbyOpenMin: 15, reminderMin: 10 } });
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
+  it('hourly sits: window, intentions and the focus card are saved with the rest', async () => {
+    openApp('/group-meditation');
+    await waitFor(() => expect(time()).toHaveValue('16:00'));
+    await user.selectOptions(screen.getByLabelText('Group sits'), 'hourly');
+    await user.selectOptions(screen.getByLabelText('First hour (UTC)'), '8');
+    await user.selectOptions(screen.getByLabelText('Last hour (UTC)'), '20');
+    await user.click(screen.getByRole('button', { name: 'Add an intention' }));
+    await user.type(screen.getByLabelText('Intentions 4'), 'Gentle focus');
+    await user.type(screen.getByLabelText("Today's focus: title"), 'The Midday Coherence Sit');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await findToast('Group meditation saved')).toBeInTheDocument();
+    expect(daily.group.value).toMatchObject({
+      cadence: 'hourly',
+      hourly: { fromHourUtc: 8, toHourUtc: 20 },
+      focus: { title: 'The Midday Coherence Sit' },
+    });
+    expect(daily.group.value.intentions).toContain('Gentle focus');
+  });
+
+  it('an hourly window that ends before it starts cannot be saved', async () => {
+    openApp('/group-meditation');
+    await waitFor(() => expect(time()).toHaveValue('16:00'));
+    await user.selectOptions(screen.getByLabelText('Group sits'), 'hourly');
+    await user.selectOptions(screen.getByLabelText('First hour (UTC)'), '20');
+    await user.selectOptions(screen.getByLabelText('Last hour (UTC)'), '8');
+    expect(await screen.findByText('The last hour must not be before the first.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
   });
 

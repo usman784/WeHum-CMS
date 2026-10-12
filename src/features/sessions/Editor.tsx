@@ -27,7 +27,7 @@ import { ErrorState } from '../../ui/States';
 import { Switch } from '../../ui/Switch';
 import { toast } from '../../ui/Toast';
 import { Tooltip } from '../../ui/Tooltip';
-import { FILE_RULES, useMediaUpload } from '../media/api';
+import { FILE_RULES, makePreview, useMediaUpload } from '../media/api';
 import { useTeachers } from '../teachers/api';
 import { useThemes } from '../themes/api';
 import {
@@ -35,6 +35,7 @@ import {
   type Session, type SessionDetail, type SessionInput, type SessionType, type SessionValues, type YoutubeInfo,
 } from './api'; // prettier-ignore
 import { lengthLabel, STATUS } from './display';
+import { mmss, parseMmss } from './api';
 
 const TYPES: { value: SessionType; label: string; sub: string; icon: typeof Film }[] = [
   { value: 'audio', label: 'Audio', sub: 'Upload a finished MP3, WAV or M4A', icon: AudioLines },
@@ -104,6 +105,7 @@ function SessionForm({ session }: FormProps) {
   const type = watch('type');
   const access = watch('access');
   const description = watch('description');
+  const phases = watch('phases') ?? [];
   const [mediaId, youtubeId, coverMediaId, coverUrl] = watch(['mediaId', 'youtubeId', 'coverMediaId', 'coverUrl']);
 
   const others = useEditingPresence('session', session?.id);
@@ -494,6 +496,43 @@ function SessionForm({ session }: FormProps) {
             />
           </SectionCard>
 
+          <SectionCard title="Phases" description="Chapters in the player: “Phase 2 · Anchoring breath”. Optional, up to 12." className="gap-3 p-[22px]">
+            {phases.map((p, i) => (
+              <div key={i} className="grid grid-cols-[90px_minmax(0,1fr)_auto] items-end gap-2.5">
+                <Input
+                  label="Starts at"
+                  size="sm"
+                  defaultValue={mmss(p.atSec)}
+                  onBlur={(ev) => {
+                    const sec = parseMmss(ev.target.value);
+                    if (sec === null) return void (ev.target.value = mmss(p.atSec));
+                    setValue('phases', phases.map((x, j) => (j === i ? { ...x, atSec: sec } : x)), { shouldDirty: true });
+                  }}
+                />
+                <Input
+                  label="Name"
+                  size="sm"
+                  value={p.title}
+                  maxLength={60}
+                  onChange={(ev) => setValue('phases', phases.map((x, j) => (j === i ? { ...x, title: ev.target.value } : x)), { shouldDirty: true })}
+                />
+                <Button variant="ghost" size="sm" onClick={() => setValue('phases', phases.filter((_, j) => j !== i), { shouldDirty: true })}>
+                  Remove
+                </Button>
+              </div>
+            ))}
+            {phases.length < 12 ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start"
+                onClick={() => setValue('phases', [...phases, { atSec: (phases.at(-1)?.atSec ?? -180) + 180, title: '' }], { shouldDirty: true })}
+              >
+                + Add a phase
+              </Button>
+            ) : null}
+          </SectionCard>
+
           <SectionCard
             title="SoS"
             description="Used when this meditation is a tile on the “How can I help?” screen."
@@ -533,6 +572,30 @@ function SessionForm({ session }: FormProps) {
               </span>
             ) : null}
           </SectionCard>
+
+          {type === 'audio' ? (
+            <SectionCard title="30-second preview" description="Free listeners can hear the first 30 seconds of a premium meditation, then see the membership sheet." className="p-[22px]">
+              {access !== 'premium' ? (
+                <p className="text-body text-text-body">Only premium meditations have a preview.</p>
+              ) : !file.media || file.media.status !== 'ready' ? (
+                <p className="text-body text-text-muted">Upload the audio first. The clip is made when it is processed.</p>
+              ) : file.media.hasPreview ? (
+                <p className="text-body font-semibold text-success-text">Preview clip ready</p>
+              ) : (
+                <>
+                  <p className="text-body text-text-muted">No clip yet (older upload). Until it exists, the app stops the full file at 30 seconds.</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="self-start"
+                    onClick={() => void makePreview(file.media!.id).then(() => toast.success('Making the preview clip…')).catch((err) => toast.apiError(err))}
+                  >
+                    Generate the 30-second clip
+                  </Button>
+                </>
+              )}
+            </SectionCard>
+          ) : null}
 
           <SectionCard title="Access" className="p-[22px]">
             {type === 'youtube' ? (

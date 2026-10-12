@@ -13,7 +13,8 @@ import { Badge, StatusText } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
 import { ConflictDialog, type ConflictField } from '../../ui/ConflictDialog';
-import { Input } from '../../ui/Input';
+import { Input, Textarea } from '../../ui/Input';
+import { useTeachers } from '../teachers/api';
 import { PageHeader } from '../../ui/PageHeader';
 import { Select } from '../../ui/Select';
 import { SkeletonRows } from '../../ui/Skeleton';
@@ -40,7 +41,10 @@ const FIELDS: ConflictField<Challenge>[] = [
   { key: 'membersOnly', label: 'Members only' },
   { key: 'showOnYou', label: 'Show on the You tab' },
 ];
-const blank: ChallengeInput = { name: '', days: 7, counts: 'any', minMinutes: 3, membersOnly: true, showOnYou: true };
+const blank: ChallengeInput = {
+  name: '', days: 7, counts: 'any', minMinutes: 3, membersOnly: true, showOnYou: true,
+  blurb: '', leadTeacherId: '', badgeName: '', graceDays: 1, unlockTime: '07:00', schedule: [],
+};
 const toForm = (c: Challenge): ChallengeInput => ({
   name: c.name,
   days: c.days,
@@ -48,6 +52,12 @@ const toForm = (c: Challenge): ChallengeInput => ({
   minMinutes: c.minMinutes,
   membersOnly: c.membersOnly,
   showOnYou: c.showOnYou,
+  blurb: c.blurb ?? '',
+  leadTeacherId: c.leadTeacherId ?? '',
+  badgeName: c.badgeName ?? '',
+  graceDays: c.graceDays ?? 1,
+  unlockTime: c.unlockTime ?? '07:00',
+  schedule: c.schedule ?? [],
 });
 
 function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null; onCreated: (c: Challenge) => void }) {
@@ -59,6 +69,9 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
   useEffect(() => reset(challenge ? toForm(challenge) : blank), [challenge?.version]); // eslint-disable-line react-hooks/exhaustive-deps
   const [busy, setBusy] = useState(false);
   const minMinutes = Number(watch('minMinutes')) || 3;
+  const teachers = useTeachers();
+  const schedule = watch('schedule') ?? [];
+  const days = Number(watch('days')) || 0;
   const counts = watch('counts');
 
   const onError = (e: unknown) => {
@@ -124,7 +137,62 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
           checked={watch('showOnYou')}
           onCheckedChange={(v) => setValue('showOnYou', v, { shouldDirty: true })}
         />
-        <p className="text-xs text-text-faint">Missing a day never resets progress. No streaks, no grace days.</p>
+        <Textarea label="About" hint="shown on the challenge screen" rows={3} maxLength={600} value={watch('blurb')} error={e.blurb?.message} {...register('blurb')} />
+        <Select
+          label="Led by"
+          size="sm"
+          placeholder="Nobody"
+          options={(teachers.data ?? []).map((t) => ({ value: t.id, label: t.name }))}
+          {...register('leadTeacherId')}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <Input label="Day unlocks at" hint="each person's time" size="sm" type="time" error={e.unlockTime?.message} {...register('unlockTime')} />
+          <Input label="Grace days" size="sm" inputMode="numeric" error={e.graceDays?.message} {...register('graceDays')} />
+        </div>
+        <Input label="Badge for finishers" size="sm" placeholder="Finisher" error={e.badgeName?.message} {...register('badgeName')} />
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm font-semibold">Schedule</legend>
+          {schedule.map((d, i) => (
+            <div key={i} className="grid grid-cols-[34px_minmax(0,1fr)_64px] items-end gap-2">
+              <span className="pb-2.5 text-sm font-semibold text-text-muted">{i + 1}</span>
+              <Input
+                label={`Day ${i + 1} title`}
+                hideLabel
+                size="sm"
+                value={d.title}
+                maxLength={80}
+                onChange={(ev) => setValue('schedule', schedule.map((x, j) => (j === i ? { ...x, title: ev.target.value } : x)), { shouldDirty: true })}
+              />
+              <Input
+                label={`Day ${i + 1} minutes`}
+                hideLabel
+                size="sm"
+                inputMode="numeric"
+                value={String(d.minutes)}
+                onChange={(ev) => setValue('schedule', schedule.map((x, j) => (j === i ? { ...x, minutes: Number(ev.target.value) || 0 } : x)), { shouldDirty: true })}
+              />
+            </div>
+          ))}
+          <div className="flex gap-2">
+            {schedule.length < Math.min(days, 365) ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setValue('schedule', [...schedule, { day: schedule.length + 1, title: '', minutes: 10, summary: '' }], { shouldDirty: true })}
+              >
+                + Add day {schedule.length + 1}
+              </Button>
+            ) : null}
+            {schedule.length ? (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setValue('schedule', schedule.slice(0, -1), { shouldDirty: true })}>
+                Remove last
+              </Button>
+            ) : null}
+          </div>
+          <p className="text-xs text-text-faint">Days without a title show as “Day N”. Minutes are shown on the schedule.</p>
+        </fieldset>
+        <p className="text-xs text-text-faint">Missing a day never resets progress: a grace day is used first and the cohort keeps its pace.</p>
         <div className="flex gap-2.5">
           {challenge && challenge.status !== 'live' ? (
             <Button

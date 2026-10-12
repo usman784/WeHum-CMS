@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/Tabs';
 import { TimeInput } from '../../ui/TimeInput';
 import { toast } from '../../ui/Toast';
 import { useConfigForm } from '../config/useConfigForm';
+import { AppContent } from './Content';
 import {
   actionLabel,
   ROLE_INFO,
@@ -41,6 +42,7 @@ const TABS = [
   { value: 'team', label: 'Team & roles' },
   { value: 'membership', label: 'Membership' },
   { value: 'releases', label: 'App & releases' },
+  { value: 'content', label: 'App content' },
   { value: 'legal', label: 'Legal & privacy' },
   { value: 'audit', label: 'Audit log' },
 ] as const;
@@ -84,6 +86,9 @@ const FEATURES: { key: keyof MainConfig['features']; label: string; description:
   { key: 'breathwork', label: 'Breathwork', description: 'Breathwork sessions as their own section.' },
   { key: 'milestones', label: 'Milestones', description: 'Progress milestones (7 days, 30 days …).' },
   { key: 'intent', label: 'Intent question', description: 'Ask “what brings you here?” during onboarding.' },
+  { key: 'streaks', label: 'Streaks', description: 'Forgiving streak with one grace day a week on Today, You and the payoff.' },
+  { key: 'hourlySits', label: 'Hourly sits', description: 'Group sits every hour inside the window set in Group meditation.' },
+  { key: 'heartRate', label: 'Heart-rate shift', description: 'Show the heart-rate change when the person connects Apple Health or Health Connect.' },
 ];
 
 function Row({ children }: { children: ReactNode }) {
@@ -700,6 +705,9 @@ export function SettingsPage() {
             </TabsContent>
             <TabsContent value="releases">
               <Releases form={main} />
+            </TabsContent>
+            <TabsContent value="content">
+              <AppContent />
             </TabsContent>
             <TabsContent value="legal">
               <Legal form={legal} />

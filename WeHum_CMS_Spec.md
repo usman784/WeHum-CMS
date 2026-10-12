@@ -369,19 +369,19 @@ Legend: every screen has loading skeleton, empty state, error state with retry, 
 | # | Where | Control | Feeds (app screen) | API |
 |---|---|---|---|---|
 | S1 | Settings → App & releases | Flags: `streaks`, `hourlySits`, `heartRate` (+ existing `challenges`) | Today streak strip, hourly sits, heart-rate toggle | `PUT /v1/admin/config/main` |
-| S2 | Settings → **Sit times** (new tab) | Suggested blocks (time + label), reorder | Sit-time screen "Suggested prime blocks" | `config/sitTimes` |
-| S3 | Settings → **Downloads** (new card on General) | Storage quota (MB) | Downloads manager | `config/downloads` |
+| S2 | Settings → **App content** → Sit times | Suggested blocks (time + label), up to six | Sit-time screen "Suggested prime blocks" | `config/sitTimes` |
+| S3 | Settings → **App content** → Downloads | Storage quota (MB) | Downloads manager | `config/downloads` |
 | S4 | Session editor → **Phases** | List of `{ at (mm:ss), title }`, drag reorder, validation inside duration | Player "Phase 2 · …" | `PATCH sessions/{id}` |
 | S5 | Session editor → **Preview clip** | Shows preview status (Ready / Not generated), "Generate 30 s preview" | 30 s preview sheet | media job |
 | S6 | Daily messages → editor | **Transcript** editor (timed lines `00:00 text`, section marker), **Video file** upload, **Access** Free / Premium | Daily message + transcript, archive lock | `PUT daily-messages/{date}` |
 | S7 | Sounds → Bells tab | **Role** per bell: Opening / Interval / Closing | Silence Room "Acoustic intervals & signals" | `PATCH sound-blocks/{id}` |
 | S8 | Group meditation | **Cadence** Daily / Hourly (window from–to UTC, length), **Intentions** (3 options), **Today's focus** (title, summary, quote, attribution), doors-open seconds; local-time preview | Lobby, Next sit countdown, Together | `PUT /v1/admin/group` |
-| S9 | Silence Room (new card on Group meditation) | Durations list incl. Open-ended, cadence (inhale/exhale s), extend minutes | Silence Room | `config/silence` |
-| S10 | SoS | **Duration** per tile, **sound beds** list, **Crisis directory**: regions (name, countries), lines (name, kind, description, call/text actions), international list, grounding tip, default region | SoS + Crisis directory | `config/sos`, `config/crisis` |
+| S9 | Settings → **App content** → Silence Room | Durations incl. Open-ended, cadence (inhale/exhale s), extend minutes | Silence Room | `config/silence` |
+| S10 | SoS → header card: **Sound bed choices**; Settings → **App content** → **Crisis directory** | Sound beds list; regions (name, countries), lines (name, kind, description, call/text actions), international list, grounding tip, default region. Tile durations come from each tile's meditation | SoS + Crisis directory | `config/sos`, `config/crisis` |
 | S11 | Challenges | Cohort sprint editor: blurb, lead teacher, days table (title, minutes, summary), unlock time, grace days, badge name, start date; KPIs: in cohort, regions, finish rate | Challenge detail, Library "Multi-part challenges" | `/v1/admin/challenges` |
-| S12 | Moderation → Dedications | **Post as Raphael** composer (text, session), teacher badge | Together feed "Raphael · Teacher" | `POST /v1/admin/dedications/teacher` |
+| S12 | Dedications & gratitude → header button | **Post as Raphael** (text ≤ 200; attached to the newest live meditation), shown as "Raphael · Teacher" | Together feed | `POST /v1/admin/dedications/teacher` (owner, admin, moderator) |
 | S13 | Users → detail | Streak card: current, record, weekly goal (read-only); heart-rate opt-in status | support | `GET /v1/admin/users/{id}` |
-| S14 | Dashboard | Tile "Sitting in silence now" and "Streaks ≥ 7 days" | – | dashboard KPIs |
+| S14 | Dashboard | Tiles "Sitting in silence now" and "7-day runs" (people who sat on each of the last 7 days) | – | `/v1/admin/dashboard` `kpis.silenceNow`, `kpis.streaks7` |
 
 Copy follows the app: "sit / sitting", "Disciplines" (route and API stay `themes`).
 
@@ -510,8 +510,8 @@ Copy follows the app: "sit / sitting", "Disciplines" (route and API stay `themes
 ### 15b. Stitch phases (order = `roadmap/wehum-roadmap.html`)
 | Phase | Sprint | CMS scope | Exit tests |
 |---|---|---|---|
-| **S1** | 19–30 Oct | Flags (S1), Sit times tab (S2), Downloads quota (S3) | Settings e2e; app config reaches `bootstrap` |
-| **S2** | 2–6 Nov | Session phases + preview status (S4, S5) | editor tests, 409 conflict |
+| **S1** | 19–30 Oct | Flags (S1), App content: Sit times (S2), Downloads quota (S3) | Settings e2e; app config reaches `bootstrap` |
+| **S2** | 2–6 Nov | Session phases + 30-second preview status (S4, S5) | editor tests, 409 conflict |
 | **S3** | 9–20 Nov | Daily-message transcript / video / access (S6), bell roles (S7), group cadence + intentions + focus (S8), silence card (S9) | e2e: change cadence → `config:changed` → app |
 | **S4** | 23–27 Nov | SoS durations + crisis directory (S10) | region editor tests, validation |
 | **S5** | 30 Nov–4 Dec | Post as Raphael (S12) | moderation role matrix |

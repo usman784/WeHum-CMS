@@ -13,6 +13,13 @@ export type Challenge = {
   membersOnly: boolean;
   showOnYou: boolean;
   startsAt: string | null;
+  /** Cohort sprint content (challenge detail screen). */
+  blurb: string | null;
+  leadTeacherId: string | null;
+  badgeName: string | null;
+  graceDays: number;
+  unlockTime: string;
+  schedule: { day: number; title: string; minutes: number; summary: string; sessionId?: string | null }[];
   status: 'draft' | 'scheduled' | 'live' | 'archived';
   version: number;
   createdAt: string;
@@ -42,6 +49,20 @@ export const challengeSchema = z.object({
     .max(120, 'At most 120 minutes'),
   membersOnly: z.boolean(),
   showOnYou: z.boolean(),
+  blurb: z.string().trim().max(600, 'At most 600 characters').transform((v) => v || null),
+  leadTeacherId: z.string().transform((v) => v || null),
+  badgeName: z.string().trim().max(60, 'At most 60 characters').transform((v) => v || null),
+  graceDays: z.coerce.number({ invalid_type_error: 'Enter a number' }).int().min(0, 'At least 0').max(7, 'At most 7'),
+  unlockTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use hours and minutes'),
+  schedule: z.array(
+    z.object({
+      day: z.number().int().min(1),
+      title: z.string().trim().min(1, 'Name the day').max(80),
+      minutes: z.coerce.number().int().min(1, 'At least 1').max(180),
+      summary: z.string().trim().max(240),
+      sessionId: z.string().uuid().nullable().optional(),
+    }),
+  ).max(365),
 });
 export type ChallengeInput = z.input<typeof challengeSchema>;
 export type ChallengeValues = z.output<typeof challengeSchema>;

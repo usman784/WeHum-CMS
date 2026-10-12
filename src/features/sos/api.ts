@@ -8,6 +8,8 @@ export const MAX_TILES = 8;
 export type SosValue = {
   title: string;
   subtitle: string;
+  /** The “Sound bed baseline” choices under the tiles (e.g. Low brown noise, Delta wave, None). */
+  soundBeds?: string[];
   help: { title: string; body: string; bookingUrl: string; contactEmail: string };
 };
 export type SosTile = {
@@ -44,6 +46,7 @@ export function sosErrors(v: SosValue): SosErrors {
 const tidy = (v: SosValue): SosValue => ({
   title: v.title.trim(),
   subtitle: v.subtitle.trim(),
+  soundBeds: (v.soundBeds ?? []).map((b) => b.trim()).filter(Boolean),
   help: {
     title: v.help.title.trim(),
     body: v.help.body.trim(),

@@ -48,6 +48,10 @@ export type UserDetail = {
     groupMeditations: number;
     avgMinutes: number | null;
   };
+  /** Forgiving streak (current run, record, grace day left this week, weekly goal). Null when streaks are off. */
+  streak?: { current: number; record: number; graceLeft: number; weeklyGoal: number; goalDaysDone: number };
+  /** How many sits carry a heart-rate reading from the phone. */
+  heartRateReadings?: number;
   recentMeditations: { id: string; session: string | null; kind: string; startedAt: string; durationSec: number | null }[];
   dedications: { id: string; text: string; status: string; holdingCount: number; createdAt: string; session: string }[];
   membership: Membership & {

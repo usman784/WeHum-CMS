@@ -5,6 +5,9 @@ import { Button } from '../../ui/Button';
 import { Card, SectionCard } from '../../ui/Card';
 import { ConflictDialog, type ConflictField } from '../../ui/ConflictDialog';
 import { PageHeader } from '../../ui/PageHeader';
+import { ListEditor } from '../../ui/ListEditor';
+import { Input } from '../../ui/Input';
+import { NumberInput } from '../../ui/NumberInput';
 import { Select } from '../../ui/Select';
 import { SkeletonRows } from '../../ui/Skeleton';
 import { EmptyState, ErrorState } from '../../ui/States';
@@ -18,7 +21,13 @@ const FIELDS: ConflictField<GroupValue>[] = [
   { key: 'lengthMin', label: 'Length used for the group start', format: (v) => `${String(v)} min` },
   { key: 'lobbyOpenMin', label: 'Open the lobby before the start', format: (v) => `${String(v)} min` },
   { key: 'reminderMin', label: 'Reminder before the start', format: (v) => `${String(v)} min` },
+  { key: 'cadence', label: 'How often', format: (v) => (v === 'hourly' ? 'Every hour' : 'Once a day') },
+  { key: 'hourly', label: 'Hourly window (UTC)', format: (v) => `${(v as GroupValue['hourly']).fromHourUtc}:00–${(v as GroupValue['hourly']).toHourUtc}:00 · ${(v as GroupValue['hourly']).lengthMin} min` },
+  { key: 'intentions', label: 'Intentions', format: (v) => (v as string[]).join(' · ') || 'none' },
+  { key: 'focus', label: "Today's focus", format: (v) => (v as GroupValue['focus']).title || 'hidden' },
+  { key: 'doorsOpenSec', label: 'Doors open before the start', format: (v) => `${String(v)} s` },
 ];
+const HOURS = Array.from({ length: 24 }, (_, h) => ({ value: String(h), label: `${String(h).padStart(2, '0')}:00` }));
 
 const minutes = (list: number[], current: number) =>
   [...new Set([...list, current])].sort((a, b) => a - b).map((n) => ({ value: String(n), label: `${n} min` }));
@@ -66,6 +75,44 @@ export function GroupMeditationPage() {
       ) : (
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="flex flex-col gap-5">
+            <SectionCard title="How often" size="h3">
+              <Select
+                label="Group sits"
+                value={v.cadence}
+                onChange={(e) => form.edit({ cadence: e.target.value as GroupValue['cadence'] })}
+                options={[
+                  { value: 'daily', label: 'Once a day, at the start time below' },
+                  { value: 'hourly', label: 'Every hour, inside a window' },
+                ]}
+              />
+              {v.cadence === 'hourly' ? (
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Select
+                    label="First hour (UTC)"
+                    value={String(v.hourly.fromHourUtc)}
+                    onChange={(e) => form.edit({ hourly: { ...v.hourly, fromHourUtc: Number(e.target.value) } })}
+                    options={HOURS}
+                  />
+                  <Select
+                    label="Last hour (UTC)"
+                    value={String(v.hourly.toHourUtc)}
+                    onChange={(e) => form.edit({ hourly: { ...v.hourly, toHourUtc: Number(e.target.value) } })}
+                    options={HOURS}
+                  />
+                  <Select
+                    label="Length"
+                    value={String(v.hourly.lengthMin)}
+                    onChange={(e) => form.edit({ hourly: { ...v.hourly, lengthMin: Number(e.target.value) as GroupValue['hourly']['lengthMin'] } })}
+                    options={LENGTHS.map((n) => ({ value: String(n), label: `${n} min` }))}
+                  />
+                  <p className="text-sm text-text-muted sm:col-span-3">
+                    Each hourly sit plays the Meditation of the Day in this length. The Hourly sits flag in Settings → App &amp; releases turns the
+                    app side on.
+                  </p>
+                </div>
+              ) : null}
+            </SectionCard>
+
             <SectionCard title="When the Meditation of the Day starts together" size="h3">
               <div className="grid gap-4 sm:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
                 <TimeInput
@@ -135,6 +182,20 @@ export function GroupMeditationPage() {
                 options={minutes(REMINDER, v.reminderMin)}
               />
               <p className="text-sm text-text-muted">Reminders go only to people who tapped “Remind me”.</p>
+            </SectionCard>
+            <SectionCard title="Before the sit" description="Shown on the lobby and the countdown screens.">
+              <ListEditor
+                label="Intentions"
+                items={v.intentions}
+                max={6}
+                addLabel="Add an intention"
+                placeholder="Calm under pressure"
+                onChange={(intentions) => form.edit({ intentions })}
+              />
+              <Input label="Today's focus: title" value={v.focus.title} maxLength={60} onChange={(e) => form.edit({ focus: { ...v.focus, title: e.target.value } })} />
+              <Input label="Summary" value={v.focus.summary} maxLength={120} onChange={(e) => form.edit({ focus: { ...v.focus, summary: e.target.value } })} />
+              <Input label="Quote" value={v.focus.quote} maxLength={200} onChange={(e) => form.edit({ focus: { ...v.focus, quote: e.target.value } })} />
+              <NumberInput label="Doors open before the start" unit="s" min={0} max={600} step={30} value={v.doorsOpenSec} onChange={(n) => n !== null && form.edit({ doorsOpenSec: n })} />
             </SectionCard>
             <section
               aria-label="More start times"

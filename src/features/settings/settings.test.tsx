@@ -39,6 +39,35 @@ describe('Settings', () => {
     expect(router.state.location.search).toBe('?tab=releases');
   });
 
+  it('new flags: streaks, hourly sits and heart rate switch from App & releases', async () => {
+    openApp('/settings?tab=releases');
+    await userEvent.click(await screen.findByRole('switch', { name: 'Hourly sits' }));
+    await userEvent.click(screen.getByRole('switch', { name: 'Heart-rate shift' }));
+    await userEvent.click(save());
+    expect(await findToast('Settings saved')).toBeInTheDocument();
+    expect(insights.main.value.features).toMatchObject({ streaks: true, hourlySits: true, heartRate: true });
+  });
+
+  it('app content: sit times, Silence Room and downloads each save on their own', async () => {
+    openApp('/settings?tab=content');
+    const blocks = await screen.findByRole('list', { name: 'Sit time blocks' });
+    expect(within(blocks).getAllByRole('listitem')).toHaveLength(4);
+    const quota = await screen.findByLabelText(/Storage quota/);
+    await userEvent.clear(quota);
+    await userEvent.type(quota, '3000');
+    await userEvent.tab();
+    const card = quota.closest('section')!;
+    await userEvent.click(within(card).getByRole('button', { name: 'Save' }));
+    expect(await findToast('Downloads saved')).toBeInTheDocument();
+    expect(insights.downloads.value.quotaMb).toBe(3000);
+    // Silence Room: switch the 45 minute option off
+    await userEvent.click(screen.getByRole('button', { name: '45 min' }));
+    const sil = screen.getByRole('heading', { name: 'Silence Room' }).closest('section')!;
+    await userEvent.click(within(sil).getByRole('button', { name: 'Save' }));
+    expect(await findToast('Silence Room saved')).toBeInTheDocument();
+    expect(insights.silence.value.durations).not.toContain(45);
+  });
+
   it('legal: https links only; saves the legal document', async () => {
     openApp('/settings?tab=legal');
     const privacy = await screen.findByRole('textbox', { name: 'Privacy policy URL' });

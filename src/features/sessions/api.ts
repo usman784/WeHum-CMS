@@ -28,6 +28,8 @@ export type Session = {
   isSos: boolean;
   sosFeeling: string | null;
   sosSubtitle: string | null;
+  /** Chapters shown in the player. */
+  phases: Phase[];
   status: SessionStatus;
   publishAt: string | null;
   plays: number;
@@ -37,6 +39,8 @@ export type Session = {
   updatedAt: string;
   updatedBy: string | null;
 };
+
+export type Phase = { atSec: number; title: string };
 
 export type SessionDetail = Session & {
   /** Where this meditation is used. A meditation in a future MOTD or a program cannot be archived or deleted. */
@@ -153,6 +157,13 @@ const nullableText = (max: number, what: string) =>
     .max(max, `${what} can be at most ${max} characters`)
     .transform((v) => v || null);
 
+/** "02:30" ↔ 150 s for the phase editor. */
+export const mmss = (sec: number) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+export const parseMmss = (v: string): number | null => {
+  const m = /^(\d{1,3}):([0-5]\d)$/.exec(v.trim());
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+};
+
 /** "work stress, Morning" → ["work stress", "morning"]. At most 12 tags of 30 characters, no repeats. */
 export function parseTags(raw: string): string[] {
   return [...new Set(raw.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean))]; // prettier-ignore
@@ -179,6 +190,7 @@ export const sessionSchema = z.object({
   downloadable: z.boolean(),
   sosFeeling: nullableText(40, 'The feeling'),
   sosSubtitle: nullableText(80, 'The subtitle'),
+  phases: z.array(z.object({ atSec: z.number().int().min(0).max(14400), title: z.string().trim().min(1, 'Name the phase').max(60) })).max(12),
 });
 export type SessionInput = z.input<typeof sessionSchema>;
 export type SessionValues = z.output<typeof sessionSchema>;
@@ -199,6 +211,7 @@ export const blankSession: SessionInput = {
   downloadable: true,
   sosFeeling: '',
   sosSubtitle: '',
+  phases: [],
 };
 
 export const sessionToForm = (s: Session): SessionInput => ({
@@ -217,6 +230,7 @@ export const sessionToForm = (s: Session): SessionInput => ({
   downloadable: s.downloadable,
   sosFeeling: s.sosFeeling ?? '',
   sosSubtitle: s.sosSubtitle ?? '',
+  phases: s.phases ?? [],
 });
 
 /**

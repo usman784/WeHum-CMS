@@ -40,6 +40,8 @@ export type Media = {
   width: number | null;
   height: number | null;
   blurhash: string | null;
+  /** The 30-second preview clip of an audio file exists. */
+  hasPreview?: boolean;
   createdAt: string;
   /** Short-lived URL for the CMS player / thumbnail. Null until ready. */
   previewUrl: string | null;
@@ -192,3 +194,6 @@ export function useMediaUpload({ kind, mediaId: attached, onReady, onUploaded }:
     retry: () => lastFile.current && start(lastFile.current),
   };
 }
+
+/** Starts the job that makes the 30-second preview clip of a processed audio file. */
+export const makePreview = (mediaId: string) => api<{ id: string; jobId: string }>(`/v1/admin/media/${mediaId}/preview`, { method: 'POST' }).then((r) => r.data);

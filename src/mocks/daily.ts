@@ -50,7 +50,7 @@ export const daily = {
 };
 
 const message = (date: string, p: Partial<DailyMessage> & { title: string }): DailyMessage => ({
-  type: 'audio', text: null, mediaId: null, imageMediaId: null, durationSec: 240, themeTag: null, status: 'draft', version: 1, updatedAt: now(), date, ...p,
+  type: 'audio', text: null, mediaId: null, imageMediaId: null, durationSec: 240, themeTag: null, transcript: [], videoMediaId: null, access: 'premium', status: 'draft', version: 1, updatedAt: now(), date, ...p,
 }); // prettier-ignore
 
 export function resetDaily() {
@@ -83,7 +83,12 @@ export function resetDaily() {
     key: 'group',
     version: 1,
     updatedAt: now(),
-    value: { startUtc: '16:00', lengthMin: 30, lobbyOpenMin: 15, reminderMin: 10 },
+    value: {
+      startUtc: '16:00', lengthMin: 30, lobbyOpenMin: 15, reminderMin: 10,
+      cadence: 'daily', hourly: { fromHourUtc: 6, toHourUtc: 22, lengthMin: 10 },
+      intentions: ['Calm under pressure', 'Deep physical release', 'Mindful stillness'],
+      focus: { title: '', summary: '', quote: '', attribution: 'Raphael' }, doorsOpenSec: 60,
+    },
   };
   daily.history = [
     { date: day(-1), title: sessions[0]!.title, groupJoined: 486, soloCount: 1940, practicedToday: 2426 },
