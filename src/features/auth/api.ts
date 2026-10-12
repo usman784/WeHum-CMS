@@ -22,7 +22,7 @@ export const authApi = {
   me: () => api<Admin>('/v1/admin/me').then((r) => r.data),
   /** Public totals for the sign-in page. */
   publicLive: () =>
-    api<{ meditatedToday: number | null; meditatingNow: number | null; at: number }>('/v1/admin/public/live').then((r) => r.data),
+    api<{ meditatedToday: number | null; meditatingNow: number | null; at: number; branding?: { appName: string; logoUrl: string | null } }>('/v1/admin/public/live').then((r) => r.data),
 };
 
 /**

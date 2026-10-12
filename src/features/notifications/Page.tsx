@@ -29,6 +29,7 @@ import {
   useAnnouncements,
   useAudienceCount,
   useAutomatic,
+  useDelivery,
   useLinkTargets,
   usePushCache,
   type Announcement,
@@ -306,6 +307,41 @@ function LockScreen({ title, body }: { title: string; body: string }) {
   );
 }
 
+const KEY_LABEL: Record<string, string> = { daily_nudge: 'Reminder', daily_message: 'Daily message', group_warning: 'Group warning', trial_ending: 'Trial ending' };
+const keyLabel = (k: string) => KEY_LABEL[k] ?? (k.startsWith('ann:') ? 'Announcement' : k.startsWith('sit:') ? 'Sit warning' : k);
+
+/** Pushes per day from the delivery log: how many went out, were opened, and how many people hit the daily limit. */
+function Delivery() {
+  const q = useDelivery(14);
+  const days = q.data?.days ?? [];
+  return (
+    <SectionCard title="Delivery per day" description={q.data ? `Each person gets at most ${q.data.maxPerDay} pushes a day (Settings → App content).` : 'Pushes sent, opened and held back by the daily limit.'}>
+      {q.isPending ? <p className="text-sm text-text-muted">Loading…</p> : days.length === 0 ? <p className="text-sm text-text-muted">Nothing sent yet.</p> : (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-overline uppercase text-text-muted">
+              <th className="pb-2 font-semibold">Day</th><th className="pb-2 text-right font-semibold">Sent</th><th className="pb-2 text-right font-semibold">Opened</th>
+              <th className="pb-2 text-right font-semibold">People</th><th className="pb-2 text-right font-semibold">Avg / person</th><th className="pb-2 text-right font-semibold">At limit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {days.map((d) => (
+              <tr key={d.date} className="border-t border-border" title={d.keys.map((k) => `${keyLabel(k.key)}: ${k.sent}`).join(' · ')}>
+                <td className="py-2">{d.date}</td>
+                <td className="py-2 text-right tabular-nums">{d.sent}</td>
+                <td className="py-2 text-right tabular-nums">{d.sent ? `${Math.round((d.opened / d.sent) * 100)}%` : '–'}</td>
+                <td className="py-2 text-right tabular-nums">{d.people}</td>
+                <td className="py-2 text-right tabular-nums">{d.avgPerPerson}</td>
+                <td className="py-2 text-right tabular-nums">{d.atCap}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </SectionCard>
+  );
+}
+
 function Automatic() {
   const auto = useAutomatic();
   const cache = usePushCache();
@@ -453,6 +489,7 @@ export function NotificationsPage() {
         <LockScreen title={draft.title} body={draft.body} />
         <div className="flex min-w-0 flex-col gap-5">
           <Automatic />
+          <Delivery />
           <History onEdit={setEditing} />
         </div>
       </div>

@@ -145,8 +145,8 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
           options={(teachers.data ?? []).map((t) => ({ value: t.id, label: t.name }))}
           {...register('leadTeacherId')}
         />
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="Day unlocks at" hint="each person's time" size="sm" type="time" error={e.unlockTime?.message} {...register('unlockTime')} />
+        <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-3">
+          <Input label="Day unlocks at" hint="local time" size="sm" type="time" error={e.unlockTime?.message} {...register('unlockTime')} />
           <Input label="Grace days" size="sm" inputMode="numeric" error={e.graceDays?.message} {...register('graceDays')} />
         </div>
         <Input label="Badge for finishers" size="sm" placeholder="Finisher" error={e.badgeName?.message} {...register('badgeName')} />

@@ -342,10 +342,11 @@ export function UserDetailPage() {
       ) : null}
       <header className="flex flex-wrap items-center gap-4">
         {back}
-        <Avatar name={u.name} id={u.id} size={56} />
+        <Avatar name={u.name} id={u.id} size={56} src={u.avatarUrl} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-h1">{u.name ?? 'Guest'}</h1>
+            <h1 className="text-h1">{[u.name, u.lastName].filter(Boolean).join(' ') || 'Guest'}</h1>
+            {u.username ? <span className="text-body text-text-muted">@{u.username}</span> : null}
             {memberBadge ? (
               <Badge tone={MEMBERSHIP_TONE[u.membership.plan]} caps size="sm">
                 {memberBadge}
@@ -399,6 +400,20 @@ export function UserDetailPage() {
               {u.heartRateReadings ? <p className="text-sm text-text-muted">{formatNumber(u.heartRateReadings)} sits have a heart-rate reading from the phone.</p> : null}
             </SectionCard>
           ) : null}
+          <SectionCard title="Notifications" description="Pushes this person received (the daily limit is in Settings).">
+            {!u.pushes?.length ? (
+              <p className="text-sm text-text-muted">No pushes yet.</p>
+            ) : (
+              <ul className="flex flex-col divide-y divide-border text-sm">
+                {u.pushes.slice(0, 12).map((p, i) => (
+                  <li key={i} className="flex items-center justify-between gap-3 py-2">
+                    <span className="font-medium">{p.key.startsWith('ann:') ? 'Announcement' : p.key.replace(/_/g, ' ')}</span>
+                    <span className="text-text-muted">{p.date}{p.openedAt ? ' · opened' : ''}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SectionCard>
           <SectionCard title="Recent meditations">
             {u.recentMeditations.length === 0 ? (
               <p className="text-sm text-text-muted">No meditations yet.</p>

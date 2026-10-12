@@ -18,7 +18,7 @@ import {
   Users,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import logo from '../../assets/logo.svg';
+import { useBranding } from '../../lib/useBranding';
 import { initials } from '../../lib/format';
 import { can, type Role } from '../../lib/rbac';
 import type { Admin } from '../../lib/session';
@@ -77,6 +77,7 @@ type Props = {
 
 /** App sidebar: logo, links by role, user card with sign out. 248 px wide; icons only under 1200 px. */
 export function Sidebar({ admin, moderationOpen = 0, onSignOut }: Props) {
+  const brand = useBranding();
   const sections = navFor(admin.role, moderationOpen);
   const settings = sections.filter((s) => !s.section);
   const main = sections.filter((s) => s.section);
@@ -86,9 +87,9 @@ export function Sidebar({ admin, moderationOpen = 0, onSignOut }: Props) {
       className="sticky top-0 flex h-screen w-[72px] shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-border bg-sidebar px-3.5 py-[18px] nav:w-sidebar"
     >
       <div className="flex items-center justify-center gap-2.5 px-2.5 pb-3.5 pt-0.5 nav:justify-start">
-        <img src={logo} alt="" className="size-[30px]" />
+        <img src={brand.logo} alt="" className="size-[30px] rounded-md object-cover" />
         <div className="hidden flex-col nav:flex">
-          <span className="text-[17px] font-bold leading-tight tracking-[-0.2px]">WeHum</span>
+          <span className="text-[17px] font-bold leading-tight tracking-[-0.2px]">{brand.appName}</span>
           <span className="text-overline font-semibold uppercase text-ember-text">Admin CMS</span>
         </div>
       </div>

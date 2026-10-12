@@ -80,7 +80,7 @@ export const handlers = [
   http.get(url('/v1/time'), () => ok({ serverTime: Date.now() })),
   http.get(url('/v1/live'), () => ok(mockLive)),
   http.get(url('/v1/admin/public/live'), () =>
-    ok({ meditatedToday: mockLive.meditatedToday, meditatingNow: mockLive.total, at: Date.now() }),
+    ok({ meditatedToday: mockLive.meditatedToday, meditatingNow: mockLive.total, at: Date.now(), branding: { appName: 'WeHum', logoUrl: null } }),
   ),
 
   http.post(url('/v1/admin/auth/login'), async ({ request }) => {

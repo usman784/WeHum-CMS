@@ -12,6 +12,9 @@ export type Membership = {
 export type UserRow = {
   id: string;
   name: string | null;
+  lastName?: string | null;
+  username?: string | null;
+  avatarUrl?: string | null;
   email: string | null;
   isGuest: boolean;
   providers: string[];
@@ -28,6 +31,10 @@ export type UserCounts = { all: number; guests: number; accounts: number; paying
 export type UserDetail = {
   id: string;
   name: string | null;
+  lastName?: string | null;
+  username?: string | null;
+  avatarUrl?: string | null;
+  pushes?: { key: string; date: string; sentAt: string; openedAt: string | null }[];
   email: string | null;
   isGuest: boolean;
   country: string | null;

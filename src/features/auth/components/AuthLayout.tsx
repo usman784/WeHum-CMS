@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import logo from '../../../assets/logo.svg';
+import { useBranding } from '../../../lib/useBranding';
 import { formatNumber } from '../../../lib/format';
 import { authApi } from '../api';
 
@@ -22,15 +22,16 @@ function useMeditatedToday() {
  */
 function Hero() {
   const count = useMeditatedToday();
+  const { appName, logo } = useBranding();
   return (
     <section
       data-theme="dark"
-      aria-label="WeHum"
+      aria-label={appName}
       className="relative hidden flex-col justify-between overflow-hidden bg-teal p-14 text-text lg:flex"
     >
       <div className="flex items-center gap-3">
         <img src={logo} alt="" className="size-10" />
-        <span className="text-2xl font-bold">WeHum</span>
+        <span className="text-2xl font-bold">{appName}</span>
       </div>
       <div className="relative flex items-center justify-center">
         <svg width="360" height="360" viewBox="0 0 360 360" aria-hidden className="max-w-full">
@@ -69,7 +70,7 @@ function Hero() {
         </p>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="max-w-[440px] text-[28px] font-bold leading-tight">Everything people hear in WeHum starts here.</p>
+        <p className="max-w-[440px] text-[28px] font-bold leading-tight">Everything people hear in {appName} starts here.</p>
         <p className="text-[15px] text-teal-text">Sessions, programs, daily messages and the community, in one place.</p>
       </div>
     </section>

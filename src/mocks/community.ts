@@ -247,6 +247,18 @@ export const communityHandlers = [
   http.get(u('/notifications/audience'), () =>
     is('owner', 'admin', 'editor') ? ok({ ...community.audience, quietHours: { start: '22:00', end: '07:00' } }) : denied(),
   ),
+  http.get(u('/notifications/delivery'), () =>
+    is('owner', 'admin', 'editor')
+      ? ok({
+          maxPerDay: 2,
+          days: [0, 1, 2].map((i) => ({
+            date: new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10),
+            sent: 220 - i * 30, opened: 90 - i * 10, people: 140 - i * 12, atCap: 24 - i * 6, avgPerPerson: 1.6,
+            keys: [{ key: 'daily_nudge', sent: 140, opened: 60 }, { key: 'daily_message', sent: 80, opened: 30 }],
+          })),
+        })
+      : denied(),
+  ),
   http.get(u('/notifications/automatic'), () => (is('owner', 'admin', 'editor') ? ok(community.automatic) : denied())),
   http.patch(u('/notifications/automatic/:key'), async ({ params, request }) => {
     if (!is('owner', 'admin')) return denied();

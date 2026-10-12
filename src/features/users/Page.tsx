@@ -37,7 +37,8 @@ export const MEMBERSHIP_TONE: Record<Membership['plan'], BadgeTone> = {
 };
 
 /** Coloured initial, as in the design (stable per user). */
-export function Avatar({ name, id, size = 40 }: { name: string | null; id: string; size?: number }) {
+export function Avatar({ name, id, size = 40, src }: { name: string | null; id: string; size?: number; src?: string | null }) {
+  if (src) return <img src={src} alt="" style={{ width: size, height: size }} className="shrink-0 rounded-full object-cover" />;
   const tones = ['bg-teal text-teal-text', 'bg-ember/15 text-ember-text', 'bg-info text-info-text', 'bg-lilac text-lilac-text'];
   const tone = tones[[...id].reduce((a, c) => a + c.charCodeAt(0), 0) % tones.length];
   return (
@@ -109,9 +110,9 @@ export function UsersPage() {
       hideable: false,
       cell: (u) => (
         <Link to={`/users/${u.id}`} className="flex min-w-0 items-center gap-3">
-          <Avatar name={u.name} id={u.id} />
+          <Avatar name={u.name} id={u.id} src={u.avatarUrl} />
           <span className="flex min-w-0 flex-col">
-            <span className="truncate text-body font-semibold">{u.name ?? 'Guest'}</span>
+            <span className="truncate text-body font-semibold">{[u.name, u.lastName].filter(Boolean).join(' ') || 'Guest'}{u.username ? <span className="ml-1.5 font-normal text-text-muted">@{u.username}</span> : null}</span>
             <span className="truncate text-xs text-text-muted">{userSubline(u)}</span>
           </span>
         </Link>
@@ -181,7 +182,7 @@ export function UsersPage() {
       <div className="flex flex-wrap items-center gap-3">
         <SearchInput
           label="Search users"
-          placeholder="Search name, email or user ID"
+          placeholder="Search name, @username, email or user ID"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

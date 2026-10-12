@@ -21,6 +21,10 @@ export type DailyMessage = {
   videoMediaId: string | null;
   /** Free messages open for everyone; premium ones for members. */
   access: 'free' | 'premium';
+  /** For "scheduled": the moment it goes live (empty = at the start of its day, UTC). */
+  publishAt?: string | null;
+  /** Local time of the push for this message (empty = each person's reminder time). */
+  pushTime?: string | null;
   status: MessageStatus;
   version: number;
   updatedAt: string;
@@ -39,6 +43,8 @@ export type MessageBody = {
   transcript: TranscriptLine[];
   videoMediaId: string | null;
   access: 'free' | 'premium';
+  publishAt?: string | null;
+  pushTime?: string | null;
   status: MessageStatus;
 };
 

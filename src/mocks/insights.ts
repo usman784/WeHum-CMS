@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import type { Funnel, Retention, Trends } from '../features/analytics/api';
 import type { ConfigDoc } from '../features/config/useConfigForm';
-import type { AuditEntry, ConfigKey, CrisisConfig, DownloadsConfig, LegalConfig, MainConfig, SilenceConfig, SitTimesConfig, TeamMember } from '../features/settings/api';
+import type { AuditEntry, BrandingConfig, ConfigKey, CrisisConfig, DownloadsConfig, LegalConfig, MainConfig, PushConfig, SilenceConfig, SitTimesConfig, TeamMember } from '../features/settings/api';
 import { session } from '../lib/session';
 import { db } from './content';
 import { body, fail, ok } from './overview';
@@ -25,6 +25,8 @@ export const insights = {
   downloads: null as unknown as ConfigDoc<DownloadsConfig>,
   silence: null as unknown as ConfigDoc<SilenceConfig>,
   crisis: null as unknown as ConfigDoc<CrisisConfig>,
+  branding: null as unknown as ConfigDoc<BrandingConfig>,
+  push: null as unknown as ConfigDoc<PushConfig>,
   team: [] as TeamMember[],
   audit: [] as AuditEntry[],
   calls: [] as { method: string; path: string; body?: unknown }[],
@@ -118,6 +120,8 @@ export function resetInsights() {
     value: { blocks: [{ time: '06:30', label: 'Dawn Stillness' }, { time: '07:00', label: 'Morning Prime' }, { time: '12:30', label: 'Midday Reset' }, { time: '21:00', label: 'Night Decompress' }] },
   };
   insights.downloads = { key: 'downloads', version: 1, updatedAt: null, value: { quotaMb: 2400 } };
+  insights.branding = { key: 'branding', version: 1, updatedAt: null, value: { appName: 'WeHum', tagline: 'Meditate together', logoMediaId: null } };
+  insights.push = { key: 'push', version: 1, updatedAt: null, value: { maxPerDay: 2 } };
   insights.silence = { key: 'silence', version: 1, updatedAt: null, value: { durations: [5, 10, 15, 20, 30, 45, 60, 0], cadence: { inhaleSec: 4, exhaleSec: 6 }, extendMin: 5 } };
   insights.crisis = {
     key: 'crisis', version: 1, updatedAt: null,
@@ -257,7 +261,7 @@ export const insightsHandlers = [
       ...insights.main,
       value: { ...insights.main.value, features: { ...insights.main.value.features, challenges: db.flags.challenges } },
     };
-    return ok({ main, legal: insights.legal, sitTimes: insights.sitTimes, downloads: insights.downloads, silence: insights.silence, crisis: insights.crisis });
+    return ok({ main, legal: insights.legal, sitTimes: insights.sitTimes, downloads: insights.downloads, silence: insights.silence, crisis: insights.crisis, branding: insights.branding, push: insights.push });
   }),
   putConfig('main'),
   putConfig('legal'),
@@ -265,6 +269,8 @@ export const insightsHandlers = [
   putConfig('downloads'),
   putConfig('silence'),
   putConfig('crisis'),
+  putConfig('branding'),
+  putConfig('push'),
   http.get(u('/team'), () => (is('owner', 'admin') ? ok(insights.team) : denied())),
   http.post(u('/team/invite'), async ({ request }) => {
     const b = (await body(request)) as { email: string; name?: string; role: TeamMember['role'] };

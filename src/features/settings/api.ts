@@ -46,7 +46,11 @@ export type CrisisConfig = {
   regions: CrisisRegion[];
   international: { country: string; line: string; value: string }[];
 };
-export type ConfigKey = 'main' | 'legal' | 'sitTimes' | 'downloads' | 'silence' | 'crisis';
+/** `app_config.branding` — app name, tagline and logo (a ready image in the media library) shown in the app. */
+export type BrandingConfig = { appName: string; tagline: string; logoMediaId: string | null };
+/** `app_config.push` — at most this many pushes per person and day. */
+export type PushConfig = { maxPerDay: number };
+export type ConfigKey = 'main' | 'legal' | 'sitTimes' | 'downloads' | 'silence' | 'crisis' | 'branding' | 'push';
 export type AllConfig = {
   main: ConfigDoc<MainConfig>;
   legal: ConfigDoc<LegalConfig>;
@@ -54,6 +58,8 @@ export type AllConfig = {
   downloads: ConfigDoc<DownloadsConfig>;
   silence: ConfigDoc<SilenceConfig>;
   crisis: ConfigDoc<CrisisConfig>;
+  branding: ConfigDoc<BrandingConfig>;
+  push: ConfigDoc<PushConfig>;
 } & Record<string, ConfigDoc<unknown>>;
 
 export type TeamMember = {

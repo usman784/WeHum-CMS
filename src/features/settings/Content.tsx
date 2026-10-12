@@ -10,11 +10,15 @@ import { NumberInput } from '../../ui/NumberInput';
 import { Select } from '../../ui/Select';
 import { toast } from '../../ui/Toast';
 import { useConfigForm } from '../config/useConfigForm';
+import { ImagePicker } from '../../ui/ImagePicker';
+import { useMediaUpload } from '../media/api';
 import {
   settingsApi,
   useAllConfig,
   useSettingsCache,
+  type BrandingConfig,
   type ConfigKey,
+  type PushConfig,
   type CrisisConfig,
   type CrisisLine,
   type CrisisRegion,
@@ -69,7 +73,7 @@ function SitTimes() {
       {others ? <p role="status" className="text-sm text-info-text">{others.by?.name ?? 'Someone'} saved new sit times.</p> : null}
       <ul aria-label="Sit time blocks" className="flex flex-col gap-2.5">
         {v.blocks.map((b, i) => (
-          <li key={i} className="grid grid-cols-[120px_minmax(0,1fr)_auto] items-end gap-3">
+          <li key={i} className="grid grid-cols-[168px_minmax(0,1fr)_auto] items-end gap-3">
             <Input label="Time" type="time" value={b.time} onChange={(e) => set(i, { time: e.target.value })} />
             <Input label="Name" value={b.label} maxLength={30} onChange={(e) => set(i, { label: e.target.value })} />
             <IconButton label={`Remove ${b.label || 'block'}`} onClick={() => form.edit({ blocks: v.blocks.filter((_, j) => j !== i) })} disabled={v.blocks.length <= 1}>
@@ -95,6 +99,47 @@ function Downloads() {
   return (
     <SectionCard title="Downloads" description="The storage allowance the Downloads manager shows (it is a display limit; phones decide the real space).">
       <NumberInput label="Storage quota" unit="MB" min={100} max={20000} step={100} value={v.quotaMb} onChange={(n) => n && form.edit({ quotaMb: n })} />
+      <SaveBar form={form} />
+    </SectionCard>
+  );
+}
+
+/** App name, tagline and logo: the app and this CMS read them on launch. The launcher icon is part of the store build. */
+export function Branding() {
+  const { form, loading } = useCard<BrandingConfig>('branding', 'Branding');
+  const v = form.value;
+  const logo = useMediaUpload({ kind: 'image', mediaId: v?.logoMediaId ?? null, onUploaded: (id) => form.edit({ logoMediaId: id }) });
+  if (loading || !v) return null;
+  return (
+    <SectionCard title="Branding" description="The name and logo people see inside the app and in this admin. The home-screen icon is set with each store release.">
+      <div className="flex flex-wrap items-start gap-5">
+        <div className="w-28">
+          <ImagePicker label="Logo" minSize={256} variant="avatar" value={logo.media?.previewUrl ?? null} onChange={logo.start} disabled={logo.busy} />
+        </div>
+        <div className="flex min-w-[240px] flex-1 flex-col gap-3">
+          <Input label="App name" maxLength={30} value={v.appName} onChange={(e) => form.edit({ appName: e.target.value })} />
+          <Input label="Tagline" hint="shown under the name on the welcome screen" maxLength={80} value={v.tagline} onChange={(e) => form.edit({ tagline: e.target.value })} />
+        </div>
+      </div>
+      {logo.state.status === 'error' ? <p role="alert" className="text-sm text-danger-text">{logo.state.message}</p> : null}
+      {v.logoMediaId ? (
+        <Button variant="ghost" size="sm" onClick={() => form.edit({ logoMediaId: null })}>
+          Use the default logo
+        </Button>
+      ) : null}
+      <SaveBar form={form} invalid={!v.appName.trim() || logo.busy} />
+    </SectionCard>
+  );
+}
+
+/** How many pushes one person can get per day, across reminders, daily messages, group warnings and announcements. */
+export function PushLimit() {
+  const { form, loading } = useCard<PushConfig>('push', 'Notification limit');
+  const v = form.value;
+  if (loading || !v) return null;
+  return (
+    <SectionCard title="Notification limit" description="Reminders, daily messages, group warnings and announcements together. Anything beyond the limit is held back, so nobody is flooded.">
+      <NumberInput label="Pushes per person per day" min={1} max={10} step={1} value={v.maxPerDay} onChange={(n) => n && form.edit({ maxPerDay: n })} />
       <SaveBar form={form} />
     </SectionCard>
   );
@@ -277,6 +322,8 @@ function Crisis() {
 export function AppContent() {
   return (
     <div className="flex flex-col gap-5">
+      <Branding />
+      <PushLimit />
       <SitTimes />
       <Silence />
       <Downloads />

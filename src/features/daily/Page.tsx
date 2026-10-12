@@ -57,8 +57,10 @@ const FIELDS: ConflictField<DailyMessage>[] = [
   { key: 'transcript', label: 'Transcript', format: (v) => `${(v as unknown[]).length} lines` },
 ];
 
-type Draft = Omit<MessageBody, 'status'>;
-const blank: Draft = { type: 'audio', title: '', text: null, mediaId: null, imageMediaId: null, durationSec: null, themeTag: null, transcript: [], videoMediaId: null, access: 'premium' };
+/** `goLive` is a local HH:mm on the message's day; it becomes `publishAt` when the message is scheduled. */
+type Draft = Omit<MessageBody, 'status' | 'publishAt'> & { goLive: string };
+const hhmmOf = (iso: string | null | undefined) => { if (!iso) return ''; const d = new Date(iso); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+const blank: Draft = { goLive: '', pushTime: null, type: 'audio', title: '', text: null, mediaId: null, imageMediaId: null, durationSec: null, themeTag: null, transcript: [], videoMediaId: null, access: 'premium' };
 const draftOf = (m: DailyMessage | undefined): Draft =>
   m
     ? {
@@ -72,6 +74,8 @@ const draftOf = (m: DailyMessage | undefined): Draft =>
         transcript: m.transcript ?? [],
         videoMediaId: m.videoMediaId ?? null,
         access: m.access ?? 'premium',
+        goLive: hhmmOf(m.publishAt),
+        pushTime: m.pushTime ?? null,
       }
     : blank;
 const sameDraft = (a: Draft, b: Draft) => JSON.stringify(a) === JSON.stringify(b);
@@ -140,8 +144,10 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
   });
 
   const submit = (status: MessageStatus) => {
+    const { goLive, ...rest } = draft;
     const body: MessageBody = {
-      ...draft,
+      ...rest,
+      publishAt: status === 'scheduled' && goLive ? new Date(`${date}T${goLive}:00`).toISOString() : null,
       title: draft.title.trim(),
       text: draft.type === 'text' ? draft.text?.trim() || null : draft.text,
       status,
@@ -294,6 +300,10 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
         onChange={(access: 'free' | 'premium') => set({ access })}
         options={[{ value: 'premium', label: 'Members' }, { value: 'free', label: 'Everyone (free)' }]}
       />
+      <div className="grid grid-cols-2 gap-3">
+        <Input label="Goes live at" hint="local time, scheduled days" size="sm" type="time" value={draft.goLive} onChange={(e) => set({ goLive: e.target.value })} />
+        <Input label="Push at" hint="empty = reminder time" size="sm" type="time" value={draft.pushTime ?? ''} onChange={(e) => set({ pushTime: e.target.value || null })} />
+      </div>
       <Input
         label="Title"
         size="sm"
