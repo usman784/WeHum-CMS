@@ -2,6 +2,8 @@
 
 The admin panel for WeHum. The full specification is `WeHum_CMS_Spec.md`: read §0 and §0.1 first, then build phase by phase (§15). Every screen has a screenshot in `design/screens/` and its exact source in `design/source/`. `starter/` is the original starter code, kept for reference.
 
+> **Oct 12 — Stitch redesign.** New CMS controls are listed in `WeHum_CMS_Spec.md` §9b; the screen-by-screen app map is `../stitch-export/SCREEN_MAP.md`. `design/screens/` holds the original 19 screens plus `S*` screens rendered from the new pages.
+
 ## Run it
 
 Needs Node 22+ and pnpm 9 (`npm i -g pnpm@9`, or put `npx pnpm@9` in front of each command).

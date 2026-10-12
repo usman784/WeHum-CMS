@@ -3,6 +3,7 @@
 > This file is the single source of truth for the WeHum admin panel (CMS).
 > **Backend:** Node.js + PostgreSQL + Redis + Socket.IO, specified in `../backend/WeHum_Backend_Spec.md`. **No Firebase.**
 > **Design reference:** `cms/design/` has a screenshot and the exact HTML source for the 19 screens, plus sign-in and the sidebar (§0.1). Frames are 1440 px desktop.
+> **Oct 12 update — Stitch redesign.** The client's Stitch project (31 app screens) and the 7-sprint roadmap add content that the CMS must manage. §9b lists every new field and page, §15b the phases. The Stitch screens have no admin designs of their own: the new CMS controls reuse the existing patterns (cards, tables, side editors) and are drawn in `design/screens/S*.png` (rendered from the built pages). The app-side map is `../stitch-export/SCREEN_MAP.md`.
 > **Contracts:**
 > - REST: `../backend/starter/openapi/openapi.yaml`. Generate TS types with `openapi-typescript`.
 > - Sockets: backend spec §7.3 and `../backend/starter/src/realtime/socket-events.ts` (copy into `src/lib/`).
@@ -363,6 +364,27 @@ Legend: every screen has loading skeleton, empty state, error state with retry, 
 | 19 | Settings | Admin | Tabs: General (app name, support email, default reminder time, languages), Team & roles (invite, role select, last sign-in, 2-step status, role descriptions), Membership (link to Subscriptions; guests can use app without account — locked on), App & releases (min iOS/Android version, maintenance mode, feature flags: challenges, gratitude, breathwork, milestones, intent), Legal & privacy (privacy URL, terms URL, health disclaimer, delete inactive anonymous data after 12 months) | Save | live | owner cannot be demoted by admin; last owner protection |
 
 
+### 9b. Stitch additions (what the redesign needs from the CMS)
+
+| # | Where | Control | Feeds (app screen) | API |
+|---|---|---|---|---|
+| S1 | Settings → App & releases | Flags: `streaks`, `hourlySits`, `heartRate` (+ existing `challenges`) | Today streak strip, hourly sits, heart-rate toggle | `PUT /v1/admin/config/main` |
+| S2 | Settings → **Sit times** (new tab) | Suggested blocks (time + label), reorder | Sit-time screen "Suggested prime blocks" | `config/sitTimes` |
+| S3 | Settings → **Downloads** (new card on General) | Storage quota (MB) | Downloads manager | `config/downloads` |
+| S4 | Session editor → **Phases** | List of `{ at (mm:ss), title }`, drag reorder, validation inside duration | Player "Phase 2 · …" | `PATCH sessions/{id}` |
+| S5 | Session editor → **Preview clip** | Shows preview status (Ready / Not generated), "Generate 30 s preview" | 30 s preview sheet | media job |
+| S6 | Daily messages → editor | **Transcript** editor (timed lines `00:00 text`, section marker), **Video file** upload, **Access** Free / Premium | Daily message + transcript, archive lock | `PUT daily-messages/{date}` |
+| S7 | Sounds → Bells tab | **Role** per bell: Opening / Interval / Closing | Silence Room "Acoustic intervals & signals" | `PATCH sound-blocks/{id}` |
+| S8 | Group meditation | **Cadence** Daily / Hourly (window from–to UTC, length), **Intentions** (3 options), **Today's focus** (title, summary, quote, attribution), doors-open seconds; local-time preview | Lobby, Next sit countdown, Together | `PUT /v1/admin/group` |
+| S9 | Silence Room (new card on Group meditation) | Durations list incl. Open-ended, cadence (inhale/exhale s), extend minutes | Silence Room | `config/silence` |
+| S10 | SoS | **Duration** per tile, **sound beds** list, **Crisis directory**: regions (name, countries), lines (name, kind, description, call/text actions), international list, grounding tip, default region | SoS + Crisis directory | `config/sos`, `config/crisis` |
+| S11 | Challenges | Cohort sprint editor: blurb, lead teacher, days table (title, minutes, summary), unlock time, grace days, badge name, start date; KPIs: in cohort, regions, finish rate | Challenge detail, Library "Multi-part challenges" | `/v1/admin/challenges` |
+| S12 | Moderation → Dedications | **Post as Raphael** composer (text, session), teacher badge | Together feed "Raphael · Teacher" | `POST /v1/admin/dedications/teacher` |
+| S13 | Users → detail | Streak card: current, record, weekly goal (read-only); heart-rate opt-in status | support | `GET /v1/admin/users/{id}` |
+| S14 | Dashboard | Tile "Sitting in silence now" and "Streaks ≥ 7 days" | – | dashboard KPIs |
+
+Copy follows the app: "sit / sitting", "Disciplines" (route and API stay `themes`).
+
 ---
 
 ## 10. Edge cases & checks (CMS)
@@ -484,6 +506,17 @@ Legend: every screen has loading skeleton, empty state, error state with retry, 
 | **P7 Community & messaging** | Moderation queue live, rules, bulk, mute; Push notifications (compose with counters, audience preview count, send modes, test to me, automatic list, history stats live) | Moderation e2e with 2 moderators; push scheduling validation (quiet hours warning) |
 | **P8 Analytics, settings & hardening** | Dashboard final, Analytics (charts, funnel, retention, export), Settings tabs (general, team & roles, membership, releases & flags, legal), Audit log viewer, a11y, Lighthouse budgets | axe clean; Lighthouse ≥ 90/95; flags flip reaches app (`config:changed`) |
 | **P9 Coming soon** | Challenges full, Gratitude feed moderation tab, Breathwork content, Milestones | Flag on/off tests |
+
+### 15b. Stitch phases (order = `roadmap/wehum-roadmap.html`)
+| Phase | Sprint | CMS scope | Exit tests |
+|---|---|---|---|
+| **S1** | 19–30 Oct | Flags (S1), Sit times tab (S2), Downloads quota (S3) | Settings e2e; app config reaches `bootstrap` |
+| **S2** | 2–6 Nov | Session phases + preview status (S4, S5) | editor tests, 409 conflict |
+| **S3** | 9–20 Nov | Daily-message transcript / video / access (S6), bell roles (S7), group cadence + intentions + focus (S8), silence card (S9) | e2e: change cadence → `config:changed` → app |
+| **S4** | 23–27 Nov | SoS durations + crisis directory (S10) | region editor tests, validation |
+| **S5** | 30 Nov–4 Dec | Post as Raphael (S12) | moderation role matrix |
+| **S6** | 7–11 Dec | Dashboard tiles (S14), user streak card (S13), audit coverage for all new writes, full a11y/Lighthouse pass, **design/screens refreshed** | axe, Lighthouse budgets |
+| **S7** | 14–18 Dec | Cohort challenge editor (S11) | challenge e2e |
 
 ---
 
