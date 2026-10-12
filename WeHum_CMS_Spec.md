@@ -767,3 +767,21 @@ Open issues / risks:
 Evidence: `test-results/daily-*.png` (four screens, dark and light), real-backend log `test-results/backend.log`.
 
 Status: ✅ done
+
+
+### Phase S — Stitch redesign
+Date: 2026-10-12
+
+Built (spec §9b; renders in `design/screens/S*.png`, listed in `design/README.md`):
+- **Settings**: Silence room (durations, cadence, extend), Downloads quota, Sit-time blocks, Crisis directory (regions and lines), feature flags for streaks, hourly sits and heart rate; `ListEditor` for ordered text lists.
+- **Group sits**: cadence (daily / hourly with window), intentions, today's focus card, doors-open seconds.
+- **Daily messages**: access (free / premium), timed transcript lines, video media. **Sessions**: phases (chapters), free back-catalogue tag, preview clip status. **Sounds**: bell role. **SoS**: tile duration and sound beds. **Challenges**: cohort sprint fields and grace days, no longer marked "coming soon". **Moderation**: place and anonymize. **Users**: streak and zip export. **Dashboard**: streak and hourly counters.
+- OpenAPI copy refreshed from the backend.
+
+Tests run: `pnpm exec vitest run` → 33 files, 512 passed; `tsc --noEmit` and `eslint` clean.
+
+Decisions / deviations:
+- The Stitch project has no admin screens, so the new controls reuse existing cards, tables and side editors.
+- The Playwright suites (`e2e`) were not re-run in this phase; the screenshots come from the mock-API dev server.
+
+Status: ✅ done
