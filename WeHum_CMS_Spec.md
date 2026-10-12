@@ -785,3 +785,16 @@ Decisions / deviations:
 - The Playwright suites (`e2e`) were not re-run in this phase; the screenshots come from the mock-API dev server.
 
 Status: ✅ done
+
+
+### Phase S2 — Branding, notification limit, delivery report, scheduling (Oct 12)
+Built (design renders in `design/screens/S*.png`, regenerated against the real backend with the demo audience):
+- **Settings → App content**: *Branding* (app name, tagline, logo upload, "use the default logo") and *Notification limit* (pushes per person per day). The CMS sidebar and sign-in screen show the saved name and logo.
+- **Push notifications**: *Delivery per day* (sent, opened %, people, average per person, people at the limit; the tooltip lists the kinds).
+- **Daily Messages**: *Goes live at* (for scheduled days) and *Push at* (empty = each person's reminder time).
+- **Users**: username (`@name`) and photo in the list and detail, search by `@username`, last pushes in the detail.
+- Fix: the time field in *Sit times* was cut ("06:30 A"); the challenge unlock-time field was cramped.
+
+Tests run: `pnpm exec vitest run` → 33 files, 512 passed (with `--maxWorkers=3 --testTimeout=30000` when the machine is busy); `tsc` and `eslint` clean.
+
+Status: ✅ done
