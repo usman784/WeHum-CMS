@@ -196,4 +196,5 @@ export function useMediaUpload({ kind, mediaId: attached, onReady, onUploaded }:
 }
 
 /** Starts the job that makes the 30-second preview clip of a processed audio file. */
-export const makePreview = (mediaId: string) => api<{ id: string; jobId: string }>(`/v1/admin/media/${mediaId}/preview`, { method: 'POST' }).then((r) => r.data);
+export const makePreview = (mediaId: string) =>
+  api<{ id: string; jobId: string }>(`/v1/admin/media/${mediaId}/preview`, { method: 'POST' }).then((r) => r.data);

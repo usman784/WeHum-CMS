@@ -56,9 +56,15 @@ export function parseTranscript(src: string): { lines: TranscriptLine[]; bad: nu
   src.split('\n').forEach((raw, i) => {
     const l = raw.trim();
     if (!l) return;
-    if (l.startsWith('# ')) { section = l.slice(2).trim().slice(0, 40) || undefined; return; }
+    if (l.startsWith('# ')) {
+      section = l.slice(2).trim().slice(0, 40) || undefined;
+      return;
+    }
     const m = /^(\d{1,2}):([0-5]\d)\s+(.+)$/.exec(l);
-    if (!m) { bad.push(i + 1); return; }
+    if (!m) {
+      bad.push(i + 1);
+      return;
+    }
     lines.push({ t: Number(m[1]) * 60 + Number(m[2]), text: m[3]!.slice(0, 400), ...(section ? { section } : {}) });
   });
   return { lines, bad };

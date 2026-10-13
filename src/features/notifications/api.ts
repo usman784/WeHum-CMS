@@ -83,12 +83,21 @@ export function useAutomatic() {
   });
 }
 
-export type DeliveryDay = { date: string; sent: number; opened: number; people: number; atCap: number; avgPerPerson: number; keys: { key: string; sent: number; opened: number }[] };
+export type DeliveryDay = {
+  date: string;
+  sent: number;
+  opened: number;
+  people: number;
+  atCap: number;
+  avgPerPerson: number;
+  keys: { key: string; sent: number; opened: number }[];
+};
 /** What was pushed per day (delivery log): totals, kinds, and how many people reached the daily limit. */
 export function useDelivery(days = 14) {
   return useQuery({
     queryKey: qk.notification.list({ delivery: days }),
-    queryFn: () => api<{ maxPerDay: number; days: DeliveryDay[] }>('/v1/admin/notifications/delivery', { query: { days } }).then((r) => r.data),
+    queryFn: () =>
+      api<{ maxPerDay: number; days: DeliveryDay[] }>('/v1/admin/notifications/delivery', { query: { days } }).then((r) => r.data),
     refetchInterval: 60_000,
   });
 }

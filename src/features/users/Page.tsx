@@ -112,7 +112,10 @@ export function UsersPage() {
         <Link to={`/users/${u.id}`} className="flex min-w-0 items-center gap-3">
           <Avatar name={u.name} id={u.id} src={u.avatarUrl} />
           <span className="flex min-w-0 flex-col">
-            <span className="truncate text-body font-semibold">{[u.name, u.lastName].filter(Boolean).join(' ') || 'Guest'}{u.username ? <span className="ml-1.5 font-normal text-text-muted">@{u.username}</span> : null}</span>
+            <span className="truncate text-body font-semibold">
+              {[u.name, u.lastName].filter(Boolean).join(' ') || 'Guest'}
+              {u.username ? <span className="ml-1.5 font-normal text-text-muted">@{u.username}</span> : null}
+            </span>
             <span className="truncate text-xs text-text-muted">{userSubline(u)}</span>
           </span>
         </Link>

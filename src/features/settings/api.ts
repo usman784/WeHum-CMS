@@ -52,7 +52,14 @@ export type BrandingConfig = { appName: string; tagline: string; logoMediaId: st
 export type PushConfig = { maxPerDay: number };
 /** `app_config.newsletter` — e-mail addresses go to the newsletter list from the server (the API key is an environment secret). */
 export type NewsletterConfig = { enabled: boolean; listId: string; doubleOptIn: boolean; tags: string[] };
-export type NewsletterStatus = { enabled: boolean; keyConfigured: boolean; listId: string | null; synced: number; pending: number; failed: number };
+export type NewsletterStatus = {
+  enabled: boolean;
+  keyConfigured: boolean;
+  listId: string | null;
+  synced: number;
+  pending: number;
+  failed: number;
+};
 export type ConfigKey = 'main' | 'legal' | 'sitTimes' | 'downloads' | 'silence' | 'crisis' | 'branding' | 'push' | 'newsletter';
 export type AllConfig = {
   main: ConfigDoc<MainConfig>;

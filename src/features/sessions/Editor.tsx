@@ -468,7 +468,11 @@ function SessionForm({ session }: FormProps) {
             <Input label="Title" error={e.title?.message} {...register('title')} />
             <Textarea
               label={isYoutube ? 'Video description' : 'Short description'}
-              hint={isYoutube ? 'Taken from YouTube when you paste the link; links in it open inside the app. Shown collapsed on the session page.' : 'Shown on the session page'}
+              hint={
+                isYoutube
+                  ? 'Taken from YouTube when you paste the link; links in it open inside the app. Shown collapsed on the session page.'
+                  : 'Shown on the session page'
+              }
               rows={isYoutube ? 6 : 2}
               maxLength={isYoutube ? 4000 : 160}
               error={e.description?.message}
@@ -498,7 +502,11 @@ function SessionForm({ session }: FormProps) {
             />
           </SectionCard>
 
-          <SectionCard title="Phases" description="Chapters in the player: “Phase 2 · Anchoring breath”. Optional, up to 12." className="gap-3 p-[22px]">
+          <SectionCard
+            title="Phases"
+            description="Chapters in the player: “Phase 2 · Anchoring breath”. Optional, up to 12."
+            className="gap-3 p-[22px]"
+          >
             {phases.map((p, i) => (
               <div key={i} className="grid grid-cols-[90px_minmax(0,1fr)_auto] items-end gap-2.5">
                 <Input
@@ -508,7 +516,11 @@ function SessionForm({ session }: FormProps) {
                   onBlur={(ev) => {
                     const sec = parseMmss(ev.target.value);
                     if (sec === null) return void (ev.target.value = mmss(p.atSec));
-                    setValue('phases', phases.map((x, j) => (j === i ? { ...x, atSec: sec } : x)), { shouldDirty: true });
+                    setValue(
+                      'phases',
+                      phases.map((x, j) => (j === i ? { ...x, atSec: sec } : x)),
+                      { shouldDirty: true },
+                    );
                   }}
                 />
                 <Input
@@ -516,9 +528,25 @@ function SessionForm({ session }: FormProps) {
                   size="sm"
                   value={p.title}
                   maxLength={60}
-                  onChange={(ev) => setValue('phases', phases.map((x, j) => (j === i ? { ...x, title: ev.target.value } : x)), { shouldDirty: true })}
+                  onChange={(ev) =>
+                    setValue(
+                      'phases',
+                      phases.map((x, j) => (j === i ? { ...x, title: ev.target.value } : x)),
+                      { shouldDirty: true },
+                    )
+                  }
                 />
-                <Button variant="ghost" size="sm" onClick={() => setValue('phases', phases.filter((_, j) => j !== i), { shouldDirty: true })}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setValue(
+                      'phases',
+                      phases.filter((_, j) => j !== i),
+                      { shouldDirty: true },
+                    )
+                  }
+                >
                   Remove
                 </Button>
               </div>
@@ -528,7 +556,9 @@ function SessionForm({ session }: FormProps) {
                 variant="outline"
                 size="sm"
                 className="self-start"
-                onClick={() => setValue('phases', [...phases, { atSec: (phases.at(-1)?.atSec ?? -180) + 180, title: '' }], { shouldDirty: true })}
+                onClick={() =>
+                  setValue('phases', [...phases, { atSec: (phases.at(-1)?.atSec ?? -180) + 180, title: '' }], { shouldDirty: true })
+                }
               >
                 + Add a phase
               </Button>
@@ -576,7 +606,11 @@ function SessionForm({ session }: FormProps) {
           </SectionCard>
 
           {type === 'audio' ? (
-            <SectionCard title="30-second preview" description="Free listeners can hear the first 30 seconds of a premium meditation, then see the membership sheet." className="p-[22px]">
+            <SectionCard
+              title="30-second preview"
+              description="Free listeners can hear the first 30 seconds of a premium meditation, then see the membership sheet."
+              className="p-[22px]"
+            >
               {access !== 'premium' ? (
                 <p className="text-body text-text-body">Only premium meditations have a preview.</p>
               ) : !file.media || file.media.status !== 'ready' ? (
@@ -585,12 +619,18 @@ function SessionForm({ session }: FormProps) {
                 <p className="text-body font-semibold text-success-text">Preview clip ready</p>
               ) : (
                 <>
-                  <p className="text-body text-text-muted">No clip yet (older upload). Until it exists, the app stops the full file at 30 seconds.</p>
+                  <p className="text-body text-text-muted">
+                    No clip yet (older upload). Until it exists, the app stops the full file at 30 seconds.
+                  </p>
                   <Button
                     variant="outline"
                     size="sm"
                     className="self-start"
-                    onClick={() => void makePreview(file.media!.id).then(() => toast.success('Making the preview clip…')).catch((err) => toast.apiError(err))}
+                    onClick={() =>
+                      void makePreview(file.media!.id)
+                        .then(() => toast.success('Making the preview clip…'))
+                        .catch((err) => toast.apiError(err))
+                    }
                   >
                     Generate the 30-second clip
                   </Button>

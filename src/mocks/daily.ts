@@ -84,10 +84,15 @@ export function resetDaily() {
     version: 1,
     updatedAt: now(),
     value: {
-      startUtc: '16:00', lengthMin: 30, lobbyOpenMin: 15, reminderMin: 10,
-      cadence: 'daily', hourly: { fromHourUtc: 6, toHourUtc: 22, lengthMin: 10 },
+      startUtc: '16:00',
+      lengthMin: 30,
+      lobbyOpenMin: 15,
+      reminderMin: 10,
+      cadence: 'daily',
+      hourly: { fromHourUtc: 6, toHourUtc: 22, lengthMin: 10 },
       intentions: ['Calm under pressure', 'Deep physical release', 'Mindful stillness'],
-      focus: { title: '', summary: '', quote: '', attribution: 'Raphael' }, doorsOpenSec: 60,
+      focus: { title: '', summary: '', quote: '', attribution: 'Raphael' },
+      doorsOpenSec: 60,
     },
   };
   daily.history = [

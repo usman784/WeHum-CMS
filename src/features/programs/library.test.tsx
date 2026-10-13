@@ -360,8 +360,18 @@ describe('Programs screen', () => {
 describe('challenge helpers', () => {
   it('schema: numbers typed as text are accepted, limits are explained', () => {
     const base = {
-      name: 'Calm', days: '7', counts: 'any', minMinutes: '3', membersOnly: true, showOnYou: true,
-      blurb: '', leadTeacherId: '', badgeName: '', graceDays: '1', unlockTime: '07:00', schedule: [],
+      name: 'Calm',
+      days: '7',
+      counts: 'any',
+      minMinutes: '3',
+      membersOnly: true,
+      showOnYou: true,
+      blurb: '',
+      leadTeacherId: '',
+      badgeName: '',
+      graceDays: '1',
+      unlockTime: '07:00',
+      schedule: [],
     };
     expect(challengeSchema.parse(base)).toMatchObject({ days: 7, minMinutes: 3 });
     expect(challengeSchema.safeParse({ ...base, days: '0' }).error?.issues[0]?.message).toBe('At least 1 day');

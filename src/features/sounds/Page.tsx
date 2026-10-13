@@ -182,7 +182,13 @@ function BlockDialog({ kind, block, onClose }: EditorProps) {
           onTakeTheirs={() =>
             edit.takeTheirs((theirs) => {
               cache.saved(theirs);
-              reset({ name: theirs.name, access: theirs.access, loopable: theirs.loopable, visible: theirs.visible, bellRole: theirs.bellRole ?? null });
+              reset({
+                name: theirs.name,
+                access: theirs.access,
+                loopable: theirs.loopable,
+                visible: theirs.visible,
+                bellRole: theirs.bellRole ?? null,
+              });
               setNewMediaId(null);
             })
           }

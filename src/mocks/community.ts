@@ -253,8 +253,15 @@ export const communityHandlers = [
           maxPerDay: 2,
           days: [0, 1, 2].map((i) => ({
             date: new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10),
-            sent: 220 - i * 30, opened: 90 - i * 10, people: 140 - i * 12, atCap: 24 - i * 6, avgPerPerson: 1.6,
-            keys: [{ key: 'daily_nudge', sent: 140, opened: 60 }, { key: 'daily_message', sent: 80, opened: 30 }],
+            sent: 220 - i * 30,
+            opened: 90 - i * 10,
+            people: 140 - i * 12,
+            atCap: 24 - i * 6,
+            avgPerPerson: 1.6,
+            keys: [
+              { key: 'daily_nudge', sent: 140, opened: 60 },
+              { key: 'daily_message', sent: 80, opened: 30 },
+            ],
           })),
         })
       : denied(),

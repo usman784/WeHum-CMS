@@ -22,7 +22,12 @@ const FIELDS: ConflictField<GroupValue>[] = [
   { key: 'lobbyOpenMin', label: 'Open the lobby before the start', format: (v) => `${String(v)} min` },
   { key: 'reminderMin', label: 'Reminder before the start', format: (v) => `${String(v)} min` },
   { key: 'cadence', label: 'How often', format: (v) => (v === 'hourly' ? 'Every hour' : 'Once a day') },
-  { key: 'hourly', label: 'Hourly window (UTC)', format: (v) => `${(v as GroupValue['hourly']).fromHourUtc}:00–${(v as GroupValue['hourly']).toHourUtc}:00 · ${(v as GroupValue['hourly']).lengthMin} min` },
+  {
+    key: 'hourly',
+    label: 'Hourly window (UTC)',
+    format: (v) =>
+      `${(v as GroupValue['hourly']).fromHourUtc}:00–${(v as GroupValue['hourly']).toHourUtc}:00 · ${(v as GroupValue['hourly']).lengthMin} min`,
+  },
   { key: 'intentions', label: 'Intentions', format: (v) => (v as string[]).join(' · ') || 'none' },
   { key: 'focus', label: "Today's focus", format: (v) => (v as GroupValue['focus']).title || 'hidden' },
   { key: 'doorsOpenSec', label: 'Doors open before the start', format: (v) => `${String(v)} s` },
@@ -102,12 +107,14 @@ export function GroupMeditationPage() {
                   <Select
                     label="Length"
                     value={String(v.hourly.lengthMin)}
-                    onChange={(e) => form.edit({ hourly: { ...v.hourly, lengthMin: Number(e.target.value) as GroupValue['hourly']['lengthMin'] } })}
+                    onChange={(e) =>
+                      form.edit({ hourly: { ...v.hourly, lengthMin: Number(e.target.value) as GroupValue['hourly']['lengthMin'] } })
+                    }
                     options={LENGTHS.map((n) => ({ value: String(n), label: `${n} min` }))}
                   />
                   <p className="text-sm text-text-muted sm:col-span-3">
-                    Each hourly sit plays the Meditation of the Day in this length. The Hourly sits flag in Settings → App &amp; releases turns the
-                    app side on.
+                    Each hourly sit plays the Meditation of the Day in this length. The Hourly sits flag in Settings → App &amp; releases
+                    turns the app side on.
                   </p>
                 </div>
               ) : null}
@@ -192,10 +199,33 @@ export function GroupMeditationPage() {
                 placeholder="Calm under pressure"
                 onChange={(intentions) => form.edit({ intentions })}
               />
-              <Input label="Today's focus: title" value={v.focus.title} maxLength={60} onChange={(e) => form.edit({ focus: { ...v.focus, title: e.target.value } })} />
-              <Input label="Summary" value={v.focus.summary} maxLength={120} onChange={(e) => form.edit({ focus: { ...v.focus, summary: e.target.value } })} />
-              <Input label="Quote" value={v.focus.quote} maxLength={200} onChange={(e) => form.edit({ focus: { ...v.focus, quote: e.target.value } })} />
-              <NumberInput label="Doors open before the start" unit="s" min={0} max={600} step={30} value={v.doorsOpenSec} onChange={(n) => n !== null && form.edit({ doorsOpenSec: n })} />
+              <Input
+                label="Today's focus: title"
+                value={v.focus.title}
+                maxLength={60}
+                onChange={(e) => form.edit({ focus: { ...v.focus, title: e.target.value } })}
+              />
+              <Input
+                label="Summary"
+                value={v.focus.summary}
+                maxLength={120}
+                onChange={(e) => form.edit({ focus: { ...v.focus, summary: e.target.value } })}
+              />
+              <Input
+                label="Quote"
+                value={v.focus.quote}
+                maxLength={200}
+                onChange={(e) => form.edit({ focus: { ...v.focus, quote: e.target.value } })}
+              />
+              <NumberInput
+                label="Doors open before the start"
+                unit="s"
+                min={0}
+                max={600}
+                step={30}
+                value={v.doorsOpenSec}
+                onChange={(n) => n !== null && form.edit({ doorsOpenSec: n })}
+              />
             </SectionCard>
             <section
               aria-label="More start times"

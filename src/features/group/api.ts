@@ -36,7 +36,9 @@ export function groupProblem(v: GroupValue): string | null {
 }
 
 /** Values saved before the redesign have no cadence, intentions or focus: show the defaults. */
-export function withDefaults(v: Partial<GroupValue> & Pick<GroupValue, 'startUtc' | 'lengthMin' | 'lobbyOpenMin' | 'reminderMin'>): GroupValue {
+export function withDefaults(
+  v: Partial<GroupValue> & Pick<GroupValue, 'startUtc' | 'lengthMin' | 'lobbyOpenMin' | 'reminderMin'>,
+): GroupValue {
   return {
     cadence: 'daily',
     hourly: { fromHourUtc: 6, toHourUtc: 22, lengthMin: 10 },

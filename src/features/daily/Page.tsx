@@ -59,8 +59,25 @@ const FIELDS: ConflictField<DailyMessage>[] = [
 
 /** `goLive` is a local HH:mm on the message's day; it becomes `publishAt` when the message is scheduled. */
 type Draft = Omit<MessageBody, 'status' | 'publishAt'> & { goLive: string };
-const hhmmOf = (iso: string | null | undefined) => { if (!iso) return ''; const d = new Date(iso); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
-const blank: Draft = { goLive: '', pushTime: null, type: 'audio', title: '', text: null, mediaId: null, imageMediaId: null, durationSec: null, themeTag: null, transcript: [], videoMediaId: null, access: 'premium' };
+const hhmmOf = (iso: string | null | undefined) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+const blank: Draft = {
+  goLive: '',
+  pushTime: null,
+  type: 'audio',
+  title: '',
+  text: null,
+  mediaId: null,
+  imageMediaId: null,
+  durationSec: null,
+  themeTag: null,
+  transcript: [],
+  videoMediaId: null,
+  access: 'premium',
+};
 const draftOf = (m: DailyMessage | undefined): Draft =>
   m
     ? {
@@ -114,7 +131,9 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
   const video = useMediaUpload({ kind: 'video', mediaId: draft.videoMediaId, onUploaded: (id) => set({ videoMediaId: id }) });
   const [tText, setTText] = useState(() => formatTranscript(draftOf(message).transcript));
   const parsed = useMemo(() => parseTranscript(tText), [tText]);
-  useEffect(() => { setTText(formatTranscript(draftOf(message).transcript)); }, [message?.version]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    setTText(formatTranscript(draftOf(message).transcript));
+  }, [message?.version]); // eslint-disable-line react-hooks/exhaustive-deps
   const uploading = draft.type !== 'text' && media.busy;
 
   // The saved message changed under this form (my own save, or someone else's): follow it unless there are unsaved edits.
@@ -298,11 +317,28 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
         label="Who can open it"
         value={draft.access}
         onChange={(access: 'free' | 'premium') => set({ access })}
-        options={[{ value: 'premium', label: 'Members' }, { value: 'free', label: 'Everyone (free)' }]}
+        options={[
+          { value: 'premium', label: 'Members' },
+          { value: 'free', label: 'Everyone (free)' },
+        ]}
       />
       <div className="grid grid-cols-2 gap-3">
-        <Input label="Goes live at" hint="local time, scheduled days" size="sm" type="time" value={draft.goLive} onChange={(e) => set({ goLive: e.target.value })} />
-        <Input label="Push at" hint="empty = reminder time" size="sm" type="time" value={draft.pushTime ?? ''} onChange={(e) => set({ pushTime: e.target.value || null })} />
+        <Input
+          label="Goes live at"
+          hint="local time, scheduled days"
+          size="sm"
+          type="time"
+          value={draft.goLive}
+          onChange={(e) => set({ goLive: e.target.value })}
+        />
+        <Input
+          label="Push at"
+          hint="empty = reminder time"
+          size="sm"
+          type="time"
+          value={draft.pushTime ?? ''}
+          onChange={(e) => set({ pushTime: e.target.value || null })}
+        />
       </div>
       <Input
         label="Title"
@@ -383,7 +419,12 @@ function DayEditor({ date, today, message, themes, onSaved, onRemoved, onDuplica
             <Button variant="outline" className="flex-1" disabled={save.saving} onClick={() => submit('draft')}>
               Back to draft
             </Button>
-            <Button className="flex-1" loading={save.saving} disabled={!dirty || textTooLong || parsed.bad.length > 0} onClick={() => submit(status)}>
+            <Button
+              className="flex-1"
+              loading={save.saving}
+              disabled={!dirty || textTooLong || parsed.bad.length > 0}
+              onClick={() => submit(status)}
+            >
               Save changes
             </Button>
           </>

@@ -359,7 +359,11 @@ export function UserDetailPage() {
             ) : null}
           </div>
           <p className="text-sm text-text-muted">{headerLine(u)}</p>
-          {u.bio ? <p className="max-w-prose text-sm text-body" aria-label="Bio">{u.bio}</p> : null}
+          {u.bio ? (
+            <p className="max-w-prose text-sm text-body" aria-label="Bio">
+              {u.bio}
+            </p>
+          ) : null}
         </div>
       </header>
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -393,12 +397,34 @@ export function UserDetailPage() {
           {u.streak ? (
             <SectionCard title="Streak" description="One grace day a week keeps the run alive; a second miss in the same week resets it.">
               <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <div><dt className="text-xs text-text-muted">Current run</dt><dd className="tabular text-h3">{formatNumber(u.streak.current)} {u.streak.current === 1 ? 'day' : 'days'}</dd></div>
-                <div><dt className="text-xs text-text-muted">Record</dt><dd className="tabular text-h3">{formatNumber(u.streak.record)} {u.streak.record === 1 ? 'day' : 'days'}</dd></div>
-                <div><dt className="text-xs text-text-muted">Grace left this week</dt><dd className="tabular text-h3">{u.streak.graceLeft}</dd></div>
-                <div><dt className="text-xs text-text-muted">Weekly goal</dt><dd className="tabular text-h3">{u.streak.goalDaysDone} of {u.streak.weeklyGoal}</dd></div>
+                <div>
+                  <dt className="text-xs text-text-muted">Current run</dt>
+                  <dd className="tabular text-h3">
+                    {formatNumber(u.streak.current)} {u.streak.current === 1 ? 'day' : 'days'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-text-muted">Record</dt>
+                  <dd className="tabular text-h3">
+                    {formatNumber(u.streak.record)} {u.streak.record === 1 ? 'day' : 'days'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-text-muted">Grace left this week</dt>
+                  <dd className="tabular text-h3">{u.streak.graceLeft}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-text-muted">Weekly goal</dt>
+                  <dd className="tabular text-h3">
+                    {u.streak.goalDaysDone} of {u.streak.weeklyGoal}
+                  </dd>
+                </div>
               </dl>
-              {u.heartRateReadings ? <p className="text-sm text-text-muted">{formatNumber(u.heartRateReadings)} sits have a heart-rate reading from the phone.</p> : null}
+              {u.heartRateReadings ? (
+                <p className="text-sm text-text-muted">
+                  {formatNumber(u.heartRateReadings)} sits have a heart-rate reading from the phone.
+                </p>
+              ) : null}
             </SectionCard>
           ) : null}
           <SectionCard title="Notifications" description="Pushes this person received (the daily limit is in Settings).">
@@ -409,7 +435,10 @@ export function UserDetailPage() {
                 {u.pushes.slice(0, 12).map((p, i) => (
                   <li key={i} className="flex items-center justify-between gap-3 py-2">
                     <span className="font-medium">{p.key.startsWith('ann:') ? 'Announcement' : p.key.replace(/_/g, ' ')}</span>
-                    <span className="text-text-muted">{p.date}{p.openedAt ? ' · opened' : ''}</span>
+                    <span className="text-text-muted">
+                      {p.date}
+                      {p.openedAt ? ' · opened' : ''}
+                    </span>
                   </li>
                 ))}
               </ul>

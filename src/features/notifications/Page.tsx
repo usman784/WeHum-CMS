@@ -307,7 +307,12 @@ function LockScreen({ title, body }: { title: string; body: string }) {
   );
 }
 
-const KEY_LABEL: Record<string, string> = { daily_nudge: 'Reminder', daily_message: 'Daily message', group_warning: 'Group warning', trial_ending: 'Trial ending' };
+const KEY_LABEL: Record<string, string> = {
+  daily_nudge: 'Reminder',
+  daily_message: 'Daily message',
+  group_warning: 'Group warning',
+  trial_ending: 'Trial ending',
+};
 const keyLabel = (k: string) => KEY_LABEL[k] ?? (k.startsWith('ann:') ? 'Announcement' : k.startsWith('sit:') ? 'Sit warning' : k);
 
 /** Pushes per day from the delivery log: how many went out, were opened, and how many people hit the daily limit. */
@@ -315,13 +320,28 @@ function Delivery() {
   const q = useDelivery(14);
   const days = q.data?.days ?? [];
   return (
-    <SectionCard title="Delivery per day" description={q.data ? `Each person gets at most ${q.data.maxPerDay} pushes a day (Settings → App content).` : 'Pushes sent, opened and held back by the daily limit.'}>
-      {q.isPending ? <p className="text-sm text-text-muted">Loading…</p> : days.length === 0 ? <p className="text-sm text-text-muted">Nothing sent yet.</p> : (
+    <SectionCard
+      title="Delivery per day"
+      description={
+        q.data
+          ? `Each person gets at most ${q.data.maxPerDay} pushes a day (Settings → App content).`
+          : 'Pushes sent, opened and held back by the daily limit.'
+      }
+    >
+      {q.isPending ? (
+        <p className="text-sm text-text-muted">Loading…</p>
+      ) : days.length === 0 ? (
+        <p className="text-sm text-text-muted">Nothing sent yet.</p>
+      ) : (
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-overline uppercase text-text-muted">
-              <th className="pb-2 font-semibold">Day</th><th className="pb-2 text-right font-semibold">Sent</th><th className="pb-2 text-right font-semibold">Opened</th>
-              <th className="pb-2 text-right font-semibold">People</th><th className="pb-2 text-right font-semibold">Avg / person</th><th className="pb-2 text-right font-semibold">At limit</th>
+              <th className="pb-2 font-semibold">Day</th>
+              <th className="pb-2 text-right font-semibold">Sent</th>
+              <th className="pb-2 text-right font-semibold">Opened</th>
+              <th className="pb-2 text-right font-semibold">People</th>
+              <th className="pb-2 text-right font-semibold">Avg / person</th>
+              <th className="pb-2 text-right font-semibold">At limit</th>
             </tr>
           </thead>
           <tbody>

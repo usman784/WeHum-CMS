@@ -42,8 +42,18 @@ const FIELDS: ConflictField<Challenge>[] = [
   { key: 'showOnYou', label: 'Show on the You tab' },
 ];
 const blank: ChallengeInput = {
-  name: '', days: 7, counts: 'any', minMinutes: 3, membersOnly: true, showOnYou: true,
-  blurb: '', leadTeacherId: '', badgeName: '', graceDays: 1, unlockTime: '07:00', schedule: [],
+  name: '',
+  days: 7,
+  counts: 'any',
+  minMinutes: 3,
+  membersOnly: true,
+  showOnYou: true,
+  blurb: '',
+  leadTeacherId: '',
+  badgeName: '',
+  graceDays: 1,
+  unlockTime: '07:00',
+  schedule: [],
 };
 const toForm = (c: Challenge): ChallengeInput => ({
   name: c.name,
@@ -137,7 +147,15 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
           checked={watch('showOnYou')}
           onCheckedChange={(v) => setValue('showOnYou', v, { shouldDirty: true })}
         />
-        <Textarea label="About" hint="shown on the challenge screen" rows={3} maxLength={600} value={watch('blurb')} error={e.blurb?.message} {...register('blurb')} />
+        <Textarea
+          label="About"
+          hint="shown on the challenge screen"
+          rows={3}
+          maxLength={600}
+          value={watch('blurb')}
+          error={e.blurb?.message}
+          {...register('blurb')}
+        />
         <Select
           label="Led by"
           size="sm"
@@ -161,7 +179,13 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
                 size="sm"
                 value={d.title}
                 maxLength={80}
-                onChange={(ev) => setValue('schedule', schedule.map((x, j) => (j === i ? { ...x, title: ev.target.value } : x)), { shouldDirty: true })}
+                onChange={(ev) =>
+                  setValue(
+                    'schedule',
+                    schedule.map((x, j) => (j === i ? { ...x, title: ev.target.value } : x)),
+                    { shouldDirty: true },
+                  )
+                }
               />
               <Input
                 label={`Day ${i + 1} minutes`}
@@ -169,7 +193,13 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
                 size="sm"
                 inputMode="numeric"
                 value={String(d.minutes)}
-                onChange={(ev) => setValue('schedule', schedule.map((x, j) => (j === i ? { ...x, minutes: Number(ev.target.value) || 0 } : x)), { shouldDirty: true })}
+                onChange={(ev) =>
+                  setValue(
+                    'schedule',
+                    schedule.map((x, j) => (j === i ? { ...x, minutes: Number(ev.target.value) || 0 } : x)),
+                    { shouldDirty: true },
+                  )
+                }
               />
             </div>
           ))}
@@ -179,20 +209,31 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setValue('schedule', [...schedule, { day: schedule.length + 1, title: '', minutes: 10, summary: '' }], { shouldDirty: true })}
+                onClick={() =>
+                  setValue('schedule', [...schedule, { day: schedule.length + 1, title: '', minutes: 10, summary: '' }], {
+                    shouldDirty: true,
+                  })
+                }
               >
                 + Add day {schedule.length + 1}
               </Button>
             ) : null}
             {schedule.length ? (
-              <Button type="button" variant="ghost" size="sm" onClick={() => setValue('schedule', schedule.slice(0, -1), { shouldDirty: true })}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setValue('schedule', schedule.slice(0, -1), { shouldDirty: true })}
+              >
                 Remove last
               </Button>
             ) : null}
           </div>
           <p className="text-xs text-text-faint">Days without a title show as “Day N”. Minutes are shown on the schedule.</p>
         </fieldset>
-        <p className="text-xs text-text-faint">Missing a day never resets progress: a grace day is used first and the cohort keeps its pace.</p>
+        <p className="text-xs text-text-faint">
+          Missing a day never resets progress: a grace day is used first and the cohort keeps its pace.
+        </p>
         <div className="flex gap-2.5">
           {challenge && challenge.status !== 'live' ? (
             <Button

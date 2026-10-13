@@ -1,7 +1,20 @@
 import { http, HttpResponse } from 'msw';
 import type { Funnel, Retention, Trends } from '../features/analytics/api';
 import type { ConfigDoc } from '../features/config/useConfigForm';
-import type { AuditEntry, BrandingConfig, ConfigKey, CrisisConfig, DownloadsConfig, LegalConfig, MainConfig, NewsletterConfig, PushConfig, SilenceConfig, SitTimesConfig, TeamMember } from '../features/settings/api';
+import type {
+  AuditEntry,
+  BrandingConfig,
+  ConfigKey,
+  CrisisConfig,
+  DownloadsConfig,
+  LegalConfig,
+  MainConfig,
+  NewsletterConfig,
+  PushConfig,
+  SilenceConfig,
+  SitTimesConfig,
+  TeamMember,
+} from '../features/settings/api';
 import { session } from '../lib/session';
 import { db } from './content';
 import { body, fail, ok } from './overview';
@@ -99,7 +112,16 @@ export function resetInsights() {
     value: {
       minVersion: { ios: '1.0.0', android: '1.0.0' },
       maintenance: false,
-      features: { challenges: false, gratitude: false, breathwork: false, milestones: false, intent: true, streaks: true, hourlySits: false, heartRate: false },
+      features: {
+        challenges: false,
+        gratitude: false,
+        breathwork: false,
+        milestones: false,
+        intent: true,
+        streaks: true,
+        hourlySits: false,
+        heartRate: false,
+      },
       supportEmail: 'support@wehum.app',
       defaultReminderTime: '07:00',
       languages: ['en'],
@@ -117,22 +139,64 @@ export function resetInsights() {
     },
   };
   insights.sitTimes = {
-    key: 'sitTimes', version: 1, updatedAt: null,
-    value: { blocks: [{ time: '06:30', label: 'Dawn Stillness' }, { time: '07:00', label: 'Morning Prime' }, { time: '12:30', label: 'Midday Reset' }, { time: '21:00', label: 'Night Decompress' }] },
+    key: 'sitTimes',
+    version: 1,
+    updatedAt: null,
+    value: {
+      blocks: [
+        { time: '06:30', label: 'Dawn Stillness' },
+        { time: '07:00', label: 'Morning Prime' },
+        { time: '12:30', label: 'Midday Reset' },
+        { time: '21:00', label: 'Night Decompress' },
+      ],
+    },
   };
   insights.downloads = { key: 'downloads', version: 1, updatedAt: null, value: { quotaMb: 2400 } };
-  insights.branding = { key: 'branding', version: 1, updatedAt: null, value: { appName: 'WeHum', tagline: 'Meditate together', logoMediaId: null } };
+  insights.branding = {
+    key: 'branding',
+    version: 1,
+    updatedAt: null,
+    value: { appName: 'WeHum', tagline: 'Meditate together', logoMediaId: null },
+  };
   insights.push = { key: 'push', version: 1, updatedAt: null, value: { maxPerDay: 2 } };
-  insights.newsletter = { key: 'newsletter', version: 1, updatedAt: null, value: { enabled: false, listId: '', doubleOptIn: true, tags: ['wehum-app'] } };
-  insights.silence = { key: 'silence', version: 1, updatedAt: null, value: { durations: [5, 10, 15, 20, 30, 45, 60, 0], cadence: { inhaleSec: 4, exhaleSec: 6 }, extendMin: 5 } };
+  insights.newsletter = {
+    key: 'newsletter',
+    version: 1,
+    updatedAt: null,
+    value: { enabled: false, listId: '', doubleOptIn: true, tags: ['wehum-app'] },
+  };
+  insights.silence = {
+    key: 'silence',
+    version: 1,
+    updatedAt: null,
+    value: { durations: [5, 10, 15, 20, 30, 45, 60, 0], cadence: { inhaleSec: 4, exhaleSec: 6 }, extendMin: 5 },
+  };
   insights.crisis = {
-    key: 'crisis', version: 1, updatedAt: null,
+    key: 'crisis',
+    version: 1,
+    updatedAt: null,
     value: {
-      defaultRegion: 'US', tip: 'Place both feet flat on the floor and take slow, extended exhales.',
-      regions: [{
-        code: 'US', name: 'United States & Canada', countries: ['US', 'CA'],
-        lines: [{ id: '988', name: '988 Suicide & Crisis Lifeline', kind: 'Voice & SMS', description: 'Confidential support, free, 24/7.', actions: [{ type: 'call', label: 'Call 988', value: '988' }, { type: 'sms', label: 'Text 988', value: '988' }] }],
-      }],
+      defaultRegion: 'US',
+      tip: 'Place both feet flat on the floor and take slow, extended exhales.',
+      regions: [
+        {
+          code: 'US',
+          name: 'United States & Canada',
+          countries: ['US', 'CA'],
+          lines: [
+            {
+              id: '988',
+              name: '988 Suicide & Crisis Lifeline',
+              kind: 'Voice & SMS',
+              description: 'Confidential support, free, 24/7.',
+              actions: [
+                { type: 'call', label: 'Call 988', value: '988' },
+                { type: 'sms', label: 'Text 988', value: '988' },
+              ],
+            },
+          ],
+        },
+      ],
       international: [{ country: 'European Union', line: 'Universal emergency services', value: '112' }],
     },
   };
@@ -263,7 +327,17 @@ export const insightsHandlers = [
       ...insights.main,
       value: { ...insights.main.value, features: { ...insights.main.value.features, challenges: db.flags.challenges } },
     };
-    return ok({ main, legal: insights.legal, sitTimes: insights.sitTimes, downloads: insights.downloads, silence: insights.silence, crisis: insights.crisis, branding: insights.branding, push: insights.push, newsletter: insights.newsletter });
+    return ok({
+      main,
+      legal: insights.legal,
+      sitTimes: insights.sitTimes,
+      downloads: insights.downloads,
+      silence: insights.silence,
+      crisis: insights.crisis,
+      branding: insights.branding,
+      push: insights.push,
+      newsletter: insights.newsletter,
+    });
   }),
   putConfig('main'),
   putConfig('legal'),
@@ -274,7 +348,18 @@ export const insightsHandlers = [
   putConfig('branding'),
   putConfig('push'),
   putConfig('newsletter'),
-  http.get(u('/newsletter/status'), () => (is('owner', 'admin') ? ok({ enabled: insights.newsletter.value.enabled, keyConfigured: false, listId: insights.newsletter.value.listId || null, synced: 0, pending: 0, failed: 0 }) : denied())),
+  http.get(u('/newsletter/status'), () =>
+    is('owner', 'admin')
+      ? ok({
+          enabled: insights.newsletter.value.enabled,
+          keyConfigured: false,
+          listId: insights.newsletter.value.listId || null,
+          synced: 0,
+          pending: 0,
+          failed: 0,
+        })
+      : denied(),
+  ),
   http.get(u('/team'), () => (is('owner', 'admin') ? ok(insights.team) : denied())),
   http.post(u('/team/invite'), async ({ request }) => {
     const b = (await body(request)) as { email: string; name?: string; role: TeamMember['role'] };

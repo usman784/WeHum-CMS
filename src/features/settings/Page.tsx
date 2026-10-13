@@ -60,7 +60,10 @@ const MAIN_FIELDS: ConflictField<MainConfig>[] = [
   {
     key: 'latestVersion',
     label: 'Latest app version',
-    format: (v) => (v ? `iOS ${(v as NonNullable<MainConfig['latestVersion']>).ios} · Android ${(v as NonNullable<MainConfig['latestVersion']>).android}` : 'not set'),
+    format: (v) =>
+      v
+        ? `iOS ${(v as NonNullable<MainConfig['latestVersion']>).ios} · Android ${(v as NonNullable<MainConfig['latestVersion']>).android}`
+        : 'not set',
   },
   { key: 'storeUrls', label: 'Store links', format: (v) => (v ? 'set' : 'default') },
   { key: 'maintenance', label: 'Maintenance mode' },
@@ -88,7 +91,11 @@ const FEATURES: { key: keyof MainConfig['features']; label: string; description:
   { key: 'intent', label: 'Intent question', description: 'Ask “what brings you here?” during onboarding.' },
   { key: 'streaks', label: 'Streaks', description: 'Forgiving streak with one grace day a week on Today, You and the payoff.' },
   { key: 'hourlySits', label: 'Hourly sits', description: 'Group sits every hour inside the window set in Group meditation.' },
-  { key: 'heartRate', label: 'Heart-rate shift', description: 'Show the heart-rate change when the person connects Apple Health or Health Connect.' },
+  {
+    key: 'heartRate',
+    label: 'Heart-rate shift',
+    description: 'Show the heart-rate change when the person connects Apple Health or Health Connect.',
+  },
 ];
 
 function Row({ children }: { children: ReactNode }) {
@@ -176,10 +183,20 @@ function Releases({ form }: { form: MainForm }) {
         />
       </Row>
       <Row>
-        <Input label="App Store link" value={stores.ios} onChange={(e) => form.edit({ storeUrls: { ...stores, ios: e.target.value.trim() } })} />
-        <Input label="Play Store link" value={stores.android} onChange={(e) => form.edit({ storeUrls: { ...stores, android: e.target.value.trim() } })} />
+        <Input
+          label="App Store link"
+          value={stores.ios}
+          onChange={(e) => form.edit({ storeUrls: { ...stores, ios: e.target.value.trim() } })}
+        />
+        <Input
+          label="Play Store link"
+          value={stores.android}
+          onChange={(e) => form.edit({ storeUrls: { ...stores, android: e.target.value.trim() } })}
+        />
       </Row>
-      <p className="text-sm text-text-muted">Apps older than the latest version (but not below the minimum) see a “new version” prompt once, with a Later button.</p>
+      <p className="text-sm text-text-muted">
+        Apps older than the latest version (but not below the minimum) see a “new version” prompt once, with a Later button.
+      </p>
       <Switch
         label="Maintenance mode"
         description="The app shows a short “back soon” screen. Use only during planned work."
@@ -628,7 +645,11 @@ export function SettingsPage() {
   const mv = main.value;
   const lv = legal.value;
   const invalid =
-    (!!mv && (!semverOk(mv.minVersion.ios) || !semverOk(mv.minVersion.android) || (!!mv.latestVersion && (!semverOk(mv.latestVersion.ios) || !semverOk(mv.latestVersion.android))) || !/^\S+@\S+\.\S+$/.test(mv.supportEmail))) ||
+    (!!mv &&
+      (!semverOk(mv.minVersion.ios) ||
+        !semverOk(mv.minVersion.android) ||
+        (!!mv.latestVersion && (!semverOk(mv.latestVersion.ios) || !semverOk(mv.latestVersion.android))) ||
+        !/^\S+@\S+\.\S+$/.test(mv.supportEmail))) ||
     (!!lv && (!/^https:\/\/\S+$/.test(lv.privacyUrl) || !/^https:\/\/\S+$/.test(lv.termsUrl)));
   const dirty = main.dirty || legal.dirty;
   const usesForms = tab === 'general' || tab === 'releases' || tab === 'legal';
