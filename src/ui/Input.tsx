@@ -1,24 +1,48 @@
-import { Search } from 'lucide-react';
-import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { Eye, EyeOff, Search } from 'lucide-react';
+import { forwardRef, useState, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { cn } from '../lib/cn';
 import { controlClass, FieldShell, useFieldIds, type FieldProps } from './Field';
 
 type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & FieldProps & { size?: 'md' | 'sm' };
 
-/** Text input with label, help and error. Works with react-hook-form `register`. */
+/**
+ * Text input with label, help and error. Works with react-hook-form `register`.
+ * A password input has an eye button to show or hide what is typed (the field keeps its value and focus).
+ */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, hint, error, help, aside, hideLabel, className, size = 'md', ...p }, ref) => {
+  ({ label, hint, error, help, aside, hideLabel, className, size = 'md', type, ...p }, ref) => {
     const ids = useFieldIds(error, help);
+    const [shown, setShown] = useState(false);
+    const isPassword = type === 'password';
+    const input = (
+      <input
+        ref={ref}
+        id={ids.id}
+        type={isPassword && shown ? 'text' : type}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={ids.describedBy}
+        className={cn(controlClass(size, !!error), isPassword && 'pr-12')}
+        {...p}
+      />
+    );
     return (
       <FieldShell {...{ label, hint, error, help, aside, hideLabel, className, ids }}>
-        <input
-          ref={ref}
-          id={ids.id}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={ids.describedBy}
-          className={controlClass(size, !!error)}
-          {...p}
-        />
+        {isPassword ? (
+          <div className="relative">
+            {input}
+            <button
+              type="button"
+              onClick={() => setShown((v) => !v)}
+              aria-label={shown ? 'Hide password' : 'Show password'}
+              aria-pressed={shown}
+              className="absolute right-1 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-btn text-text-muted hover:text-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-ember"
+            >
+              {shown ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
+            </button>
+          </div>
+        ) : (
+          input
+        )}
       </FieldShell>
     );
   },

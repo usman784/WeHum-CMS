@@ -91,6 +91,22 @@ describe('schemas', () => {
   });
 });
 
+describe('password field', () => {
+  it('has an eye button that shows and hides what is typed, keeping the text', async () => {
+    open('/login');
+    const field = await screen.findByLabelText('Password');
+    await user.type(field, 'secret-pass-1');
+    expect(field).toHaveAttribute('type', 'password');
+    await user.click(screen.getByRole('button', { name: 'Show password' }));
+    expect(field).toHaveAttribute('type', 'text');
+    expect(field).toHaveValue('secret-pass-1');
+    expect(screen.getByRole('button', { name: 'Hide password' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: 'Hide password' }));
+    expect(field).toHaveAttribute('type', 'password');
+    expect(field).toHaveValue('secret-pass-1');
+  });
+});
+
 describe('form errors', () => {
   const validation = new ApiError('VALIDATION_FAILED', 400, 'Invalid input', {
     fields: [{ path: 'email', message: 'Invalid email' }, { path: 'other', message: 'x' }, { nope: 1 }],
