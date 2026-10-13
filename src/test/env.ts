@@ -14,6 +14,14 @@ export default <Environment>{
     const env = await builtinEnvironments.jsdom.setup(global, options);
     global.AbortController = AbortController;
     global.AbortSignal = AbortSignal;
+    // An upload cancelled at the end of a test can still get its last XHR event after jsdom is gone; MSW builds that event
+    // with the global ProgressEvent, so keep a copy alive on Node's own global to stop a harmless "not defined" error.
+    const { ProgressEvent } = global;
+    const teardown = env.teardown;
+    env.teardown = async (g) => {
+      await teardown(g);
+      (globalThis as { ProgressEvent?: unknown }).ProgressEvent ??= ProgressEvent;
+    };
     return env;
   },
 };
