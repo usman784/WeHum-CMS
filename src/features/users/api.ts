@@ -32,6 +32,7 @@ export type UserDetail = {
   id: string;
   name: string | null;
   lastName?: string | null;
+  bio?: string | null;
   username?: string | null;
   avatarUrl?: string | null;
   pushes?: { key: string; date: string; sentAt: string; openedAt: string | null }[];

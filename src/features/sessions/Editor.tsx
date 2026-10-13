@@ -103,6 +103,7 @@ function SessionForm({ session }: FormProps) {
   const e = formState.errors;
   const dirty = formState.isDirty;
   const type = watch('type');
+  const isYoutube = type === 'youtube';
   const access = watch('access');
   const description = watch('description');
   const phases = watch('phases') ?? [];
@@ -162,6 +163,7 @@ function SessionForm({ session }: FormProps) {
       if (info.durationSec) setValue('durationSec', info.durationSec, { shouldDirty: true });
       if (!getValues('coverMediaId')) setValue('coverUrl', info.thumbnailUrl, { shouldDirty: true });
       if (!getValues('title').trim() && info.title) setValue('title', info.title.slice(0, 120), { shouldDirty: true });
+      if (info.description) setValue('description', info.description, { shouldDirty: true }); // the app shows it as “Video description”
     } catch (err) {
       setYt(null);
       setValue('youtubeId', null, { shouldDirty: true });
@@ -465,10 +467,10 @@ function SessionForm({ session }: FormProps) {
           <SectionCard title="Details" className="gap-4 p-[22px]">
             <Input label="Title" error={e.title?.message} {...register('title')} />
             <Textarea
-              label="Short description"
-              hint="Shown on the session page"
-              rows={2}
-              maxLength={160}
+              label={isYoutube ? 'Video description' : 'Short description'}
+              hint={isYoutube ? 'Taken from YouTube when you paste the link; links in it open inside the app. Shown collapsed on the session page.' : 'Shown on the session page'}
+              rows={isYoutube ? 6 : 2}
+              maxLength={isYoutube ? 4000 : 160}
               error={e.description?.message}
               {...register('description')}
               value={description}

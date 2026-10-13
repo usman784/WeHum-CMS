@@ -68,6 +68,23 @@ describe('Settings', () => {
     expect(insights.silence.value.durations).not.toContain(45);
   });
 
+  it('newsletter: says when the server has no key, saves the list and options on its own, and keeps the button off until it can work', async () => {
+    openApp('/settings?tab=content');
+    const card = (await screen.findByRole('heading', { name: 'Newsletter' })).closest('section')!;
+    expect(await within(card).findByText(/Mailchimp API key is not set on the server/)).toBeInTheDocument();
+    expect(within(card).getByRole('button', { name: 'Add waiting addresses now' })).toBeDisabled();
+    expect(within(card).getByRole('switch', { name: /Ask people to confirm/ })).toBeChecked(); // double opt-in is the safe default
+    await userEvent.click(within(card).getByRole('switch', { name: /Send addresses to the newsletter list/ }));
+    expect(within(card).getByRole('button', { name: 'Save' })).toBeDisabled(); // a list ID is needed first
+    await userEvent.type(within(card).getByRole('textbox', { name: /Audience \(list\) ID/ }), 'abc123');
+    await userEvent.clear(within(card).getByRole('textbox', { name: /Tags/ }));
+    await userEvent.type(within(card).getByRole('textbox', { name: /Tags/ }), 'wehum-app, members');
+    await userEvent.click(within(card).getByRole('button', { name: 'Save' }));
+    expect(await findToast('Newsletter saved')).toBeInTheDocument();
+    expect(insights.newsletter.value).toEqual({ enabled: true, listId: 'abc123', doubleOptIn: true, tags: ['wehum-app', 'members'] });
+    expect(await within(card).findByLabelText('Newsletter status')).toHaveTextContent('0 on the list');
+  });
+
   it('legal: https links only; saves the legal document', async () => {
     openApp('/settings?tab=legal');
     const privacy = await screen.findByRole('textbox', { name: 'Privacy policy URL' });

@@ -798,3 +798,9 @@ Built (design renders in `design/screens/S*.png`, regenerated against the real b
 Tests run: `pnpm exec vitest run` → 33 files, 512 passed (with `--maxWorkers=3 --testTimeout=30000` when the machine is busy); `tsc` and `eslint` clean.
 
 Status: ✅ done
+
+### Oct 13 — Client tickets
+- **Settings → App content → Newsletter:** switch, Audience (list) ID, double opt-in, tags, live counts (on the list / waiting / refused by the list), "Add waiting addresses now"; a notice while the server has no `MAILCHIMP_API_KEY`.
+- **Sessions:** a YouTube item's description is filled from YouTube when the link is pasted (up to 4,000 characters, shown in the app as the collapsible "Video description"); other types stay at 160.
+- **Users → detail:** shows the person's bio.
+Tests: `pnpm exec vitest run` (512 + 2 new), `tsc` clean. The upload test no longer prints a late "ProgressEvent is not defined" error.

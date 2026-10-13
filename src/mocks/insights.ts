@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import type { Funnel, Retention, Trends } from '../features/analytics/api';
 import type { ConfigDoc } from '../features/config/useConfigForm';
-import type { AuditEntry, BrandingConfig, ConfigKey, CrisisConfig, DownloadsConfig, LegalConfig, MainConfig, PushConfig, SilenceConfig, SitTimesConfig, TeamMember } from '../features/settings/api';
+import type { AuditEntry, BrandingConfig, ConfigKey, CrisisConfig, DownloadsConfig, LegalConfig, MainConfig, NewsletterConfig, PushConfig, SilenceConfig, SitTimesConfig, TeamMember } from '../features/settings/api';
 import { session } from '../lib/session';
 import { db } from './content';
 import { body, fail, ok } from './overview';
@@ -27,6 +27,7 @@ export const insights = {
   crisis: null as unknown as ConfigDoc<CrisisConfig>,
   branding: null as unknown as ConfigDoc<BrandingConfig>,
   push: null as unknown as ConfigDoc<PushConfig>,
+  newsletter: null as unknown as ConfigDoc<NewsletterConfig>,
   team: [] as TeamMember[],
   audit: [] as AuditEntry[],
   calls: [] as { method: string; path: string; body?: unknown }[],
@@ -122,6 +123,7 @@ export function resetInsights() {
   insights.downloads = { key: 'downloads', version: 1, updatedAt: null, value: { quotaMb: 2400 } };
   insights.branding = { key: 'branding', version: 1, updatedAt: null, value: { appName: 'WeHum', tagline: 'Meditate together', logoMediaId: null } };
   insights.push = { key: 'push', version: 1, updatedAt: null, value: { maxPerDay: 2 } };
+  insights.newsletter = { key: 'newsletter', version: 1, updatedAt: null, value: { enabled: false, listId: '', doubleOptIn: true, tags: ['wehum-app'] } };
   insights.silence = { key: 'silence', version: 1, updatedAt: null, value: { durations: [5, 10, 15, 20, 30, 45, 60, 0], cadence: { inhaleSec: 4, exhaleSec: 6 }, extendMin: 5 } };
   insights.crisis = {
     key: 'crisis', version: 1, updatedAt: null,
@@ -261,7 +263,7 @@ export const insightsHandlers = [
       ...insights.main,
       value: { ...insights.main.value, features: { ...insights.main.value.features, challenges: db.flags.challenges } },
     };
-    return ok({ main, legal: insights.legal, sitTimes: insights.sitTimes, downloads: insights.downloads, silence: insights.silence, crisis: insights.crisis, branding: insights.branding, push: insights.push });
+    return ok({ main, legal: insights.legal, sitTimes: insights.sitTimes, downloads: insights.downloads, silence: insights.silence, crisis: insights.crisis, branding: insights.branding, push: insights.push, newsletter: insights.newsletter });
   }),
   putConfig('main'),
   putConfig('legal'),
@@ -271,6 +273,8 @@ export const insightsHandlers = [
   putConfig('crisis'),
   putConfig('branding'),
   putConfig('push'),
+  putConfig('newsletter'),
+  http.get(u('/newsletter/status'), () => (is('owner', 'admin') ? ok({ enabled: insights.newsletter.value.enabled, keyConfigured: false, listId: insights.newsletter.value.listId || null, synced: 0, pending: 0, failed: 0 }) : denied())),
   http.get(u('/team'), () => (is('owner', 'admin') ? ok(insights.team) : denied())),
   http.post(u('/team/invite'), async ({ request }) => {
     const b = (await body(request)) as { email: string; name?: string; role: TeamMember['role'] };

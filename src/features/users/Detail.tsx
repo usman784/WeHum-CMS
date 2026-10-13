@@ -359,6 +359,7 @@ export function UserDetailPage() {
             ) : null}
           </div>
           <p className="text-sm text-text-muted">{headerLine(u)}</p>
+          {u.bio ? <p className="max-w-prose text-sm text-body" aria-label="Bio">{u.bio}</p> : null}
         </div>
       </header>
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">

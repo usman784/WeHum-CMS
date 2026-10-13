@@ -64,6 +64,15 @@ describe('session helpers', () => {
     expect(sessionSchema.safeParse({ ...form, description: 'x'.repeat(161) }).success).toBe(false);
   });
 
+  it('a YouTube item can carry the video’s whole description (4,000 characters); other types stay short', () => {
+    const yt = { ...blankSession, title: 'x', type: 'youtube' as const };
+    expect(sessionSchema.safeParse({ ...yt, description: 'x'.repeat(4000) }).success).toBe(true);
+    expect(sessionSchema.safeParse({ ...yt, description: 'x'.repeat(4001) }).success).toBe(false);
+    const audio = sessionSchema.safeParse({ ...blankSession, title: 'x', type: 'audio', description: 'x'.repeat(161) });
+    expect(audio.success).toBe(false);
+    expect(audio.error?.issues[0]?.message).toBe('The description can be at most 160 characters');
+  });
+
   it('request body: YouTube is always free with no file; uploads carry no YouTube id', () => {
     const v = sessionSchema.parse({
       ...blankSession,

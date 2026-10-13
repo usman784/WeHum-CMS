@@ -50,7 +50,10 @@ export type CrisisConfig = {
 export type BrandingConfig = { appName: string; tagline: string; logoMediaId: string | null };
 /** `app_config.push` — at most this many pushes per person and day. */
 export type PushConfig = { maxPerDay: number };
-export type ConfigKey = 'main' | 'legal' | 'sitTimes' | 'downloads' | 'silence' | 'crisis' | 'branding' | 'push';
+/** `app_config.newsletter` — e-mail addresses go to the newsletter list from the server (the API key is an environment secret). */
+export type NewsletterConfig = { enabled: boolean; listId: string; doubleOptIn: boolean; tags: string[] };
+export type NewsletterStatus = { enabled: boolean; keyConfigured: boolean; listId: string | null; synced: number; pending: number; failed: number };
+export type ConfigKey = 'main' | 'legal' | 'sitTimes' | 'downloads' | 'silence' | 'crisis' | 'branding' | 'push' | 'newsletter';
 export type AllConfig = {
   main: ConfigDoc<MainConfig>;
   legal: ConfigDoc<LegalConfig>;
@@ -60,6 +63,7 @@ export type AllConfig = {
   crisis: ConfigDoc<CrisisConfig>;
   branding: ConfigDoc<BrandingConfig>;
   push: ConfigDoc<PushConfig>;
+  newsletter: ConfigDoc<NewsletterConfig>;
 } & Record<string, ConfigDoc<unknown>>;
 
 export type TeamMember = {
@@ -115,6 +119,11 @@ export function useAudit(f: AuditFilters) {
     getNextPageParam: (last) => last.meta?.nextCursor ?? undefined,
   });
 }
+
+export const newsletterApi = {
+  status: () => api<NewsletterStatus>('/v1/admin/newsletter/status').then((r) => r.data),
+  syncNow: () => api<NewsletterStatus & { added: number }>('/v1/admin/newsletter/sync', { method: 'POST', body: {} }).then((r) => r.data),
+};
 
 export const settingsApi = {
   saveConfig: <T>(key: ConfigKey, value: T, version: number) =>

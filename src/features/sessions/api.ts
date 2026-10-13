@@ -114,7 +114,7 @@ export function useSessionSearch(q: string, enabled = true) {
   });
 }
 
-export type YoutubeInfo = { youtubeId: string; title: string | null; thumbnailUrl: string; durationSec: number | null };
+export type YoutubeInfo = { youtubeId: string; title: string | null; description?: string | null; thumbnailUrl: string; durationSec: number | null };
 export type BulkResult = { results: { id: string; ok: boolean; error?: { code: string; message: string } }[]; ok: number; failed: number };
 
 type Body = Partial<SessionValues> & { type?: SessionType };
@@ -171,7 +171,7 @@ export function parseTags(raw: string): string[] {
 
 export const sessionSchema = z.object({
   title: z.string().trim().min(1, 'Enter a title').max(120, 'The title can be at most 120 characters'),
-  description: nullableText(160, 'The description'),
+  description: nullableText(4000, 'The description'), // a YouTube item carries the video's own text; other types are checked below (160)
   type: z.enum(['audio', 'video', 'youtube']),
   access: z.enum(['free', 'premium']),
   themeId: z.string().transform((v) => v || null),
@@ -191,6 +191,8 @@ export const sessionSchema = z.object({
   sosFeeling: nullableText(40, 'The feeling'),
   sosSubtitle: nullableText(80, 'The subtitle'),
   phases: z.array(z.object({ atSec: z.number().int().min(0).max(14400), title: z.string().trim().min(1, 'Name the phase').max(60) })).max(12),
+}).superRefine((v, ctx) => {
+  if (v.type !== 'youtube' && (v.description?.length ?? 0) > 160) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['description'], message: 'The description can be at most 160 characters' });
 });
 export type SessionInput = z.input<typeof sessionSchema>;
 export type SessionValues = z.output<typeof sessionSchema>;

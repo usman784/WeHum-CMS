@@ -1,4 +1,5 @@
 import { Plus, Trash2 } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useChangedByOthers } from '../../hooks/useEntity';
 import { Button } from '../../ui/Button';
@@ -8,6 +9,7 @@ import { Input, Textarea } from '../../ui/Input';
 import { ListEditor } from '../../ui/ListEditor';
 import { NumberInput } from '../../ui/NumberInput';
 import { Select } from '../../ui/Select';
+import { Switch } from '../../ui/Switch';
 import { toast } from '../../ui/Toast';
 import { useConfigForm } from '../config/useConfigForm';
 import { ImagePicker } from '../../ui/ImagePicker';
@@ -19,6 +21,8 @@ import {
   type BrandingConfig,
   type ConfigKey,
   type PushConfig,
+  type NewsletterConfig,
+  newsletterApi,
   type CrisisConfig,
   type CrisisLine,
   type CrisisRegion,
@@ -141,6 +145,52 @@ export function PushLimit() {
     <SectionCard title="Notification limit" description="Reminders, daily messages, group warnings and announcements together. Anything beyond the limit is held back, so nobody is flooded.">
       <NumberInput label="Pushes per person per day" min={1} max={10} step={1} value={v.maxPerDay} onChange={(n) => n && form.edit({ maxPerDay: n })} />
       <SaveBar form={form} />
+    </SectionCard>
+  );
+}
+
+/** E-mail list: verified addresses are added to Mailchimp by the server, once each (also everyone who signed up earlier). */
+export function Newsletter() {
+  const { form, loading } = useCard<NewsletterConfig>('newsletter', 'Newsletter');
+  const qc = useQueryClient();
+  const status = useQuery({ queryKey: ['admin', 'newsletter-status'], queryFn: newsletterApi.status, refetchInterval: 30_000 });
+  const [busy, setBusy] = useState(false);
+  const [tagsText, setTagsText] = useState<string | null>(null); // what is typed, so commas and spaces are not eaten while typing
+  const v = form.value;
+  if (loading || !v) return null;
+  const s = status.data;
+  const sync = async () => {
+    setBusy(true);
+    try {
+      const r = await newsletterApi.syncNow();
+      qc.setQueryData(['admin', 'newsletter-status'], r);
+      toast.success(r.added ? `${r.added} address${r.added === 1 ? '' : 'es'} added to the list` : 'Nothing new to add');
+    } catch {
+      toast.error('Could not reach the newsletter service. Try again in a minute.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <SectionCard title="Newsletter" description="Verified e-mail addresses are added to your Mailchimp list by the server (never from a mail account), once each, with the first name. People who signed up before are added too.">
+      {s && !s.keyConfigured ? (
+        <p role="status" className="text-sm text-info-text">The Mailchimp API key is not set on the server yet (MAILCHIMP_API_KEY, like xxxxxxxx-us21). Nothing is sent until it is.</p>
+      ) : null}
+      <Switch label="Send addresses to the newsletter list" description="Off: nothing leaves the server." checked={v.enabled} onCheckedChange={(on) => form.edit({ enabled: on })} />
+      <Input label="Audience (list) ID" hint="Mailchimp → Audience → Settings → Audience name and defaults" maxLength={40} value={v.listId} onChange={(e) => form.edit({ listId: e.target.value.trim() })} />
+      <Switch label="Ask people to confirm (double opt-in)" description="Mailchimp sends a confirmation e-mail first. Recommended in the EU." checked={v.doubleOptIn} onCheckedChange={(on) => form.edit({ doubleOptIn: on })} />
+      <Input label="Tags" hint="comma separated, added to every address" value={tagsText ?? v.tags.join(', ')} onChange={(e) => { setTagsText(e.target.value); form.edit({ tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean).slice(0, 10) }); }} />
+      {s ? (
+        <p className="text-sm text-text-muted" aria-label="Newsletter status">
+          <span className="font-semibold text-body">{s.synced}</span> on the list · <span className="font-semibold text-body">{s.pending}</span> waiting · <span className="font-semibold text-body">{s.failed}</span> refused by the list
+        </p>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-3">
+        <SaveBar form={form} invalid={v.enabled && !v.listId.trim()} />
+        <Button variant="outline" size="sm" onClick={sync} disabled={busy || !s?.keyConfigured || !s.enabled}>
+          {busy ? 'Adding…' : 'Add waiting addresses now'}
+        </Button>
+      </div>
     </SectionCard>
   );
 }
@@ -324,6 +374,7 @@ export function AppContent() {
     <div className="flex flex-col gap-5">
       <Branding />
       <PushLimit />
+      <Newsletter />
       <SitTimes />
       <Silence />
       <Downloads />
