@@ -1675,7 +1675,7 @@ export interface paths {
         put?: never;
         /**
          * Resolve YouTube URL → title, duration, thumbnail
-         * @description Auth: admin:owner,admin,editor. private/removed → 422 YOUTUBE_UNAVAILABLE
+         * @description Auth: admin:owner,admin,editor. private/removed/not embeddable, or (with YOUTUBE_API_KEY) made for kids → 422 YOUTUBE_UNAVAILABLE. Response data adds warnings: (short | unlisted | unverified)[] (non-blocking; fewer ads on short/unlisted, unverified = Data API checks did not run)
          */
         post: operations["post_v1_admin_youtube_resolve"];
         delete?: never;

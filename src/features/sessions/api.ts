@@ -120,6 +120,8 @@ export type YoutubeInfo = {
   description?: string | null;
   thumbnailUrl: string;
   durationSec: number | null;
+  /** Non-blocking notes: 'short' | 'unlisted' (fewer ads from YouTube) | 'unverified' (API checks did not run). */
+  warnings?: string[];
 };
 export type BulkResult = { results: { id: string; ok: boolean; error?: { code: string; message: string } }[]; ok: number; failed: number };
 

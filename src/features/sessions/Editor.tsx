@@ -419,6 +419,11 @@ function SessionForm({ session }: FormProps) {
                     </div>
                   </div>
                 ) : null}
+                {yt?.warnings?.length ? (
+                  <p role="status" className="text-sm text-warning">
+                    {yt.warnings.map((w) => YOUTUBE_WARNING[w] ?? w).join(' ')}
+                  </p>
+                ) : null}
                 {yt && !yt.durationSec ? (
                   <Input
                     label="Length in minutes"
@@ -798,6 +803,12 @@ function SessionForm({ session }: FormProps) {
 }
 
 /** 04 Session editor: `/sessions/new` and `/sessions/:id`. */
+const YOUTUBE_WARNING: Record<string, string> = {
+  short: 'This is a YouTube Short. YouTube serves fewer ads on Shorts, so ads may not appear in the app.',
+  unlisted: 'This video is unlisted. YouTube may serve fewer ads on it; use a public video if ads matter.',
+  unverified: 'Could not check this video with YouTube (no API key or no answer), so “made for kids” and embedding were not verified.',
+};
+
 export function SessionEditorPage() {
   const { id } = useParams();
   const isNew = !id || id === 'new';

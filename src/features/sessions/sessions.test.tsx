@@ -521,6 +521,22 @@ describe('Session editor', () => {
     expect(created).toMatchObject({ type: 'youtube', access: 'free', youtubeId: 'Qm7r2XyK8aE', mediaId: null, durationSec: 2400, coverUrl: 'https://i.ytimg.com/vi/Qm7r2XyK8aE/hqdefault.jpg', downloadable: false }); // prettier-ignore
   });
 
+  it('YouTube: warnings from the link check are shown and do not block', async () => {
+    server.use(
+      http.post(url('/v1/admin/youtube/resolve'), () =>
+        HttpResponse.json({ data: { youtubeId: 'Qm7r2XyK8aE', title: 'A Short', thumbnailUrl: 'https://i.ytimg.com/vi/Qm7r2XyK8aE/hq.jpg', durationSec: 45, warnings: ['short', 'unverified'] } }),
+      ),
+    );
+    openApp('/sessions/new');
+    await h1('New session');
+    await user.click(screen.getByRole('radio', { name: /YouTube link/ }));
+    await user.type(screen.getByLabelText('YouTube link'), 'https://www.youtube.com/shorts/Qm7r2XyK8aE');
+    await user.click(screen.getByRole('button', { name: 'Check link' }));
+    expect(await screen.findByText(/This is a YouTube Short/)).toBeInTheDocument();
+    expect(screen.getByText(/were not verified/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Title')).toHaveValue('A Short');
+  });
+
   it('YouTube: a private or removed video is refused with the reason', async () => {
     openApp('/sessions/new');
     await h1('New session');
