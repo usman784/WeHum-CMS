@@ -1,0 +1,51 @@
+name: Deploy demo server
+
+# Runs after CI is green on main, or by hand. Builds the CMS for the demo API and copies it to /opt/wehum/cms on the
+# VPS (nginx serves that folder). Secrets: SSH_HOST, SSH_USER, SSH_KEY.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-demo
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_ENV: staging
+      VITE_API_URL: https://api.wehum.app
+      VITE_SOCKET_URL: https://api.wehum.app
+      VITE_RELEASE: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: SSH key and host
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+      - name: Copy the build
+        run: |
+          SSH="ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes"
+          rsync -az --delete -e "$SSH" dist/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/wehum/cms/"
+      - name: Health check
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://cms.wehum.app/)
+          echo "cms: $code"
+          [ "$code" = "200" ]
