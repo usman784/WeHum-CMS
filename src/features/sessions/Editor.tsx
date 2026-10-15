@@ -802,13 +802,13 @@ function SessionForm({ session }: FormProps) {
   );
 }
 
-/** 04 Session editor: `/sessions/new` and `/sessions/:id`. */
 const YOUTUBE_WARNING: Record<string, string> = {
   short: 'This is a YouTube Short. YouTube serves fewer ads on Shorts, so ads may not appear in the app.',
   unlisted: 'This video is unlisted. YouTube may serve fewer ads on it; use a public video if ads matter.',
   unverified: 'Could not check this video with YouTube (no API key or no answer), so “made for kids” and embedding were not verified.',
 };
 
+/** 04 Session editor: `/sessions/new` and `/sessions/:id`. */
 export function SessionEditorPage() {
   const { id } = useParams();
   const isNew = !id || id === 'new';
