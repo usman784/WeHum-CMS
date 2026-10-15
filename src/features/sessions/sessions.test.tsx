@@ -524,7 +524,15 @@ describe('Session editor', () => {
   it('YouTube: warnings from the link check are shown and do not block', async () => {
     server.use(
       http.post(url('/v1/admin/youtube/resolve'), () =>
-        HttpResponse.json({ data: { youtubeId: 'Qm7r2XyK8aE', title: 'A Short', thumbnailUrl: 'https://i.ytimg.com/vi/Qm7r2XyK8aE/hq.jpg', durationSec: 45, warnings: ['short', 'unverified'] } }),
+        HttpResponse.json({
+          data: {
+            youtubeId: 'Qm7r2XyK8aE',
+            title: 'A Short',
+            thumbnailUrl: 'https://i.ytimg.com/vi/Qm7r2XyK8aE/hq.jpg',
+            durationSec: 45,
+            warnings: ['short', 'unverified'],
+          },
+        }),
       ),
     );
     openApp('/sessions/new');

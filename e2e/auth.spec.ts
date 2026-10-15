@@ -46,7 +46,9 @@ test('keyboard only: email → password → forgot link → sign in, and the for
   await page.getByLabel('Email').focus();
   await page.keyboard.type('not-an-email');
   await page.keyboard.press('Tab');
-  await expect(page.getByLabel('Password')).toBeFocused();
+  await expect(page.getByLabel('Password', { exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Show password' })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Forgot password?' })).toBeFocused();
   await page.keyboard.press('Tab');

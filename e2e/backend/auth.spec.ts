@@ -62,8 +62,8 @@ test('owner: password + code; a reload keeps the session; nothing is kept in bro
 test('wrong password and wrong code are refused with a clear message', async ({ page }) => {
   await enterPassword(page, OWNER.email, 'not-the-password');
   await expect(page.getByRole('alert')).toHaveText('Email or password is wrong');
-  await expect(page.getByLabel('Password')).toHaveValue('');
-  await page.getByLabel('Password').fill(PASSWORD);
+  await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByLabel('6-digit code').fill('000000');
   await expect(page.getByRole('alert')).toHaveText('That code is not valid');
@@ -131,13 +131,13 @@ test('five wrong passwords lock the account: "Too many attempts. Try again in 15
   await page.goto('/login');
   await page.getByLabel('Email').fill(email);
   for (let i = 1; i <= 5; i++) {
-    await page.getByLabel('Password').fill(`wrong-password-${i}`);
+    await page.getByLabel('Password', { exact: true }).fill(`wrong-password-${i}`);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page.getByRole('alert')).toHaveText('Email or password is wrong');
-    await expect(page.getByLabel('Password')).toHaveValue('');
+    await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
   }
   // locked now: even the right password is refused
-  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.getByRole('alert')).toHaveText('Too many attempts. Try again in 15 minutes.');
   const [row] = sql<{ locked: boolean }>(`SELECT locked_until > now() AS locked FROM admin_users WHERE email=$1`, [email]);
@@ -216,7 +216,7 @@ test('forgot password: emailed link sets a new password and ends open sessions',
 
   await enterPassword(page, email); // old password
   await expect(page.getByRole('alert')).toHaveText('Email or password is wrong');
-  await page.getByLabel('Password').fill('A-brand-new-password-1');
+  await page.getByLabel('Password', { exact: true }).fill('A-brand-new-password-1');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByLabel('6-digit code').fill(await freshCode(email));
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
