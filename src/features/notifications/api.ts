@@ -61,6 +61,7 @@ export const SEND_MODES: { value: SendMode; label: string }[] = [
 export const OPENS = [
   { value: '', label: 'The app (no special screen)' },
   { value: 'wehum://today', label: 'Today' },
+  { value: 'wehum://motd', label: 'Meditation of the Day' },
   { value: 'wehum://group', label: 'Group meditation' },
   { value: 'wehum://membership', label: 'Membership' },
   { value: 'session', label: 'A session…' },

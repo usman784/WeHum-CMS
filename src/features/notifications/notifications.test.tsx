@@ -90,6 +90,15 @@ describe('Push notifications', () => {
     expect(community.calls[0]!.body).toMatchObject({ audience: 'country', countries: ['DE', 'AT'], deepLink: 'wehum://today' });
   });
 
+  it('a push can open the Meditation of the Day (wehum://motd), not only Today', async () => {
+    openApp('/notifications');
+    await write('Time to meditate', 'Today’s meditation is ready.');
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Opens' }), 'wehum://motd');
+    await userEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+    expect(await findToast('Draft saved')).toBeInTheDocument();
+    expect(community.calls[0]!.body).toMatchObject({ deepLink: 'wehum://motd' });
+  });
+
   it('?audience=founding (from Subscriptions) preselects Founding members', async () => {
     openApp('/notifications?new=1&audience=founding');
     expect(await screen.findByRole('combobox', { name: 'Audience' })).toHaveValue('founding');
