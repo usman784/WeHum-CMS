@@ -62,7 +62,12 @@ describe('Today screen helpers', () => {
   it('attentionDays: today and the next two days that have no meditation or a missing length', () => {
     const ready = { mediaId: 'm', status: 'ready', durationSec: 600 } as const;
     const all = { 10: ready, 30: ready, 45: ready };
-    const d = (date: string, sessionId: string | null, variants: MotdDay['variants']): MotdDay => ({ date, sessionId, variants, complete: false });
+    const d = (date: string, sessionId: string | null, variants: MotdDay['variants']): MotdDay => ({
+      date,
+      sessionId,
+      variants,
+      complete: false,
+    });
     const week = [
       d('2026-10-13', null, null), // past: ignored
       d('2026-10-14', 's', all), // today, fine

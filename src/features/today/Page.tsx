@@ -342,8 +342,8 @@ export function TodayPage() {
             </p>
             {attention.length ? (
               <p role="status" className="rounded-btn bg-warning/15 px-4 py-2.5 text-sm font-semibold text-warning">
-                Schedule the meditation before members open it:{' '}
-                {attention.map((a) => `${dayTitle(a.date)} (${a.reason})`).join(' · ')}. Until then they hear the latest earlier one.
+                Schedule the meditation before members open it: {attention.map((a) => `${dayTitle(a.date)} (${a.reason})`).join(' · ')}.
+                Until then they hear the latest earlier one.
               </p>
             ) : null}
             {motd.error ? (
