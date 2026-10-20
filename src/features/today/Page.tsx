@@ -28,7 +28,7 @@ import { useConfigForm } from '../config/useConfigForm';
 import { FILE_RULES, useMediaUpload } from '../media/api';
 import { SessionPicker } from '../sessions/SessionPicker';
 import {
-  dayNote, FREE_PICKS, LENGTHS, missingLengths, motdApi, rulesApi, useMotdWeek, useTodayCache, useTodayRules, weekDays, weekLabel, weekStart,
+  attentionDays, dayNote, FREE_PICKS, LENGTHS, missingLengths, motdApi, rulesApi, useMotdWeek, useTodayCache, useTodayRules, weekDays, weekLabel, weekStart,
   type Length, type MotdDay, type TodayRules,
 } from './api'; // prettier-ignore
 
@@ -303,6 +303,7 @@ export function TodayPage() {
   };
 
   const missingNow = day?.sessionId ? missingLengths(day) : [];
+  const attention = days ? attentionDays(days, today) : [];
 
   return (
     <>
@@ -337,8 +338,14 @@ export function TodayPage() {
             </div>
             <p className="text-sm text-text-muted">
               The big card members see first on Today. Drag a row onto another to swap two days, or pick “Change” to choose another
-              meditation. Empty days fall back to the most played meditation.
+              meditation. A day with no audio plays the latest earlier one, so schedule today and the next days.
             </p>
+            {attention.length ? (
+              <p role="status" className="rounded-btn bg-warning/15 px-4 py-2.5 text-sm font-semibold text-warning">
+                Schedule the meditation before members open it:{' '}
+                {attention.map((a) => `${dayTitle(a.date)} (${a.reason})`).join(' · ')}. Until then they hear the latest earlier one.
+              </p>
+            ) : null}
             {motd.error ? (
               <ErrorState error={motd.error} onRetry={() => void motd.refetch()} />
             ) : motd.isPending ? (

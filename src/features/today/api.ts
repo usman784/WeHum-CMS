@@ -53,9 +53,24 @@ export function weekLabel(start: string): string {
 export const missingLengths = (d: MotdDay): Length[] =>
   d.sessionId && d.variants ? LENGTHS.filter((l) => d.variants![l]?.status !== 'ready') : [];
 
+/**
+ * Today and the next two days that members would hit without a proper meditation: nothing chosen, or a length still missing.
+ * (Without audio for a day the app plays the latest earlier one, so this is a nudge to schedule, not an outage.)
+ */
+export function attentionDays(days: MotdDay[], today: string): { date: string; reason: string }[] {
+  const last = addDays(today, 2);
+  return days
+    .filter((d) => d.date >= today && d.date <= last)
+    .flatMap((d) => {
+      if (!d.sessionId) return [{ date: d.date, reason: 'nothing chosen' }];
+      const missing = missingLengths(d);
+      return missing.length ? [{ date: d.date, reason: `missing ${missing.map((l) => `${l} min`).join(', ')}` }] : [];
+    });
+}
+
 /** The line under the title in the list. */
 export function dayNote(d: MotdDay): string {
-  if (!d.sessionId) return 'Not chosen yet · falls back to the most played session';
+  if (!d.sessionId) return 'Not chosen yet · members hear the latest earlier one';
   const missing = missingLengths(d);
   if (missing.length === 0) return '10 · 30 · 45 min ready';
   const waiting = LENGTHS.filter((l) => d.variants?.[l] && d.variants[l]!.status !== 'ready' && d.variants[l]!.status !== 'failed');

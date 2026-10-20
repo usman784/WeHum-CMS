@@ -10,7 +10,7 @@ import { url } from '../../mocks/handlers';
 import { server } from '../../mocks/server';
 import { findToast, h1, openApp } from '../../test/app';
 import { a11yViolations } from '../../test/render';
-import { dayNote, missingLengths, weekDays, weekLabel, weekStart, type MotdDay } from './api';
+import { attentionDays, dayNote, missingLengths, weekDays, weekLabel, weekStart, type MotdDay } from './api';
 
 vi.mock('socket.io-client', async () => ({ io: (await import('../../test/fake-socket')).fakeIo }));
 vi.mock('../../lib/checksum', () => ({ fileChecksum: async () => undefined }));
@@ -58,6 +58,24 @@ describe('Today screen helpers', () => {
     expect(missingLengths({ date: TODAY, sessionId: null, variants: null, complete: false })).toEqual([]);
     expect(dayNote({ date: TODAY, sessionId: null, variants: null, complete: false })).toMatch(/^Not chosen yet/);
   });
+
+  it('attentionDays: today and the next two days that have no meditation or a missing length', () => {
+    const ready = { mediaId: 'm', status: 'ready', durationSec: 600 } as const;
+    const all = { 10: ready, 30: ready, 45: ready };
+    const d = (date: string, sessionId: string | null, variants: MotdDay['variants']): MotdDay => ({ date, sessionId, variants, complete: false });
+    const week = [
+      d('2026-10-13', null, null), // past: ignored
+      d('2026-10-14', 's', all), // today, fine
+      d('2026-10-15', null, null), // tomorrow, nothing chosen
+      d('2026-10-16', 's', { 10: ready, 30: null, 45: ready }), // 30 min missing
+      d('2026-10-17', null, null), // beyond the window: ignored
+    ];
+    expect(attentionDays(week, '2026-10-14')).toEqual([
+      { date: '2026-10-15', reason: 'nothing chosen' },
+      { date: '2026-10-16', reason: 'missing 30 min' },
+    ]);
+    expect(attentionDays([d('2026-10-14', 's', all)], '2026-10-14')).toEqual([]);
+  });
 });
 
 describe('Today screen: the week', () => {
@@ -70,11 +88,17 @@ describe('Today screen: the week', () => {
     expect(row('Wed, Oct 14')).toHaveTextContent(title(motd('2026-10-14')!.sessionId));
     expect(row('Wed, Oct 14')).toHaveTextContent('10 · 30 · 45 min ready');
     expect(row('Thu, Oct 15')).toHaveTextContent('Missing 45 min');
-    expect(row('Sat, Oct 17')).toHaveTextContent('Not chosen yet · falls back to the most played session');
+    expect(row('Sat, Oct 17')).toHaveTextContent('Not chosen yet · members hear the latest earlier one');
     expect(row('Tue, Oct 13')).toHaveTextContent('Past'); // yesterday: history, no buttons
     expect(within(row('Tue, Oct 13')).queryByRole('button', { name: /^Change/ })).not.toBeInTheDocument();
     expect(within(row('Sat, Oct 17')).getByRole('button', { name: /^Change the meditation of Sat, Oct 17/ })).toHaveTextContent('Choose');
     expect(await a11yViolations()).toEqual([]);
+  });
+
+  it('warns above the week when today or the next two days have no meditation or a missing length', async () => {
+    openApp('/today');
+    await screen.findByRole('list', { name: 'Days of the week' });
+    expect(await screen.findByText(/Schedule the meditation before members open it/)).toHaveTextContent('Thu, Oct 15 (missing 45 min)');
   });
 
   it('the week buttons load the other weeks', async () => {
