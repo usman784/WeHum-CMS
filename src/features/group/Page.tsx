@@ -202,8 +202,7 @@ export function GroupMeditationPage() {
                     </p>
                   ) : null}
                   <p className="text-sm text-text-muted sm:col-span-4">
-                    Sits at {sitHours(v.hourly).join(', ')} UTC. Each one plays the Meditation of the Day in this length. The Hourly sits
-                    flag in Settings → App &amp; releases turns the app side on.
+                    Sits at {sitHours(v.hourly).join(', ')} UTC. Each one plays the Meditation of the Day in this length.
                   </p>
                 </div>
               ) : null}
