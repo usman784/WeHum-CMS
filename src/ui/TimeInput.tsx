@@ -35,11 +35,12 @@ export const TimeInput = forwardRef<HTMLInputElement, TimeProps>(
         {previews.length ? (
           <ul aria-label="Local times" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {previews.map((l) => (
-              <li key={l.zone} className="flex flex-col rounded-input bg-input px-3 py-2">
+              <li key={l.zone} className="flex min-w-0 flex-col rounded-input bg-input px-3 py-2">
                 <span className="text-xs text-text-muted">{l.city}</span>
                 <span className="tabular text-body font-semibold">
                   {l.time}
-                  {l.dayShift ? <span className="ml-1.5 text-xs font-normal text-text-muted">{shift[l.dayShift]}</span> : null}
+                  {/* on its own line: next to the time it can run out of a narrow card */}
+                  {l.dayShift ? <span className="block text-xs font-normal text-text-muted">{shift[l.dayShift]}</span> : null}
                 </span>
               </li>
             ))}

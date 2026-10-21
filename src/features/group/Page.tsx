@@ -131,6 +131,7 @@ export function GroupMeditationPage() {
                     value={v.global.startUtc}
                     onChange={(startUtc) => form.edit({ global: { ...v.global, startUtc } })}
                     error={problem && problem.includes('Global') ? problem : undefined}
+                    className="sm:col-span-2"
                   />
                   <Select
                     label="Global meditation length"
