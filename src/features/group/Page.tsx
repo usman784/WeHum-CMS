@@ -14,19 +14,44 @@ import { EmptyState, ErrorState } from '../../ui/States';
 import { TimeInput } from '../../ui/TimeInput';
 import { toast } from '../../ui/Toast';
 import { useConfigForm } from '../config/useConfigForm';
-import { dayLabel, groupApi, groupProblem, LENGTHS, LOBBY_OPEN, REMINDER, useGroup, useGroupCache, type GroupValue } from './api';
+import { Switch } from '../../ui/Switch';
+import {
+  dayLabel,
+  GLOBAL_LOBBY_OPEN,
+  GLOBAL_REMINDER,
+  groupApi,
+  groupProblem,
+  LENGTHS,
+  LOBBY_OPEN,
+  REMINDER,
+  sitHours,
+  STEPS,
+  useGroup,
+  useGroupCache,
+  WEEKDAYS,
+  type GlobalValue,
+  type GroupValue,
+} from './api';
 
 const FIELDS: ConflictField<GroupValue>[] = [
   { key: 'startUtc', label: 'Start time (UTC)' },
   { key: 'lengthMin', label: 'Length used for the group start', format: (v) => `${String(v)} min` },
   { key: 'lobbyOpenMin', label: 'Open the lobby before the start', format: (v) => `${String(v)} min` },
   { key: 'reminderMin', label: 'Reminder before the start', format: (v) => `${String(v)} min` },
-  { key: 'cadence', label: 'How often', format: (v) => (v === 'hourly' ? 'Every hour' : 'Once a day') },
+  { key: 'cadence', label: 'How often', format: (v) => (v === 'hourly' ? 'Through the day' : 'Once a day') },
   {
     key: 'hourly',
     label: 'Hourly window (UTC)',
     format: (v) =>
-      `${(v as GroupValue['hourly']).fromHourUtc}:00–${(v as GroupValue['hourly']).toHourUtc}:00 · ${(v as GroupValue['hourly']).lengthMin} min`,
+      `${(v as GroupValue['hourly']).fromHourUtc}:00–${(v as GroupValue['hourly']).toHourUtc}:00 every ${(v as GroupValue['hourly']).stepHours} h · ${(v as GroupValue['hourly']).lengthMin} min`,
+  },
+  {
+    key: 'global',
+    label: 'Global meditation',
+    format: (v) => {
+      const g = v as GlobalValue;
+      return g.enabled ? `${WEEKDAYS[g.weekday] ?? '?'} ${g.startUtc} UTC · ${g.lengthMin} min` : 'off';
+    },
   },
   { key: 'intentions', label: 'Intentions', format: (v) => (v as string[]).join(' · ') || 'none' },
   { key: 'focus', label: "Today's focus", format: (v) => (v as GroupValue['focus']).title || 'hidden' },
@@ -61,7 +86,7 @@ export function GroupMeditationPage() {
     <>
       <PageHeader
         title="Group meditation"
-        subtitle="For now, a group meditation is simply the Meditation of the Day starting for everyone at the same moment. No separate schedule to plan."
+        subtitle="Group sits happen through the day (for example every 4 hours). The Global meditation is once a week, with everyone at the same time. Both play the Meditation of the Day."
         actions={
           <Button onClick={form.save} loading={form.saving} disabled={!form.dirty || !!problem}>
             Save
@@ -80,18 +105,71 @@ export function GroupMeditationPage() {
       ) : (
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="flex flex-col gap-5">
-            <SectionCard title="How often" size="h3">
+            <SectionCard title="Global meditation" size="h3">
+              <Switch
+                checked={v.global.enabled}
+                onCheckedChange={(enabled) => form.edit({ global: { ...v.global, enabled } })}
+                label="Global meditation"
+                description="Once a week, everyone sits together at the same time. It has its own card, lobby and reminder in the app."
+              />
+              {v.global.enabled ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Name in the app"
+                    value={v.global.title}
+                    maxLength={40}
+                    onChange={(e) => form.edit({ global: { ...v.global, title: e.target.value } })}
+                  />
+                  <Select
+                    label="Day of the week"
+                    value={String(v.global.weekday)}
+                    onChange={(e) => form.edit({ global: { ...v.global, weekday: Number(e.target.value) } })}
+                    options={WEEKDAYS.map((d, i) => ({ value: String(i), label: d }))}
+                  />
+                  <TimeInput
+                    label="Time of the Global meditation"
+                    value={v.global.startUtc}
+                    onChange={(startUtc) => form.edit({ global: { ...v.global, startUtc } })}
+                    error={problem && problem.includes('Global') ? problem : undefined}
+                  />
+                  <Select
+                    label="Global meditation length"
+                    value={String(v.global.lengthMin)}
+                    onChange={(e) => form.edit({ global: { ...v.global, lengthMin: Number(e.target.value) as GlobalValue['lengthMin'] } })}
+                    options={LENGTHS.map((n) => ({ value: String(n), label: `${n} min` }))}
+                  />
+                  <Select
+                    label="Global: open the lobby before"
+                    value={String(v.global.lobbyOpenMin)}
+                    onChange={(e) => form.edit({ global: { ...v.global, lobbyOpenMin: Number(e.target.value) } })}
+                    options={minutes(GLOBAL_LOBBY_OPEN, v.global.lobbyOpenMin)}
+                  />
+                  <Select
+                    label="Global: reminder before"
+                    value={String(v.global.reminderMin)}
+                    onChange={(e) => form.edit({ global: { ...v.global, reminderMin: Number(e.target.value) } })}
+                    options={minutes(GLOBAL_REMINDER, v.global.reminderMin)}
+                  />
+                  <p className="text-sm text-text-muted sm:col-span-2">
+                    Everyone sees it in their own time. The reminder goes to people who have group reminders switched on, and to those who
+                    tapped “Remind me”.
+                  </p>
+                </div>
+              ) : null}
+            </SectionCard>
+
+            <SectionCard title="Group meditation: how often" size="h3">
               <Select
                 label="Group sits"
                 value={v.cadence}
                 onChange={(e) => form.edit({ cadence: e.target.value as GroupValue['cadence'] })}
                 options={[
                   { value: 'daily', label: 'Once a day, at the start time below' },
-                  { value: 'hourly', label: 'Every hour, inside a window' },
+                  { value: 'hourly', label: 'Through the day, every few hours' },
                 ]}
               />
               {v.cadence === 'hourly' ? (
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-4">
                   <Select
                     label="First hour (UTC)"
                     value={String(v.hourly.fromHourUtc)}
@@ -112,9 +190,15 @@ export function GroupMeditationPage() {
                     }
                     options={LENGTHS.map((n) => ({ value: String(n), label: `${n} min` }))}
                   />
-                  <p className="text-sm text-text-muted sm:col-span-3">
-                    Each hourly sit plays the Meditation of the Day in this length. The Hourly sits flag in Settings → App &amp; releases
-                    turns the app side on.
+                  <Select
+                    label="Every"
+                    value={String(v.hourly.stepHours)}
+                    onChange={(e) => form.edit({ hourly: { ...v.hourly, stepHours: Number(e.target.value) } })}
+                    options={STEPS.map((n) => ({ value: String(n), label: n === 1 ? 'hour' : `${n} hours` }))}
+                  />
+                  <p className="text-sm text-text-muted sm:col-span-4">
+                    Sits at {sitHours(v.hourly).join(', ')} UTC. Each one plays the Meditation of the Day in this length. The Hourly sits
+                    flag in Settings → App &amp; releases turns the app side on.
                   </p>
                 </div>
               ) : null}

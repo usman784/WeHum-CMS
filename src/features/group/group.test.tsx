@@ -5,7 +5,7 @@ import { disconnectSocket } from '../../lib/socket';
 import { daily } from '../../mocks/daily';
 import { connectFakeSocket, findToast, h1, openApp } from '../../test/app';
 import { a11yViolations } from '../../test/render';
-import { dayLabel, groupProblem, withDefaults } from './api';
+import { dayLabel, groupProblem, sitHours, withDefaults } from './api';
 
 vi.mock('socket.io-client', async () => ({ io: (await import('../../test/fake-socket')).fakeIo }));
 afterEach(() => disconnectSocket());
@@ -21,13 +21,47 @@ describe('group helpers', () => {
   });
 });
 
+describe('group and global helpers', () => {
+  it('sitHours lists the group sits through the day for a first hour, a last hour and a step', () => {
+    expect(sitHours({ fromHourUtc: 0, toHourUtc: 23, lengthMin: 30, stepHours: 4 })).toEqual([
+      '00:00',
+      '04:00',
+      '08:00',
+      '12:00',
+      '16:00',
+      '20:00',
+    ]);
+    expect(sitHours({ fromHourUtc: 6, toHourUtc: 22, lengthMin: 10, stepHours: 4 })).toEqual(['06:00', '10:00', '14:00', '18:00', '22:00']);
+    expect(sitHours({ fromHourUtc: 6, toHourUtc: 8, lengthMin: 10, stepHours: 1 })).toEqual(['06:00', '07:00', '08:00']);
+  });
+
+  it('old values without a step stay hourly; the Global meditation defaults to Sunday 16:00 UTC', () => {
+    const v = withDefaults({
+      startUtc: '16:00',
+      lengthMin: 30,
+      lobbyOpenMin: 15,
+      reminderMin: 10,
+      cadence: 'hourly',
+      hourly: { fromHourUtc: 6, toHourUtc: 22, lengthMin: 10 },
+    } as never);
+    expect(v.hourly.stepHours).toBe(1);
+    expect(v.global).toMatchObject({ enabled: true, weekday: 0, startUtc: '16:00', lengthMin: 30 });
+  });
+
+  it('a Global meditation needs a valid time when it is on', () => {
+    const v = withDefaults({ startUtc: '16:00', lengthMin: 30, lobbyOpenMin: 15, reminderMin: 10 });
+    expect(groupProblem({ ...v, global: { ...v.global, startUtc: '' } })).toMatch(/Global meditation/);
+    expect(groupProblem({ ...v, global: { ...v.global, enabled: false, startUtc: '' } })).toBeNull();
+  });
+});
+
 describe('Group meditation screen', () => {
   it('shows the start time with local times, the lobby settings and the history; passes the a11y check', async () => {
     openApp('/group-meditation');
     expect(await h1('Group meditation')).toBeInTheDocument();
     await waitFor(() => expect(time()).toHaveValue('16:00'));
     expect(screen.getByLabelText('Length used for the group start')).toHaveValue('30');
-    const local = within(screen.getByRole('list', { name: 'Local times' }));
+    const local = within(screen.getAllByRole('list', { name: 'Local times' })[0]!);
     expect(local.getByText('Berlin')).toBeInTheDocument();
     expect(local.getByText('Sydney')).toBeInTheDocument();
     expect(screen.getByLabelText('Open the lobby before the start')).toHaveValue('15');
@@ -69,6 +103,44 @@ describe('Group meditation screen', () => {
       focus: { title: 'The Midday Coherence Sit' },
     });
     expect(daily.group.value.intentions).toContain('Gentle focus');
+  });
+
+  it('group sits every 4 hours: the step is chosen and the sit times are listed', async () => {
+    openApp('/group-meditation');
+    await waitFor(() => expect(time()).toHaveValue('16:00'));
+    await user.selectOptions(screen.getByLabelText('Group sits'), 'hourly');
+    await user.selectOptions(screen.getByLabelText('First hour (UTC)'), '0');
+    await user.selectOptions(screen.getByLabelText('Last hour (UTC)'), '23');
+    await user.selectOptions(screen.getByLabelText('Every'), '4');
+    expect(screen.getByText(/00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await findToast('Group meditation saved')).toBeInTheDocument();
+    expect(daily.group.value).toMatchObject({ cadence: 'hourly', hourly: { fromHourUtc: 0, toHourUtc: 23, stepHours: 4 } });
+  });
+
+  it('the Global meditation is its own thing: once a week, day and time set here, saved with the rest', async () => {
+    openApp('/group-meditation');
+    await waitFor(() => expect(time()).toHaveValue('16:00'));
+    expect(screen.getByRole('heading', { name: 'Global meditation' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Day of the week')).toHaveValue('0'); // Sunday
+    await user.selectOptions(screen.getByLabelText('Day of the week'), '6');
+    const gt = screen.getByLabelText('Time of the Global meditation');
+    await user.clear(gt);
+    await user.type(gt, '18:30');
+    await user.selectOptions(screen.getByLabelText('Global meditation length'), '45');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await findToast('Group meditation saved')).toBeInTheDocument();
+    expect(daily.group.value).toMatchObject({ global: { enabled: true, weekday: 6, startUtc: '18:30', lengthMin: 45 }, startUtc: '16:00' });
+  });
+
+  it('switching the Global meditation off hides its settings and is saved', async () => {
+    openApp('/group-meditation');
+    await waitFor(() => expect(time()).toHaveValue('16:00'));
+    await user.click(screen.getByRole('switch', { name: 'Global meditation' }));
+    expect(screen.queryByLabelText('Day of the week')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await findToast('Group meditation saved')).toBeInTheDocument();
+    expect(daily.group.value.global.enabled).toBe(false);
   });
 
   it('an hourly window that ends before it starts cannot be saved', async () => {
