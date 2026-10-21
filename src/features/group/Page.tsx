@@ -196,6 +196,11 @@ export function GroupMeditationPage() {
                     onChange={(e) => form.edit({ hourly: { ...v.hourly, stepHours: Number(e.target.value) } })}
                     options={STEPS.map((n) => ({ value: String(n), label: n === 1 ? 'hour' : `${n} hours` }))}
                   />
+                  {problem && problem.includes('last hour') ? (
+                    <p role="alert" className="text-sm font-semibold text-danger-text sm:col-span-4">
+                      {problem}
+                    </p>
+                  ) : null}
                   <p className="text-sm text-text-muted sm:col-span-4">
                     Sits at {sitHours(v.hourly).join(', ')} UTC. Each one plays the Meditation of the Day in this length. The Hourly sits
                     flag in Settings → App &amp; releases turns the app side on.
@@ -204,27 +209,29 @@ export function GroupMeditationPage() {
               ) : null}
             </SectionCard>
 
-            <SectionCard title="When the Meditation of the Day starts together" size="h3">
-              <div className="grid gap-4 sm:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
-                <TimeInput
-                  label="Start time"
-                  value={v.startUtc}
-                  onChange={(startUtc) => form.edit({ startUtc })}
-                  error={problem ?? undefined}
-                  className="sm:col-span-2"
-                />
-                <Select
-                  label="Length used for the group start"
-                  value={String(v.lengthMin)}
-                  onChange={(e) => form.edit({ lengthMin: Number(e.target.value) as GroupValue['lengthMin'] })}
-                  options={LENGTHS.map((n) => ({ value: String(n), label: `${n} min` }))}
-                />
-              </div>
-              <p className="text-sm text-text-muted">
-                Each person sees the start in their own time. Anyone can still begin the Meditation of the Day on their own at any time. The
-                time is fixed in UTC, so local times shift with daylight saving.
-              </p>
-            </SectionCard>
+            {v.cadence === 'daily' ? (
+              <SectionCard title="When the Meditation of the Day starts together" size="h3">
+                <div className="grid gap-4 sm:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
+                  <TimeInput
+                    label="Start time"
+                    value={v.startUtc}
+                    onChange={(startUtc) => form.edit({ startUtc })}
+                    error={problem && problem.includes('start time') ? problem : undefined}
+                    className="sm:col-span-2"
+                  />
+                  <Select
+                    label="Length used for the group start"
+                    value={String(v.lengthMin)}
+                    onChange={(e) => form.edit({ lengthMin: Number(e.target.value) as GroupValue['lengthMin'] })}
+                    options={LENGTHS.map((n) => ({ value: String(n), label: `${n} min` }))}
+                  />
+                </div>
+                <p className="text-sm text-text-muted">
+                  Each person sees the start in their own time. Anyone can still begin the Meditation of the Day on their own at any time.
+                  The time is fixed in UTC, so local times shift with daylight saving.
+                </p>
+              </SectionCard>
+            ) : null}
 
             <Card padded={false} className="overflow-hidden">
               <div
@@ -311,18 +318,6 @@ export function GroupMeditationPage() {
                 onChange={(n) => n !== null && form.edit({ doorsOpenSec: n })}
               />
             </SectionCard>
-            <section
-              aria-label="More start times"
-              className="flex flex-col gap-2.5 rounded-card border border-dashed border-border-strong p-5"
-            >
-              <h2 className="text-h3">More start times later</h2>
-              <p className="text-sm text-text-muted">
-                One start a day for now. More can be added when the app grows, without a separate schedule.
-              </p>
-              <Button variant="outline" disabled>
-                + Add another start time
-              </Button>
-            </section>
           </div>
         </div>
       )}

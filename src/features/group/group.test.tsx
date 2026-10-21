@@ -143,6 +143,17 @@ describe('Group meditation screen', () => {
     expect(daily.group.value.global.enabled).toBe(false);
   });
 
+  it('sits through the day: the once-a-day start time is not shown (it would not be used), and there is no dead "add start time" button', async () => {
+    openApp('/group-meditation');
+    await waitFor(() => expect(time()).toHaveValue('16:00'));
+    expect(screen.queryByRole('button', { name: /Add another start time/ })).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText('Group sits'), 'hourly');
+    expect(screen.queryByRole('heading', { name: 'When the Meditation of the Day starts together' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Length used for the group start')).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText('Group sits'), 'daily');
+    expect(screen.getByRole('heading', { name: 'When the Meditation of the Day starts together' })).toBeInTheDocument();
+  });
+
   it('an hourly window that ends before it starts cannot be saved', async () => {
     openApp('/group-meditation');
     await waitFor(() => expect(time()).toHaveValue('16:00'));
