@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { flushRedis, resetAdmins, roleEmail, OWNER, sql } from './harness';
+import { API, flushRedis, resetAdmins, roleEmail, OWNER, sql } from './harness';
 import { forgetTwoStep, signIn } from './signin';
 
 // Phase P7 exit tests, against the real backend: two moderators work the same queue (a decision by one leaves the
@@ -83,6 +83,38 @@ test('two moderators: a post hidden by one leaves the other’s queue at once; k
   await expect(page.getByText('Nothing to review')).toBeVisible();
   expect(sql(`SELECT 1 FROM audit_log WHERE action IN ('moderation.hide','moderation.keep')`).length).toBeGreaterThanOrEqual(2);
   await ctx.close();
+});
+
+test('a dedication written in the app at any time (by session) shows in "All posts" at once; Hide takes it off the app', async ({ page, request }) => {
+  // a member with an account in the app, posting from the details/player (no finished meditation)
+  const guest = await (await request.post(`${API}/v1/auth/guest`, { data: { installId: `e2e-${Date.now()}`, platform: 'android', appVersion: '1.0.0', timezone: 'Asia/Karachi' } })).json();
+  const userId = guest.data.me.id as string;
+  sql(`UPDATE users SET is_guest=false, first_name='Usman', country='PK', show_country=true WHERE id=$1`, [userId]);
+  sql(`INSERT INTO entitlements (user_id, active, product_id, period_type, expires_at) VALUES ($1, true, 'wehum_annual', 'normal', now() + interval '30 days')`, [userId]); // prettier-ignore
+  const token = (await (await request.post(`${API}/v1/auth/refresh`, { data: { refreshToken: guest.data.refreshToken } })).json()).data.accessToken as string;
+  const [s] = sql<{ id: string }>(`SELECT id FROM sessions WHERE status='live' ORDER BY title LIMIT 1`);
+
+  await signIn(page, roleEmail('moderator'));
+  await page.goto('/moderation');
+  await page.getByRole('radio', { name: 'All posts' }).click();
+  const list = page.getByRole('list', { name: 'Posts' });
+  await expect(page.getByText('For my father, healing slowly in Lahore.')).toHaveCount(0);
+
+  const posted = await request.post(`${API}/v1/dedications`, {
+    headers: { authorization: `Bearer ${token}` },
+    data: { sessionId: s!.id, text: 'For my father, healing slowly in Lahore.' },
+  });
+  expect(posted.status()).toBe(201);
+  // no reload: the socket (`moderation:new`) brings it in
+  const item = list.getByRole('listitem', { name: 'Post by Usman' });
+  await expect(item).toContainText('For my father, healing slowly in Lahore.', { timeout: 3_000 });
+  await page.screenshot({ path: 'test-results/shots/cms-live-new-dedication.png', fullPage: true });
+
+  await item.getByRole('button', { name: 'Hide post' }).click();
+  await expect(page.getByText('Post hidden', { exact: true })).toBeVisible();
+  await page.screenshot({ path: 'test-results/shots/cms-hidden.png', fullPage: true });
+  const feed = await (await request.get(`${API}/v1/sessions/${s!.id}/dedications`, { headers: { authorization: `Bearer ${token}` } })).json();
+  expect(feed.data.map((d: { text: string }) => d.text)).not.toContain('For my father, healing slowly in Lahore.');
 });
 
 test('rules: an owner saves them; the app-side posting rules use the new values', async ({ page }) => {

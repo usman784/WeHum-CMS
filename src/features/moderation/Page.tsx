@@ -114,7 +114,7 @@ function PostCard({
       <p className="text-h3 font-normal">“{p.text}”</p>
       <div className="flex flex-wrap items-center gap-2.5">
         <span className="flex-1 text-sm text-text-muted">
-          {p.crisis ? 'SoS screen was shown to the writer' : p.sessionId ? 'Written after the meditation' : 'Shared in the feed'}
+          {p.crisis ? 'SoS screen was shown to the writer' : p.sessionId ? 'Dedicated to this meditation' : 'Shared in the feed'}
           {p.holdingCount ? ` · ${formatCompact(p.holdingCount)} holding` : ''}
         </span>
         {p.status !== 'hidden' ? (
@@ -519,7 +519,7 @@ export function ModerationPage() {
     <>
       <PageHeader
         title="Dedications & gratitude"
-        subtitle="Written after a finished meditation and shown under each session. Text only, 200 characters, no links. Read free, post as a member."
+        subtitle="Written before, during or after a meditation and shown live under each session. Text only, 200 characters, no links. Read free, post as a member."
         actions={<TeacherPost />}
       />
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -539,8 +539,8 @@ export function ModerationPage() {
           <Today />
           <SectionCard title="Where these appear">
             <p className="text-sm text-text-muted">
-              <strong className="text-text">Dedications</strong> are written only after a finished meditation and shown on that session’s
-              own feed.
+              <strong className="text-text">Dedications</strong> are written before, during or after a meditation and shown live on that
+              session’s own feed (details and player).
             </p>
             <p className="text-sm text-text-muted">
               <strong className="text-text">Gratitude feed</strong> is coming soon.
