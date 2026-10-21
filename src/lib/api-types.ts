@@ -975,7 +975,7 @@ export interface paths {
         put?: never;
         /**
          * Post dedication after a finished meditation
-         * @description Auth: member+account. body {meditationId, text ≤ 200}; 3/day (DEDICATION_LIMIT); links blocked (DEDICATION_LINKS)
+         * @description Auth: member+account. body {meditationId or sessionId, text ≤ 200}; sessionId = at any time from details/player; 3/day (DEDICATION_LIMIT); links blocked (DEDICATION_LINKS)
          */
         post: operations["post_v1_dedications"];
         delete?: never;
