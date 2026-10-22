@@ -21,6 +21,8 @@ export type DashboardKpis = {
   library: { sessions: number; programs: number; themes: number };
   /** People sitting in the Silence Room right now. */
   silenceNow?: number;
+  /** Where the Silence Room's people are right now (ISO-2, most first). Country level only, never who. */
+  silenceCountries?: { c: string; n: number }[];
   /** People who sat on each of the last 7 days. */
   streaks7?: number;
   founding?: { taken: number; cap: number; open: boolean };

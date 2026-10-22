@@ -2864,7 +2864,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Silence Room: live count by belt, durations, cadence, bells
+         * Silence Room: live count by belt and by country (top, todayTop), durations, cadence, bells
          * @description Auth: device.
          */
         get: operations["get_v1_silence"];

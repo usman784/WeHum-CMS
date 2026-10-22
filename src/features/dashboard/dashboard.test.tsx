@@ -65,6 +65,46 @@ describe('Dashboard', () => {
     expect(await screen.findByRole('link', { name: /1 dedication needs review/ })).toBeInTheDocument();
   });
 
+  it('Silence Room right now: where its people are meditating, by country, updated live from the socket', async () => {
+    const { emit } = await connectFakeSocket();
+    openApp('/');
+    const list = await screen.findByRole('list', { name: 'Silence Room by country' });
+    expect(within(list).getAllByRole('listitem')[0]).toHaveTextContent('United Kingdom');
+    expect(within(list).getAllByRole('listitem')[0]).toHaveTextContent('5');
+    expect(screen.getByText('12 meditating')).toBeInTheDocument();
+    await emit('dashboard:kpis', {
+      liveNow: 310,
+      meditationsToday: 3300,
+      minutesToday: 40000,
+      payingMembers: 601,
+      inTrial: 110,
+      mrrUsd: 3950,
+      founding: { taken: 413, cap: 1000, open: true },
+      moderationOpen: 9,
+      silenceNow: 3,
+      silenceCountries: [{ c: 'PK', n: 3 }],
+      at: Date.now(),
+    });
+    await waitFor(() => expect(screen.getByText('3 meditating')).toBeInTheDocument());
+    const rows = within(screen.getByRole('list', { name: 'Silence Room by country' })).getAllByRole('listitem');
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveTextContent('Pakistan');
+    await emit('dashboard:kpis', {
+      liveNow: 0,
+      meditationsToday: 0,
+      minutesToday: 0,
+      payingMembers: 601,
+      inTrial: 110,
+      mrrUsd: 3950,
+      founding: { taken: 413, cap: 1000, open: true },
+      moderationOpen: 9,
+      silenceNow: 0,
+      silenceCountries: [],
+      at: Date.now(),
+    });
+    expect(await screen.findByText('No one is meditating in silence right now.')).toBeInTheDocument();
+  });
+
   it('nothing needs attention: says so', async () => {
     overview.dashboard.needsAttention = [];
     openApp('/');

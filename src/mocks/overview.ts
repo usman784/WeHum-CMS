@@ -36,6 +36,12 @@ export function resetOverview() {
       inTrial: 112,
       mrrUsd: 3904,
       library: { sessions: 142, programs: 4, themes: 8 },
+      silenceNow: 12,
+      silenceCountries: [
+        { c: 'GB', n: 5 },
+        { c: 'PK', n: 4 },
+        { c: 'US', n: 3 },
+      ],
     },
     moderationOpen: 7,
     dailyMessages: Array.from({ length: 7 }, (_, i) => {

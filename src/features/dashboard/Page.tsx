@@ -14,6 +14,7 @@ import { EmptyState, ErrorState } from '../../ui/States';
 import { dayTitle } from '../daily/api';
 import { isFull, shortDay, useDashboard, type Attention, type Dashboard } from './api';
 import { useSubscribe } from '../../hooks/useLive';
+import { countryName } from '../users/api';
 
 const MSG_TONE: Record<string, { label: string; tone: BadgeTone }> = {
   live: { label: 'Live', tone: 'success' },
@@ -112,6 +113,38 @@ function Attention({ items }: { items: Attention[] }) {
               </li>
             );
           })}
+        </ul>
+      )}
+    </SectionCard>
+  );
+}
+
+const flagOf = (code: string) =>
+  /^[A-Za-z]{2}$/.test(code) ? String.fromCodePoint(...[...code.toUpperCase()].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65)) : '';
+
+/** The Silence Room right now: where its people are meditating, by country, live from `dashboard:kpis`. Never who. */
+function SilenceNow({ people, countries }: { people: number; countries: { c: string; n: number }[] }) {
+  return (
+    <SectionCard
+      title="Silence Room right now"
+      action={<StatusText tone={people ? 'success' : 'muted'}>{people ? `${formatNumber(people)} meditating` : 'Empty'}</StatusText>}
+    >
+      {countries.length === 0 ? (
+        <p className="text-sm text-text-muted">No one is meditating in silence right now.</p>
+      ) : (
+        <ul aria-label="Silence Room by country" className="flex flex-col">
+          {countries.slice(0, 8).map((r) => (
+            <li key={r.c} className="flex min-h-10 items-center gap-3 border-t border-border first:border-t-0">
+              <span aria-hidden className="w-6 text-lg">
+                {flagOf(r.c)}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-body">{countryName(r.c)}</span>
+              <span className="tabular text-sm text-text-muted">{formatNumber(r.n)}</span>
+            </li>
+          ))}
+          {countries.length > 8 ? (
+            <li className="border-t border-border pt-2 text-sm text-text-muted">+{countries.length - 8} more countries</li>
+          ) : null}
         </ul>
       )}
     </SectionCard>
@@ -218,6 +251,7 @@ function FullDashboard({ d }: { d: Dashboard }) {
         </div>
         <div className="flex flex-col gap-5">
           <Attention items={items} />
+          <SilenceNow people={k.silenceNow ?? 0} countries={k.silenceCountries ?? []} />
           <SectionCard title="Next group meditation" action={<StatusText tone="muted">{d.nextGroup.state}</StatusText>}>
             <div className="flex items-center gap-4">
               <span className="tabular text-h2">{new Date(d.nextGroup.startsAt).toISOString().slice(11, 16)}</span>
