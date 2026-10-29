@@ -20,6 +20,7 @@ import { toast } from '../../ui/Toast';
 import { planName } from '../subscriptions/api';
 import { Avatar, MEMBERSHIP_TONE } from './Page';
 import { countryName, deleteConfirmText, providerNames, useJob, useUser, usersApi, type ExportResult, type UserDetail } from './api';
+import { AvatarStatus, OnlineText, useUserPresence } from './presence';
 
 const STORE = { app_store: 'App Store', play_store: 'Google Play', promotional: 'Gift (promotional)', stripe: 'Web' } as Record<
   string,
@@ -289,6 +290,7 @@ export function UserDetailPage() {
   const [gone, setGone] = useState(false);
   const [gifting, setGifting] = useState(false);
   useSubscribe(['jobs']);
+  const presence = useUserPresence();
   useSocketEvent('entity:changed', (e) => {
     if (e.type !== 'user' || e.id !== id) return;
     if (e.op === 'delete') setGone(true);
@@ -342,7 +344,9 @@ export function UserDetailPage() {
       ) : null}
       <header className="flex flex-wrap items-center gap-4">
         {back}
-        <Avatar name={u.name} id={u.id} size={56} src={u.avatarUrl} />
+        <AvatarStatus online={presence.of(u).online} size={56}>
+          <Avatar name={u.name} id={u.id} size={56} src={u.avatarUrl} />
+        </AvatarStatus>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-h1">{[u.name, u.lastName].filter(Boolean).join(' ') || 'Guest'}</h1>
@@ -358,7 +362,10 @@ export function UserDetailPage() {
               </Badge>
             ) : null}
           </div>
-          <p className="text-sm text-text-muted">{headerLine(u)}</p>
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-muted">
+            <OnlineText p={presence.of(u)} long />
+            <span>{headerLine(u)}</span>
+          </p>
           {u.bio ? (
             <p className="max-w-prose text-sm text-body" aria-label="Bio">
               {u.bio}
@@ -491,7 +498,7 @@ export function UserDetailPage() {
           <DataWeCollect />
           <SupportActions u={u} />
           <p className="text-xs text-text-faint">
-            {countryName(u.country)} · joined {formatDate(u.joinedAt)} · last active {formatRelative(u.lastActiveAt)}
+            {countryName(u.country)} · joined {formatDate(u.joinedAt)} · last active {formatRelative(presence.of(u).lastActiveAt)}
           </p>
         </div>
       </div>

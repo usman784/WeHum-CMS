@@ -21,12 +21,14 @@ export type UserRow = {
   country: string | null;
   joinedAt: string;
   lastActiveAt: string;
+  /** The app is open right now (a live connection); changes arrive over the socket as `users:presence`. */
+  online?: boolean;
   muted: boolean;
   membership: Membership;
   weekMinutes: number;
   meditations: number;
 };
-export type UserCounts = { all: number; guests: number; accounts: number; paying: number; trial: number };
+export type UserCounts = { all: number; guests: number; accounts: number; paying: number; trial: number; online?: number };
 
 export type UserDetail = {
   id: string;
@@ -42,6 +44,7 @@ export type UserDetail = {
   timezone: string;
   joinedAt: string;
   lastActiveAt: string;
+  online?: boolean;
   muted: boolean;
   providers: string[];
   accountSavedAt: string | null;
@@ -85,6 +88,7 @@ export type ExportResult = { json: string; csv: string; meditations: number; exp
 
 export const USER_TABS = [
   { value: 'all', label: 'All' },
+  { value: 'online', label: 'Online now' },
   { value: 'guests', label: 'Guests' },
   { value: 'free', label: 'Free account' },
   { value: 'trial', label: 'Trial' },
@@ -148,6 +152,10 @@ export const userSubline = (u: { email: string | null; isGuest: boolean; provide
 
 const regions = typeof Intl.DisplayNames === 'function' ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
 export const countryName = (code: string | null) => (code ? (regions?.of(code.toUpperCase()) ?? code) : 'Worldwide');
+
+/** 🇩🇪 for "DE" (empty for anything that is not two letters). */
+export const flagOf = (code: string) =>
+  /^[A-Za-z]{2}$/.test(code) ? String.fromCodePoint(...[...code.toUpperCase()].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65)) : '';
 
 /** What the delete dialog asks to type: the email, or the first 8 characters of the id for guests (backend rule). */
 export const deleteConfirmText = (u: { id: string; email: string | null }) => u.email ?? u.id.slice(0, 8);

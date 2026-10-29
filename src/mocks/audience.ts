@@ -39,6 +39,7 @@ const seedUsers = (): UserRow[] => [
     country: 'US',
     joinedAt: '2026-09-02T10:00:00Z',
     lastActiveAt: ago(2),
+    online: true,
     muted: false,
     membership: { plan: 'founding', label: 'Annual · Founding', status: 'active' },
     weekMinutes: 95,
@@ -99,6 +100,7 @@ function detailOf(r: UserRow): UserDetail {
     timezone: 'America/New_York',
     joinedAt: r.joinedAt,
     lastActiveAt: r.lastActiveAt,
+    online: r.online,
     muted: r.muted,
     providers: r.providers,
     accountSavedAt: r.isGuest ? null : '2026-09-05T10:00:00Z',
@@ -217,10 +219,12 @@ const counts = (): UserCounts => ({
   accounts: audience.users.filter((x) => !x.isGuest).length,
   paying: audience.users.filter((x) => ['founding', 'annual', 'monthly'].includes(x.membership.plan)).length,
   trial: audience.users.filter((x) => x.membership.plan === 'trial').length,
+  online: audience.users.filter((x) => x.online).length,
 });
 
 const TAB_FILTER: Record<string, (r: UserRow) => boolean> = {
   all: () => true,
+  online: (r) => !!r.online,
   guests: (r) => r.isGuest,
   free: (r) => !r.isGuest && r.membership.plan === 'free',
   trial: (r) => r.membership.plan === 'trial',

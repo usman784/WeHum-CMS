@@ -68,6 +68,51 @@ describe('Users', () => {
     expect(screen.queryByRole('button', { name: /new people/ })).not.toBeInTheDocument();
   });
 
+  it('online: green dot and "Online now" for people with the app open, grey and last active for the rest, changing live', async () => {
+    const { emit } = await connectFakeSocket();
+    openApp('/users');
+    const t = await table();
+    await within(t).findByText('Marcus Vance');
+    const row = (name: string) => within(t).getByText(name).closest('[role="row"]') as HTMLElement;
+    expect(within(row('Marcus Vance')).getByTestId('dot-online')).toBeInTheDocument();
+    expect(row('Marcus Vance')).toHaveTextContent('Online now');
+    expect(within(row('Elena K.')).getByTestId('dot-offline')).toBeInTheDocument();
+    expect(row('Elena K.')).not.toHaveTextContent('Online now');
+    expect(screen.getByRole('radio', { name: /Online now/ })).toHaveTextContent('1');
+    expect(screen.getByText(/· 1 online now/)).toBeInTheDocument();
+    // Elena opens the app, Marcus closes it: no reload
+    await emit('users:presence', { id: '0198a1b2-0000-7000-8000-000000000002', online: true, at: Date.now() });
+    await emit('users:presence', { id: MARCUS, online: false, at: Date.now(), lastActiveAt: new Date().toISOString() });
+    await waitFor(() => expect(row('Elena K.')).toHaveTextContent('Online now'));
+    expect(within(row('Elena K.')).getByTestId('dot-online')).toBeInTheDocument();
+    expect(within(row('Marcus Vance')).getByTestId('dot-offline')).toBeInTheDocument();
+    expect(row('Marcus Vance')).toHaveTextContent('just now');
+    expect(screen.getByRole('radio', { name: /Online now/ })).toHaveTextContent('1');
+    // the same news twice does not count twice
+    await emit('users:presence', { id: MARCUS, online: false, at: Date.now() });
+    expect(screen.getByRole('radio', { name: /Online now/ })).toHaveTextContent('1');
+  });
+
+  it('"Online now" tab lists only the people with the app open', async () => {
+    const { router } = openApp('/users');
+    const t = await table();
+    await within(t).findByText('Elena K.');
+    await userEvent.click(screen.getByRole('radio', { name: /Online now/ }));
+    await waitFor(() => expect(within(t).queryByText('Elena K.')).not.toBeInTheDocument());
+    expect(within(t).getByText('Marcus Vance')).toBeInTheDocument();
+    expect(router.state.location.search).toContain('tab=online');
+  });
+
+  it('user page: online status in the header, live', async () => {
+    const { emit } = await connectFakeSocket();
+    openApp(`/users/${MARCUS}`);
+    expect(await screen.findByText('Online now')).toBeInTheDocument();
+    expect(screen.getByTestId('dot-online')).toBeInTheDocument();
+    await emit('users:presence', { id: MARCUS, online: false, at: Date.now(), lastActiveAt: new Date().toISOString() });
+    expect(await screen.findByText(/Offline · last active/)).toBeInTheDocument();
+    expect(screen.getByTestId('dot-offline')).toBeInTheDocument();
+  });
+
   it('Export CSV downloads the current filter; editors do not see it', async () => {
     openApp('/users');
     await userEvent.click(await screen.findByRole('button', { name: 'Export CSV' }));

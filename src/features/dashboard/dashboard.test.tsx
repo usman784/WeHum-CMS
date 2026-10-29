@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { disconnectSocket } from '../../lib/socket';
 import { connectFakeSocket, h1, openApp } from '../../test/app';
@@ -37,6 +38,44 @@ describe('Dashboard', () => {
     expect(need.getByRole('link', { name: /Founding 1,000: 412 taken/ })).toHaveAttribute('href', '/subscriptions');
     expect(screen.getByText('The Midday Coherence')).toBeInTheDocument();
     expect(await a11yViolations()).toEqual([]);
+  });
+
+  it('Online now: a tile and a world map shaded by country, switchable to meditating, live from the socket', async () => {
+    const { emit } = await connectFakeSocket();
+    openApp('/');
+    await screen.findByText('Meditating right now');
+    expect(tile('Online now')).toHaveTextContent('486');
+    expect(tile('Online now')).toHaveTextContent('131 guests · 6 countries');
+    const map = await screen.findByTestId('world-map');
+    const country = (c: string) => map.querySelector(`[data-country="${c}"]`)!;
+    expect(country('US')).toHaveAttribute('data-n', '210');
+    expect(country('FR')).not.toHaveAttribute('data-n'); // nobody there
+    expect(country('US').textContent).toBe('United States · 210 online');
+    expect(within(screen.getByRole('list', { name: 'People online by country' })).getAllByRole('listitem')[0]).toHaveTextContent(
+      'United States',
+    );
+    await emit('dashboard:kpis', {
+      liveNow: 214,
+      meditationsToday: 3180,
+      minutesToday: 1,
+      payingMembers: 600,
+      inTrial: 112,
+      mrrUsd: 3904,
+      founding: { taken: 412, cap: 1000, open: true },
+      moderationOpen: 7,
+      onlineNow: 3,
+      onlineGuests: 1,
+      onlineCountries: [{ c: 'FR', n: 3 }],
+      at: Date.now(),
+    });
+    await waitFor(() => expect(tile('Online now')).toHaveTextContent('3'));
+    expect(country('FR')).toHaveAttribute('data-n', '3');
+    expect(country('US')).not.toHaveAttribute('data-n');
+    await userEvent.click(screen.getByRole('radio', { name: /Meditating/ }));
+    expect(country('US')).toHaveAttribute('data-n', '120');
+    expect(screen.getByRole('list', { name: 'People meditating by country' })).toHaveTextContent('Germany');
+    await emit('live:agg', { total: 9, countries: 1, top: [{ c: 'PK', n: 9 }], quiet: true, meditatedToday: 1, vibration: 1 });
+    await waitFor(() => expect(country('PK')).toHaveAttribute('data-n', '9'));
   });
 
   it('live: the socket changes the numbers without a reload and keeps the rest of the page', async () => {

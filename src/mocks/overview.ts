@@ -42,6 +42,21 @@ export function resetOverview() {
         { c: 'PK', n: 4 },
         { c: 'US', n: 3 },
       ],
+      liveTop: [
+        { c: 'US', n: 120 },
+        { c: 'GB', n: 60 },
+        { c: 'DE', n: 34 },
+      ],
+      onlineNow: 486,
+      onlineGuests: 131,
+      onlineCountries: [
+        { c: 'US', n: 210 },
+        { c: 'GB', n: 96 },
+        { c: 'DE', n: 71 },
+        { c: 'PK', n: 54 },
+        { c: 'IN', n: 33 },
+        { c: 'BR', n: 22 },
+      ],
     },
     moderationOpen: 7,
     dailyMessages: Array.from({ length: 7 }, (_, i) => {

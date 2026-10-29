@@ -1,11 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Download } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useDebounced } from '../../hooks/useDebounced';
 import { useSocketEvent, useSocketStatus, useSubscribe } from '../../hooks/useLive';
 import { useCan } from '../../hooks/useRole';
-import { formatDate, formatNumber, formatRelative, initials } from '../../lib/format';
+import { formatDate, formatNumber, initials } from '../../lib/format';
 import { qk } from '../../lib/query';
 import { Badge, type BadgeTone } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
@@ -26,6 +26,7 @@ import {
   type UserRow,
   type UserTab,
 } from './api';
+import { AvatarStatus, OnlineText, useUserPresence } from './presence';
 
 export const MEMBERSHIP_TONE: Record<Membership['plan'], BadgeTone> = {
   founding: 'ember',
@@ -86,6 +87,17 @@ export function UsersPage() {
 
   useSubscribe(['users']);
   useSocketEvent('users:new', (p) => setFresh((n) => n + p.count));
+  // green / grey dots change live; on "Online now" the list itself follows (debounced, people come and go in bursts)
+  const refetchSoon = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const presence = useUserPresence(() => {
+    if (filters.tab !== 'online') return;
+    clearTimeout(refetchSoon.current);
+    refetchSoon.current = setTimeout(() => void list.refetch(), 1500);
+  });
+  useEffect(() => () => clearTimeout(refetchSoon.current), []);
+  const fetchedAt = list.dataUpdatedAt;
+  useEffect(() => presence.reset(), [fetchedAt]); // eslint-disable-line react-hooks/exhaustive-deps
+  const onlineNow = counts?.online === undefined ? undefined : Math.max(0, counts.online + presence.delta);
   const showNew = () => {
     setFresh(0);
     void qc.invalidateQueries({ queryKey: [...qk.user.all, 'list'] });
@@ -110,7 +122,9 @@ export function UsersPage() {
       hideable: false,
       cell: (u) => (
         <Link to={`/users/${u.id}`} className="flex min-w-0 items-center gap-3">
-          <Avatar name={u.name} id={u.id} src={u.avatarUrl} />
+          <AvatarStatus online={presence.of(u).online}>
+            <Avatar name={u.name} id={u.id} src={u.avatarUrl} />
+          </AvatarStatus>
           <span className="flex min-w-0 flex-col">
             <span className="truncate text-body font-semibold">
               {[u.name, u.lastName].filter(Boolean).join(' ') || 'Guest'}
@@ -154,13 +168,13 @@ export function UsersPage() {
       id: 'active',
       header: 'Last active',
       width: '1fr',
-      cell: (u) => <span className="text-sm text-text-muted">{formatRelative(u.lastActiveAt)}</span>,
+      cell: (u) => <OnlineText p={presence.of(u)} />,
     },
   ];
 
   const filtered = filters.tab !== 'all' || !!filters.q;
   const subtitle = counts
-    ? `${formatNumber(counts.all)} people · ${formatNumber(counts.accounts)} with an account · ${formatNumber(counts.guests)} guests · ${formatNumber(counts.paying)} paying · ${formatNumber(counts.trial)} in trial`
+    ? `${formatNumber(counts.all)} people · ${formatNumber(counts.accounts)} with an account · ${formatNumber(counts.guests)} guests · ${formatNumber(counts.paying)} paying · ${formatNumber(counts.trial)} in trial${onlineNow === undefined ? '' : ` · ${formatNumber(onlineNow)} online now`}`
     : 'Everyone who uses the app, with or without an account.';
 
   return (
@@ -191,7 +205,7 @@ export function UsersPage() {
         />
         <TabPills
           label="Filter users"
-          options={[...USER_TABS]}
+          options={USER_TABS.map((t) => (t.value === 'online' && onlineNow !== undefined ? { ...t, count: onlineNow } : t))}
           value={filters.tab}
           onChange={(tab) => setFilters({ tab, q: search.trim() })}
         />

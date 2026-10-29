@@ -804,3 +804,8 @@ Status: ✅ done
 - **Sessions:** a YouTube item's description is filled from YouTube when the link is pasted (up to 4,000 characters, shown in the app as the collapsible "Video description"); other types stay at 160.
 - **Users → detail:** shows the person's bio.
 Tests: `pnpm exec vitest run` (512 + 2 new), `tsc` clean. The upload test no longer prints a late "ProgressEvent is not defined" error.
+
+### Oct 29 — Online now (client ticket)
+- **Users:** green dot on the avatar and "Online now" (grey dot and "last active …" otherwise), changing live from `users:presence`; new tab **Online now** with a live count; the subtitle says how many are online. **User detail:** the same status in the header ("Offline · last active just now").
+- **Dashboard:** tile **Online now** (guests, countries) and the card **Where people are right now**: a world map shaded by country (Natural Earth 1:110m outlines generated once into `features/dashboard/world-map.ts`), switch Online / Meditating, top countries beside it. The map is its own lazy chunk (32.8 KB gz); initial load 206.1 KB of 250.
+- Tests: `pnpm exec vitest run --maxWorkers=4` 531/531 (new: dots and live changes, Online now tab, detail header, map and switch). Lint and `tsc` clean, `pnpm size` within budget. Verified live against a local API with an iPhone 17 simulator (prod flavor): open → green, background → grey after ~36 s, reopen → green in 1 s.

@@ -54,7 +54,7 @@ export function useLiveInvalidation() {
     };
     const onLive: AdminServerToClient['live:agg'] = (p) =>
       qc.setQueryData(qk.dashboard, (old: { kpis?: object } | undefined) =>
-        old?.kpis ? { ...old, kpis: { ...old.kpis, liveNow: p.total, liveCountries: p.countries } } : old,
+        old?.kpis ? { ...old, kpis: { ...old.kpis, liveNow: p.total, liveCountries: p.countries, liveTop: p.top } } : old,
       );
     const onModeration: AdminServerToClient['moderation:count'] = ({ open }) =>
       qc.setQueryData(qk.dashboard, (old: { kpis?: object; moderationOpen?: number } | undefined) =>

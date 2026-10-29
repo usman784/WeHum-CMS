@@ -23,6 +23,12 @@ export type DashboardKpis = {
   silenceNow?: number;
   /** Where the Silence Room's people are right now (ISO-2, most first). Country level only, never who. */
   silenceCountries?: { c: string; n: number }[];
+  /** Where people are meditating right now (ISO-2, top 50, most first). */
+  liveTop?: { c: string; n: number }[];
+  /** People with the app open right now, how many of them are guests, and where (ISO-2, most first). Never who. */
+  onlineNow?: number;
+  onlineGuests?: number;
+  onlineCountries?: { c: string; n: number }[];
   /** People who sat on each of the last 7 days. */
   streaks7?: number;
   founding?: { taken: number; cap: number; open: boolean };

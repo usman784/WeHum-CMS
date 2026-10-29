@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router';
 import { Plus, ShieldAlert, Clock, Star, MessageSquareWarning } from 'lucide-react';
 import { useCan, useAdmin } from '../../hooks/useRole';
@@ -14,7 +15,9 @@ import { EmptyState, ErrorState } from '../../ui/States';
 import { dayTitle } from '../daily/api';
 import { isFull, shortDay, useDashboard, type Attention, type Dashboard } from './api';
 import { useSubscribe } from '../../hooks/useLive';
-import { countryName } from '../users/api';
+import { countryName, flagOf } from '../users/api';
+
+const WorldNow = lazy(() => import('./WorldNow'));
 
 const MSG_TONE: Record<string, { label: string; tone: BadgeTone }> = {
   live: { label: 'Live', tone: 'success' },
@@ -119,9 +122,6 @@ function Attention({ items }: { items: Attention[] }) {
   );
 }
 
-const flagOf = (code: string) =>
-  /^[A-Za-z]{2}$/.test(code) ? String.fromCodePoint(...[...code.toUpperCase()].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65)) : '';
-
 /** The Silence Room right now: where its people are meditating, by country, live from `dashboard:kpis`. Never who. */
 function SilenceNow({ people, countries }: { people: number; countries: { c: string; n: number }[] }) {
   return (
@@ -184,9 +184,27 @@ function FullDashboard({ d }: { d: Dashboard }) {
           value={formatNumber(k.library.sessions)}
           hint={`sessions · ${k.library.programs} programs · ${k.library.themes} themes`}
         />
+        <KpiTile
+          label="Online now"
+          value={formatNumber(k.onlineNow ?? 0)}
+          live
+          hint={
+            k.onlineNow
+              ? `${formatNumber(k.onlineGuests ?? 0)} guests · ${(k.onlineCountries ?? []).length} ${(k.onlineCountries ?? []).length === 1 ? 'country' : 'countries'}`
+              : 'Nobody has the app open'
+          }
+        />
         <KpiTile label="Sitting in silence now" value={formatNumber(k.silenceNow ?? 0)} live hint="in the Silence Room" />
         <KpiTile label="7-day runs" value={formatNumber(k.streaks7 ?? 0)} hint="people who sat on each of the last 7 days" />
       </div>
+      <Suspense fallback={<SkeletonRows rows={4} label="Loading the map" />}>
+        <WorldNow
+          online={k.onlineCountries ?? []}
+          meditating={k.liveTop ?? []}
+          onlineTotal={k.onlineNow ?? 0}
+          meditatingTotal={k.liveNow}
+        />
+      </Suspense>
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="flex min-w-0 flex-col gap-5">
           <SectionCard
