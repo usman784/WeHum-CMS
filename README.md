@@ -1,5 +1,31 @@
 # WeHum CMS (React · TypeScript · Vite · Tailwind)
 
+## Versions
+
+The CMS has no store release of its own. Its tags follow the app: `v<name>+<build>` marks the last CMS commit made on or before that app release day, and says which CMS the app build was used with. If the CMS needs data from an older build, check out that tag. `package.json` stays `0.1.0`; the tags are the version.
+
+### Unreleased (after 1.0.2+5)
+- Nothing yet.
+
+### 1.0.2+5 (29 Oct 2026) · tag `v1.0.2+5`
+- Online now: green/grey dots on Users, an Online now tab, a live world map on the Dashboard.
+- Dashboard: "Silence Room right now" card, live by country from `dashboard:kpis`.
+- Local time previews and Global meditation time field fit narrow cards.
+
+### 1.0.1+4 (27 Oct 2026) · tag `v1.0.1+4`
+- Group meditation settings: every N hours, plus the weekly Global meditation; once-a-day start time shown only in that mode.
+- Dedications can be posted by `sessionId` and written at any time.
+- Today screen warns when today or the next two days have no Meditation of the Day or a missing length; push "Opens" list has Meditation of the Day.
+
+### 1.0.1+3 (15 Oct 2026) · tag `v1.0.1+3`
+- Stitch CMS: feature flags, App content (sit times, silence, downloads, crisis directory), group cadence and intentions, transcripts, branding and notification-limit settings, delivery report, scheduled daily messages, usernames.
+- Newsletter settings, YouTube description and link warnings in the session editor, bio in user detail, password show/hide.
+- CD: builds and publishes to the demo server after CI is green.
+
+### 1.0.0+2 (9 Oct 2026) · tag `v1.0.0+2`
+- Phases P0 to P9: foundation, UI kit, auth with two-step sign-in, content (themes, teachers, sessions, programs, challenges, uploads), daily experience, live Dashboard, Subscriptions and Users, moderation and push, analytics and settings, "coming soon" screens.
+- Settings: latest app version and store links for the update prompt.
+
 The admin panel for WeHum. The full specification is `WeHum_CMS_Spec.md`: read §0 and §0.1 first, then build phase by phase (§15). Every screen has a screenshot in `design/screens/` and its exact source in `design/source/`. `starter/` is the original starter code, kept for reference.
 
 > **Oct 12 — Stitch redesign.** New CMS controls are listed in `WeHum_CMS_Spec.md` §9b; the screen-by-screen app map is `../stitch-export/SCREEN_MAP.md`. `design/screens/` holds the original 19 screens plus `S*` screens rendered from the new pages.
