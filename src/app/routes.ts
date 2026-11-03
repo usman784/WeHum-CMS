@@ -28,6 +28,7 @@ export const nav: { section: string; items: { key: string; label: string; path: 
     items: [
       { key: 'subscriptions', label: 'Subscriptions', path: '/subscriptions', screen: '15', need: 'revenue.view' },
       { key: 'users', label: 'Users', path: '/users', screen: '16', need: 'users.view' },
+      { key: 'beta', label: 'Beta Testers', path: '/beta-testers', screen: 'beta', need: 'beta.view' },
       { key: 'notifications', label: 'Push notifications', path: '/notifications', screen: '18', need: 'push.draft' },
     ],
   },

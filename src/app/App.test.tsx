@@ -42,7 +42,7 @@ const htmlTheme = () => document.documentElement.dataset.theme;
 describe('sidebar by role (spec §6.2)', () => {
   const all = [
     'Dashboard', 'Analytics', 'Sessions', 'Programs', 'Challenges', 'Daily Messages', 'Today screen', 'Themes', 'Teachers', 'Sounds', 'SoS',
-    'Group meditation', 'Dedications & gratitude', 'Subscriptions', 'Users', 'Push notifications', 'Settings',
+    'Group meditation', 'Dedications & gratitude', 'Subscriptions', 'Users', 'Beta Testers', 'Push notifications', 'Settings',
   ]; // prettier-ignore
 
   it.each<[Role, string[]]>([
@@ -95,6 +95,8 @@ describe('routes', () => {
     ['moderator', '/moderation', true],
     ['moderator', '/sessions', false],
     ['moderator', '/users', false],
+    ['moderator', '/beta-testers', false],
+    ['editor', '/beta-testers', true],
     ['editor', '/moderation', false],
     ['editor', '/notifications', true],
     ['admin', '/settings', true],

@@ -10,6 +10,8 @@ export type Action =
   | 'users.delete'
   | 'users.export'
   | 'users.gift'
+  | 'beta.view'
+  | 'beta.manage'
   | 'push.draft'
   | 'push.send'
   | 'settings.manage'
@@ -27,6 +29,8 @@ const matrix: Record<Action, Role[]> = {
   'users.delete': ['owner', 'admin'],
   'users.export': ['owner', 'admin'],
   'users.gift': ['owner', 'admin'],
+  'beta.view': ['owner', 'admin', 'editor'],
+  'beta.manage': ['owner', 'admin'],
   'push.draft': ['owner', 'admin', 'editor'],
   'push.send': ['owner', 'admin'],
   'settings.manage': ['owner', 'admin'],

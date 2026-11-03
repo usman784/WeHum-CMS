@@ -7,6 +7,7 @@ import { resetContent } from '../mocks/content';
 import { resetDaily } from '../mocks/daily';
 import { resetOverview } from '../mocks/overview';
 import { resetAudience } from '../mocks/audience';
+import { resetBeta } from '../mocks/beta';
 import { resetCommunity } from '../mocks/community';
 import { resetInsights } from '../mocks/insights';
 import { resetComingSoon } from '../mocks/comingsoon';
@@ -62,6 +63,7 @@ afterEach(() => {
   resetDaily();
   resetOverview();
   resetAudience();
+  resetBeta();
   resetCommunity();
   resetInsights();
   resetComingSoon();
