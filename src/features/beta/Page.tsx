@@ -60,16 +60,21 @@ export function BetaTestersPage() {
   // selection: the ticked rows, or "everything that matches the filters" (resolved by the server into a fixed list when a job starts)
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [allMatching, setAllMatching] = useState(false);
+  const [wholeGroup, setWholeGroup] = useState(false); // "Delete group": the group itself, whatever search or filters are on
   const clearSelection = () => {
     setPicked(new Set());
     setAllMatching(false);
+    setWholeGroup(false);
   };
   const filterKey = JSON.stringify(filter);
   useEffect(clearSelection, [filterKey]);
-  const count = allMatching ? matching : picked.size;
-  const selection: Selection = allMatching ? { all: true, filter } : { ids: [...picked] };
   const group = batches.data?.find((b) => b.id === filter.batchId);
-  const scope = `${group ? group.name : 'All groups'}${allMatching ? ` · all ${formatNumber(matching)} matching accounts` : ` · ${picked.size} selected`}`;
+  const groupScope = wholeGroup && group ? group : null;
+  const count = groupScope ? groupScope.accounts : allMatching ? matching : picked.size;
+  const selection: Selection = groupScope ? { all: true, filter: { batchId: groupScope.id } } : allMatching ? { all: true, filter } : { ids: [...picked] };
+  const scope = groupScope
+    ? `${groupScope.name} · the whole group (${formatNumber(groupScope.accounts)} accounts)`
+    : `${group ? group.name : 'All groups'}${allMatching ? ` · all ${formatNumber(matching)} matching accounts` : ` · ${picked.size} selected`}`;
 
   const [bulk, setBulk] = useState<BulkAction | null>(null);
   const [manage, setManage] = useState<BetaRow | null>(null);
@@ -177,12 +182,12 @@ export function BetaTestersPage() {
         subtitle="Test accounts kept apart from your members: they are left out of revenue, sign-up and usage numbers. Each one has its own login, so you can give access, pause or remove them one by one or in groups."
         actions={
           <>
-            <Button variant="outline" loading={exporting} onClick={() => void exportList()}>
-              <Download size={16} aria-hidden />
-              Export list
-            </Button>
             {canManage ? (
               <>
+                <Button variant="outline" loading={exporting} onClick={() => void exportList()}>
+                  <Download size={16} aria-hidden />
+                  Export list
+                </Button>
                 <Button variant="outline" onClick={() => setImporting(true)}>
                   <Upload size={16} aria-hidden />
                   Import CSV
@@ -238,7 +243,7 @@ export function BetaTestersPage() {
             </Button>
           ) : null}
           {canManage ? (
-            <Button size="sm" variant="danger" onClick={() => { setAllMatching(true); setBulk('delete'); }}>
+            <Button size="sm" variant="danger" onClick={() => { setPicked(new Set()); setAllMatching(false); setWholeGroup(true); setBulk('delete'); }}>
               Delete group
             </Button>
           ) : null}
@@ -314,7 +319,7 @@ export function BetaTestersPage() {
         selection={selection}
         count={count}
         scope={scope}
-        onClose={() => setBulk(null)}
+        onClose={() => { setBulk(null); setWholeGroup(false); }}
         onJob={(id) => {
           setJob({ id, label: bulk ? `${BULK_LABEL[bulk]} · ${count} accounts` : 'Working' });
           clearSelection();
