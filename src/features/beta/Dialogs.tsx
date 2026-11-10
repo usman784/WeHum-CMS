@@ -1,6 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
+import { useUser } from '../users/api';
+import { ProfileEdit } from '../users/Detail';
 import { useSocketEvent } from '../../hooks/useLive';
 import { formatDate } from '../../lib/format';
 import { qk } from '../../lib/query';
@@ -291,6 +293,7 @@ export function ManageDialog({ row, canManage, onClose, onJob }: { row: BetaRow 
   const [cred, setCred] = useState<{ login: string; password: string } | null>(null);
   const [sample, setSample] = useState<number | null>(null);
   const refresh = useRefreshBeta();
+  const profile = useUser(row && canManage ? row.id : undefined);
   useEffect(() => {
     setCred(null);
     setSample(null);
@@ -337,6 +340,7 @@ export function ManageDialog({ row, canManage, onClose, onJob }: { row: BetaRow 
           <p className="text-sm text-text-muted">Your role can look at test accounts but not change them.</p>
         ) : (
           <>
+            {profile.data ? <ProfileEdit u={profile.data} onSaved={() => void refresh()} /> : null}
             <section className="flex flex-col gap-2" aria-label="Premium access">
               <h3 className="text-h3">Premium access</h3>
               <p className="text-sm text-text-muted">Changes reach the tester's open app within seconds; they do not need to sign in again. A paid subscription is never touched.</p>

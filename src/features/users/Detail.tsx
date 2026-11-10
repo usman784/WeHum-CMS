@@ -9,6 +9,7 @@ import { formatDate, formatNumber, formatRelative } from '../../lib/format';
 import { qk } from '../../lib/query';
 import { Badge, StatusText } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
+import { Input, Textarea } from '../../ui/Input';
 import { SectionCard } from '../../ui/Card';
 import { StatBar } from '../../ui/Charts';
 import { ConfirmDialog } from '../../ui/Dialog';
@@ -156,6 +157,44 @@ function JobProgress({ id, label, onDone }: { id: string; label: string; onDone?
   );
 }
 
+/** Admin types name, e-mail and a note by hand (beta testers). */
+export function ProfileEdit({ u, onSaved }: { u: UserDetail; onSaved?: () => void }) {
+  const qc = useQueryClient();
+  const [f, setF] = useState({ firstName: u.name ?? '', lastName: u.lastName ?? '', contactEmail: u.contactEmail ?? '', note: u.note ?? '' });
+  const [err, setErr] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((p) => ({ ...p, [k]: e.target.value }));
+  const save = async () => {
+    setBusy(true);
+    setErr({});
+    try {
+      await usersApi.edit(u.id, f);
+      toast.success('Saved');
+      onSaved?.();
+      await qc.invalidateQueries({ queryKey: qk.user.detail(u.id) });
+    } catch (e) {
+      const fields = (e as { details?: { fields?: { path: string; message: string }[] } }).details?.fields;
+      if (fields?.length) setErr(Object.fromEntries(fields.map((x) => [x.path, x.message])));
+      else toast.apiError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <SectionCard title="Profile & notes" description="Set by hand. Only admins see the note.">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Input label="First name" value={f.firstName} onChange={set('firstName')} maxLength={30} />
+        <Input label="Last name" value={f.lastName} onChange={set('lastName')} maxLength={30} />
+      </div>
+      <Input label="Contact email" hint="not the login email" type="email" value={f.contactEmail} onChange={set('contactEmail')} error={err.contactEmail} />
+      <Textarea label="Notes" value={f.note} onChange={set('note')} maxLength={1000} rows={4} />
+      <Button loading={busy} onClick={() => void save()}>
+        Save
+      </Button>
+    </SectionCard>
+  );
+}
+
 function SupportActions({ u }: { u: UserDetail }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -287,6 +326,7 @@ export function UserDetailPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const canGift = useCan('users.gift');
+  const canEdit = useCan('users.edit');
   const [gone, setGone] = useState(false);
   const [gifting, setGifting] = useState(false);
   useSubscribe(['jobs']);
@@ -401,6 +441,7 @@ export function UserDetailPage() {
               hint={`${u.reminder.enabled ? 'Reminder on' : 'Reminder off'} · ${u.reminder.timezone.split('/').pop()?.replace(/_/g, ' ')}`}
             />
           </div>
+          {canEdit ? <ProfileEdit key={`${u.id}-${u.name}-${u.lastName}-${u.contactEmail}-${u.note}`} u={u} /> : null}
           {u.streak ? (
             <SectionCard title="Streak" description="One grace day a week keeps the run alive; a second miss in the same week resets it.">
               <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">

@@ -35,6 +35,10 @@ export type UserDetail = {
   name: string | null;
   lastName?: string | null;
   bio?: string | null;
+  /** Admin-only note (beta testers); not shown in the app. */
+  note?: string | null;
+  /** Typed by an admin; separate from the login email. */
+  contactEmail?: string | null;
   username?: string | null;
   avatarUrl?: string | null;
   pushes?: { key: string; date: string; sentAt: string; openedAt: string | null }[];
@@ -131,7 +135,10 @@ export function useJob(id: string | null) {
   });
 }
 
+export type UserEdit = { firstName?: string; lastName?: string; contactEmail?: string; note?: string };
+
 export const usersApi = {
+  edit: (id: string, body: UserEdit) => api(`/v1/admin/users/${id}`, { method: 'PATCH', body }).then((r) => r.data),
   exportCsv: (f: UserFilters) => download('/v1/admin/users/export', `wehum-users-${f.tab}.csv`, { tab: f.tab, q: f.q.trim() || undefined }),
   exportData: (id: string) => api<{ jobId: string }>(`/v1/admin/users/${id}/export`, { method: 'POST' }).then((r) => r.data),
   remove: (id: string, confirm: string) =>
