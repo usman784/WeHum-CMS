@@ -36,9 +36,9 @@ export type ModRules = {
 };
 
 export const FILTERS = [
+  { value: 'all', label: 'All posts' },
   { value: 'review', label: 'Needs review' },
   { value: 'flagged', label: 'Auto-flagged' },
-  { value: 'all', label: 'All posts' },
   { value: 'hidden', label: 'Hidden' },
 ] as const;
 export type ModFilter = (typeof FILTERS)[number]['value'];

@@ -19,6 +19,11 @@ describe('Moderation', () => {
   it('shows the review queue with crisis first, reason chips, today and the rules; passes the a11y check', async () => {
     openApp('/moderation');
     expect(await h1('Dedications & gratitude')).toBeInTheDocument();
+    await posts();
+    expect(screen.getByRole('radio', { name: /^All posts/ })).toBeChecked(); // new posts show at once
+    expect(within(await posts()).getAllByRole('listitem').length).toBeGreaterThan(3); // includes the clean one
+    await userEvent.click(screen.getByRole('radio', { name: /^Needs review/ }));
+    await waitFor(() => expect(within(screen.getByRole('list', { name: 'Posts' })).getAllByRole('listitem')).toHaveLength(3));
     const items = within(await posts()).getAllByRole('listitem');
     expect(items).toHaveLength(3); // flagged ×2 + reported-and-auto-hidden; the visible one is not in review
     expect(items[0]).toHaveTextContent('Sam');
@@ -33,6 +38,8 @@ describe('Moderation', () => {
 
   it('hide and keep a post; the queue updates', async () => {
     openApp('/moderation');
+    await posts();
+    await userEvent.click(screen.getByRole('radio', { name: /^Needs review/ }));
     const marcus = within(await posts()).getByRole('listitem', { name: 'Post by Marcus' });
     await userEvent.click(within(marcus).getByRole('button', { name: 'Hide post' }));
     expect(await findToast('Post hidden')).toBeInTheDocument();

@@ -150,7 +150,7 @@ function PostCard({
 
 function Queue({ source }: { source: 'dedications' | 'gratitude' }) {
   const gratitude = source === 'gratitude';
-  const [filter, setFilter] = useState<ModFilter>('review');
+  const [filter, setFilter] = useState<ModFilter>('all');
   const [sessionId, setSessionId] = useState('');
   const [kind, setKind] = useState<'' | GratitudeKind>('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
