@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
 import { useRecentChanges } from '../../hooks/useEntity';
+import { useSocketEvent } from '../../hooks/useLive';
 import { useCan } from '../../hooks/useRole';
 import { useVersionedSave } from '../../hooks/useVersionedSave';
 import { cn } from '../../lib/cn';
@@ -22,16 +23,20 @@ import { EmptyState, ErrorState } from '../../ui/States';
 import { Switch } from '../../ui/Switch';
 import { toast } from '../../ui/Toast';
 import {
-  challengeApi, challengeFinishRate, challengeSchema, COUNTS, useChallengeCache, useChallenges, useChallengesFlag,
+  challengeApi, challengeFinishRate, challengeSchema, challengesInApp, COUNTS, useChallengeCache, useChallenges, useChallengesFlag,
   type Challenge, type ChallengeInput, type ChallengeValues,
 } from './api'; // prettier-ignore
 
 const GRID = 'grid grid-cols-[minmax(0,2fr)_0.7fr_minmax(0,1.4fr)_1fr_1fr_0.9fr] items-center gap-3';
-const STATUS: Record<Challenge['status'], { label: string; tone: 'success' | 'warning' | 'teal' | 'muted' }> = {
-  live: { label: 'Live', tone: 'success' },
-  draft: { label: 'Draft', tone: 'warning' },
-  scheduled: { label: 'Scheduled', tone: 'teal' },
-  archived: { label: 'Ended', tone: 'muted' },
+type Tone = 'success' | 'warning' | 'teal' | 'muted';
+const statusOf = (s: Challenge['status']): { label: string; tone: Tone } => {
+  const all: Record<Challenge['status'], { label: string; tone: Tone }> = {
+    live: { label: challengesInApp.shown ? 'Live' : 'Ready', tone: 'success' },
+    draft: { label: 'Draft', tone: 'warning' },
+    scheduled: { label: 'Scheduled', tone: 'teal' },
+    archived: { label: 'Ended', tone: 'muted' },
+  };
+  return all[s];
 };
 const FIELDS: ConflictField<Challenge>[] = [
   { key: 'name', label: 'Name' },
@@ -91,7 +96,7 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
     save: (v, version) => challengeApi.update(challenge!.id, v, version),
     onSaved: (row, v) => {
       cache.saved(row);
-      toast.success(v.status === 'live' ? 'Challenge is live' : v.status ? 'Challenge updated' : 'Challenge saved');
+      toast.success(v.status === 'live' ? (challengesInApp.shown ? 'Challenge is live' : 'Challenge is ready') : v.status ? 'Challenge updated' : 'Challenge saved');
     },
     onError,
   });
@@ -117,7 +122,7 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
       <form onSubmit={submit} noValidate className="flex flex-col gap-3.5">
         <div className="flex items-center gap-2">
           <h2 className="min-w-0 flex-1 truncate text-h3">{challenge ? challenge.name : 'New challenge'}</h2>
-          {challenge ? <StatusText tone={STATUS[challenge.status].tone}>{STATUS[challenge.status].label}</StatusText> : null}
+          {challenge ? <StatusText tone={statusOf(challenge.status).tone}>{statusOf(challenge.status).label}</StatusText> : null}
         </div>
         <Input label="Name" size="sm" error={e.name?.message} {...register('name')} />
         <Input label="Length in days" size="sm" inputMode="numeric" error={e.days?.message} {...register('days')} />
@@ -243,7 +248,7 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
               disabled={edit.saving}
               onClick={() => edit.save({ status: 'live' }, challenge.version)}
             >
-              Make live
+              {challengesInApp.shown ? 'Make live' : 'Make ready'}
             </Button>
           ) : null}
           {challenge?.status === 'live' ? (
@@ -267,7 +272,7 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
           open
           mine={edit.conflict.mine as Partial<Challenge>}
           theirs={edit.conflict.theirs}
-          fields={[...FIELDS, { key: 'status', label: 'Status', format: (v) => STATUS[v as Challenge['status']]?.label ?? String(v) }]}
+          fields={[...FIELDS, { key: 'status', label: 'Status', format: (v) => statusOf(v as Challenge['status'])?.label ?? String(v) }]}
           saving={edit.saving}
           onKeepMine={edit.keepMine}
           onTakeTheirs={() =>
@@ -287,6 +292,7 @@ export function ChallengesPage() {
   const { data, isPending, error, refetch } = useChallenges();
   const canSettings = useCan('settings.manage');
   const flag = useChallengesFlag(canSettings);
+  useSocketEvent('config:changed', (p) => p.key === 'main' && void flag.refetch()); // the switch follows Settings at once
   const [selected, setSelected] = useState<string | 'new' | null>(null);
   const recent = useRecentChanges('challenge');
 
@@ -314,7 +320,9 @@ export function ChallengesPage() {
         }
       />
       <p role="status" className="rounded-btn bg-info px-4 py-2.5 text-body text-info-text">
-        {flag.data === true ? (
+        {!challengesInApp.shown ? (
+          'Coming soon in the app: the current app version does not show Challenges yet, even when they are Ready here. Prepare them now; they appear after the next app release.'
+        ) : flag.data === true ? (
           'The Challenges feature is switched on: live challenges show in the app.'
         ) : (
           <>
@@ -370,8 +378,8 @@ export function ChallengesPage() {
                       <span className="truncate text-text-muted">{COUNTS.find((x) => x.value === c.counts)?.short}</span>
                       <span className="tabular">{c.participants - c.finished > 0 ? formatNumber(c.participants - c.finished) : '—'}</span>
                       <span className="tabular">{rate === null ? '—' : formatPercent(rate)}</span>
-                      <StatusText tone={STATUS[c.status].tone} className="text-xs font-bold">
-                        {STATUS[c.status].label}
+                      <StatusText tone={statusOf(c.status).tone} className="text-xs font-bold">
+                        {statusOf(c.status).label}
                       </StatusText>
                     </button>
                   </li>

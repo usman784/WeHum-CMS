@@ -9,7 +9,7 @@ import { fail, url } from '../../mocks/handlers';
 import { server } from '../../mocks/server';
 import { findToast, h1, openApp } from '../../test/app';
 import { a11yViolations } from '../../test/render';
-import { challengeFinishRate, challengeSchema } from '../challenges/api';
+import { challengeFinishRate, challengeSchema, challengesInApp } from '../challenges/api';
 import { blockLength, blockSchema, loudness } from '../sounds/api';
 import { finishRate, programBlocker, toDaysBody, totalMinutes, type DayDraft } from './api';
 
@@ -387,6 +387,8 @@ describe('challenge helpers', () => {
 });
 
 describe('Challenges screen', () => {
+  beforeEach(() => void (challengesInApp.shown = true)); // Option B wording: the app follows the switch
+  afterEach(() => void (challengesInApp.shown = false));
   const rows = () => within(screen.getByRole('list', { name: 'Challenges' })).getAllByRole('button');
   const editor = () => screen.getByRole('complementary', { name: /challenge$/i });
 
@@ -400,6 +402,19 @@ describe('Challenges screen', () => {
     expect(within(editor()).getByLabelText('Name')).toHaveValue('7 days of calm');
     expect(within(editor()).getByText(/Missing a day never resets progress: a grace day is used first/)).toBeInTheDocument();
     expect(await a11yViolations()).toEqual([]);
+  });
+
+  it('while the app keeps Challenges "Coming soon": the page says so, calls them Ready, never Live', async () => {
+    challengesInApp.shown = false;
+    db.flags.challenges = true; // the switch is on, the app code still hides them
+    openApp('/challenges');
+    await screen.findByRole('list', { name: 'Challenges' });
+    expect(screen.getByText(/Coming soon in the app: the current app version does not show Challenges yet/)).toBeInTheDocument();
+    expect(screen.queryByText(/live challenges show in the app/)).not.toBeInTheDocument();
+    expect(rows()[0]).toHaveTextContent('7 days of calm7Any meditation72462%Ready');
+    expect(screen.queryByText('Live')).not.toBeInTheDocument();
+    await user.click(rows()[1]!);
+    expect(within(editor()).getByRole('button', { name: 'Make ready' })).toBeInTheDocument();
   });
 
   it('with the flag on it says live challenges show in the app; an editor is told who can switch it', async () => {

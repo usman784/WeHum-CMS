@@ -112,3 +112,11 @@ export function useChallengeCache() {
     added: (row: Challenge) => qc.setQueryData<Challenge[]>(LIST, (old) => [{ ...row, participants: 0, finished: 0 }, ...(old ?? [])]),
   };
 }
+
+/**
+ * Does the app version in the stores show Challenges? false = the app code keeps them "Coming soon" whatever the
+ * "Challenges" switch says, so the CMS calls them "Ready", not "Live".
+ * OPTION B: after the app release that follows the switch (see config_service.dart in the app), set `shown` to true:
+ * the page then says "Live" and its banner follows the switch live over the socket (config:changed).
+ */
+export const challengesInApp = { shown: false };
