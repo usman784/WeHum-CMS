@@ -21,14 +21,22 @@ test.beforeAll(() => {
 });
 
 test('write in the app → CMS shows it at once → review, hide, keep → delete the account', async ({ page, request, browser }) => {
-  const guest = await (await request.post(`${API}/v1/auth/guest`, { data: { installId: `e2e-${Date.now()}`, platform: 'android', appVersion: '1.0.0', timezone: 'Asia/Karachi' } })).json();
+  const guest = await (
+    await request.post(`${API}/v1/auth/guest`, {
+      data: { installId: `e2e-${Date.now()}`, platform: 'android', appVersion: '1.0.0', timezone: 'Asia/Karachi' },
+    })
+  ).json();
   const userId = guest.data.me.id as string;
   sql(`UPDATE users SET is_guest=false, first_name='Usman', country='PK', show_country=true WHERE id=$1`, [userId]);
   sql(`INSERT INTO entitlements (user_id, active, product_id, period_type, expires_at) VALUES ($1, true, 'wehum_annual', 'normal', now() + interval '30 days')`, [userId]); // prettier-ignore
-  const token = (await (await request.post(`${API}/v1/auth/refresh`, { data: { refreshToken: guest.data.refreshToken } })).json()).data.accessToken as string;
+  const token = (await (await request.post(`${API}/v1/auth/refresh`, { data: { refreshToken: guest.data.refreshToken } })).json()).data
+    .accessToken as string;
   const auth = { authorization: `Bearer ${token}` };
   const [s] = sql<{ id: string }>(`SELECT id FROM sessions WHERE status='live' ORDER BY title LIMIT 1`);
-  const feed = async () => ((await (await request.get(`${API}/v1/sessions/${s!.id}/dedications`, { headers: auth })).json()).data as { text: string }[]).map((d) => d.text);
+  const feed = async () =>
+    ((await (await request.get(`${API}/v1/sessions/${s!.id}/dedications`, { headers: auth })).json()).data as { text: string }[]).map(
+      (d) => d.text,
+    );
 
   // 1. open the screen: no clicks, it is on All posts
   await signIn(page, roleEmail('moderator'));
@@ -67,7 +75,11 @@ test('write in the app → CMS shows it at once → review, hide, keep → delet
   await page.screenshot({ path: shot('4-hidden'), fullPage: true });
   expect(await feed()).not.toContain(CLEAN);
   await page.getByRole('radio', { name: 'Hidden' }).click();
-  await list.getByRole('listitem', { name: 'Post by Usman' }).filter({ hasText: CLEAN }).getByRole('button', { name: 'Show again' }).click();
+  await list
+    .getByRole('listitem', { name: 'Post by Usman' })
+    .filter({ hasText: CLEAN })
+    .getByRole('button', { name: 'Show again' })
+    .click();
   await expect.poll(feed, { timeout: 5_000 }).toContain(CLEAN);
   await page.screenshot({ path: shot('5-shown-again'), fullPage: true });
 
