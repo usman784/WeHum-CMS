@@ -56,9 +56,9 @@ test('sidebar collapses to icons under 1200 px and stays usable', async ({ page 
 });
 
 for (const [role, count, forbidden] of [
-  ['owner', 17, null],
-  ['admin', 17, null],
-  ['editor', 15, '/settings'],
+  ['owner', 18, null],
+  ['admin', 18, null],
+  ['editor', 16, '/settings'],
   ['moderator', 2, '/sessions'],
 ] as const) {
   test(`${role} sees ${count} links${forbidden ? ` and gets "No permission" on ${forbidden}` : ''}`, async ({ page }) => {
