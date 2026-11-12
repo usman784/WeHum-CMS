@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { qk } from '../../lib/query';
 
+export type CityCount = { c: string; name: string; lat: number; lng: number; n: number };
 export type Attention =
   | { kind: 'reported_dedications'; count: number }
   | { kind: 'missing_daily_message'; date: string }
@@ -29,6 +30,9 @@ export type DashboardKpis = {
   onlineNow?: number;
   onlineGuests?: number;
   onlineCountries?: { c: string; n: number }[];
+  /** The same by city (top 50, most first): name, country, position rounded to ~10 km. Online and meditating. Never who. */
+  onlineCities?: CityCount[];
+  meditatingCities?: CityCount[];
   /** People who sat on each of the last 7 days. */
   streaks7?: number;
   founding?: { taken: number; cap: number; open: boolean };

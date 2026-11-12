@@ -201,6 +201,8 @@ function FullDashboard({ d }: { d: Dashboard }) {
         <WorldNow
           online={k.onlineCountries ?? []}
           meditating={k.liveTop ?? []}
+          onlineCities={k.onlineCities ?? []}
+          meditatingCities={k.meditatingCities ?? []}
           onlineTotal={k.onlineNow ?? 0}
           meditatingTotal={k.liveNow}
         />

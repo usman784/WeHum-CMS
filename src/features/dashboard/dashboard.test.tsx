@@ -78,6 +78,41 @@ describe('Dashboard', () => {
     await waitFor(() => expect(country('PK')).toHaveAttribute('data-n', '9'));
   });
 
+  it('By city: the switch draws a dot per city (online and meditating), lists the cities, and follows the socket live', async () => {
+    const { emit } = await connectFakeSocket();
+    openApp('/');
+    const map = await screen.findByTestId('world-map');
+    const dot = (name: string) => map.querySelector(`[data-city="${name}"]`);
+    expect(dot('Lahore')).toBeNull(); // country view first: no dots
+    await userEvent.click(screen.getByRole('radio', { name: 'By city' }));
+    expect(dot('Lahore')).toHaveAttribute('data-n', '31');
+    expect(dot('Lahore')!.textContent).toBe('Lahore, Pakistan · 31 online');
+    expect(map.querySelector('[data-country="US"]')).not.toHaveAttribute('data-n'); // countries are not shaded in city view
+    expect(within(screen.getByRole('list', { name: 'People online by city' })).getAllByRole('listitem')[0]).toHaveTextContent('New York');
+    expect(screen.getByText(/with no city yet/)).toBeInTheDocument(); // 486 online, fewer in cities
+    // a dot lands inside its country (Lahore is in Pakistan's box on the 960×470 map)
+    const x = Number(dot('Lahore')!.getAttribute('cx')), y = Number(dot('Lahore')!.getAttribute('cy'));
+    expect(x).toBeGreaterThan(650); expect(x).toBeLessThan(690); expect(y).toBeGreaterThan(160); expect(y).toBeLessThan(190);
+    await userEvent.click(screen.getByRole('radio', { name: /Meditating/ }));
+    expect(dot('Lahore')).toHaveAttribute('data-n', '9');
+    expect(dot('Berlin')).toBeNull(); // nobody meditating there
+    await emit('dashboard:kpis', {
+      liveNow: 1, meditationsToday: 1, minutesToday: 1, payingMembers: 1, inTrial: 1, mrrUsd: 1,
+      founding: { taken: 1, cap: 10, open: true }, moderationOpen: 0, onlineNow: 2, onlineGuests: 0,
+      onlineCountries: [{ c: 'JP', n: 2 }],
+      onlineCities: [{ c: 'JP', name: 'Tokyo', lat: 35.7, lng: 139.7, n: 2 }],
+      meditatingCities: [{ c: 'JP', name: 'Tokyo', lat: 35.7, lng: 139.7, n: 1 }],
+      at: Date.now(),
+    });
+    await waitFor(() => expect(dot('Tokyo')).toHaveAttribute('data-n', '1'));
+    expect(dot('Lahore')).toBeNull();
+    await userEvent.click(screen.getByRole('radio', { name: /Online/ }));
+    expect(dot('Tokyo')).toHaveAttribute('data-n', '2');
+    await userEvent.click(screen.getByRole('radio', { name: 'By country' }));
+    expect(map.querySelector('[data-city]')).toBeNull();
+    expect(map.querySelector('[data-country="JP"]')).toHaveAttribute('data-n', '2');
+  });
+
   it('live: the socket changes the numbers without a reload and keeps the rest of the page', async () => {
     const { emit } = await connectFakeSocket();
     openApp('/');

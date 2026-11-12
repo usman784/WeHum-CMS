@@ -207,11 +207,12 @@ export async function startBackend() {
   await waitForApi(true);
 }
 
-function spawnRole(role: 'api' | 'worker') {
+/** Start one backend role; `scheduler` (the leader: live counters, dashboard numbers) is only started by the specs that need it. */
+export function spawnRole(role: 'api' | 'worker' | 'scheduler') {
   const out = openSync(LOG, 'a');
   const child = spawn(process.execPath, ['-r', '@swc-node/register', 'src/main.ts'], {
     cwd: BACKEND_DIR,
-    env: { ...env(), APP_ROLE: role, ...(role === 'worker' && { PORT: '3001' }) },
+    env: { ...env(), APP_ROLE: role, ...(role === 'worker' && { PORT: '3001' }), ...(role === 'scheduler' && { PORT: '3002' }) },
     stdio: ['ignore', out, out],
     detached: true,
   });

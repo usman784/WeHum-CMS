@@ -57,6 +57,21 @@ export function resetOverview() {
         { c: 'IN', n: 33 },
         { c: 'BR', n: 22 },
       ],
+      onlineCities: [
+        { c: 'US', name: 'New York', lat: 40.7, lng: -74, n: 96 },
+        { c: 'GB', name: 'London', lat: 51.5, lng: -0.1, n: 71 },
+        { c: 'DE', name: 'Berlin', lat: 52.5, lng: 13.4, n: 40 },
+        { c: 'PK', name: 'Lahore', lat: 31.5, lng: 74.4, n: 31 },
+        { c: 'PK', name: 'Karachi', lat: 24.9, lng: 67, n: 18 },
+        { c: 'US', name: 'Los Angeles', lat: 34.1, lng: -118.2, n: 44 },
+        { c: 'IN', name: 'Mumbai', lat: 19.1, lng: 72.9, n: 20 },
+        { c: 'BR', name: 'São Paulo', lat: -23.5, lng: -46.6, n: 15 },
+      ],
+      meditatingCities: [
+        { c: 'US', name: 'New York', lat: 40.7, lng: -74, n: 40 },
+        { c: 'GB', name: 'London', lat: 51.5, lng: -0.1, n: 22 },
+        { c: 'PK', name: 'Lahore', lat: 31.5, lng: 74.4, n: 9 },
+      ],
     },
     moderationOpen: 7,
     dailyMessages: Array.from({ length: 7 }, (_, i) => {
