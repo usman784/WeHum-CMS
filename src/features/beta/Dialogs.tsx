@@ -38,7 +38,15 @@ function useRefreshBeta() {
 
 // ───────────── generate ─────────────
 
-const EMPTY: CreateForm = { name: 'Beta Round 1', count: 150, prefix: 'beta', access: 'mixed', premiumCount: 100, premiumDays: 30, seedPreset: 'blank' };
+const EMPTY: CreateForm = {
+  name: 'Beta Round 1',
+  count: 150,
+  prefix: 'beta',
+  access: 'mixed',
+  premiumCount: 100,
+  premiumDays: 30,
+  seedPreset: 'blank',
+};
 
 /** Create accounts: the form, then a review of exactly what will be made (counts, expiry, password style) before anything is created. */
 export function GenerateDialog({ open, onClose, onStarted }: { open: boolean; onClose: () => void; onStarted: (jobId: string) => void }) {
@@ -134,7 +142,8 @@ export function GenerateDialog({ open, onClose, onStarted }: { open: boolean; on
               ))}
             </ul>
             <p className="mt-2 text-xs text-text-muted">
-              Fictional examples. The real numbers continue after the highest login already used. Testers can change their password in the app.
+              Fictional examples. The real numbers continue after the highest login already used. Testers can change their password in the
+              app.
             </p>
           </div>
         </div>
@@ -149,7 +158,12 @@ export function GenerateDialog({ open, onClose, onStarted }: { open: boolean; on
             maxLength={14}
           />
           <NumberInput label="How many accounts" value={f.count} min={1} max={200} onChange={(v) => set({ count: v ?? 1 })} />
-          <Select label="Sample data" options={PRESETS} value={f.seedPreset} onChange={(e) => set({ seedPreset: e.target.value as CreateForm['seedPreset'] })} />
+          <Select
+            label="Sample data"
+            options={PRESETS}
+            value={f.seedPreset}
+            onChange={(e) => set({ seedPreset: e.target.value as CreateForm['seedPreset'] })}
+          />
           <div className="sm:col-span-2">
             <Segmented
               label="Initial access"
@@ -164,11 +178,26 @@ export function GenerateDialog({ open, onClose, onStarted }: { open: boolean; on
           </div>
           {f.access === 'mixed' ? (
             <>
-              <NumberInput label="Premium accounts" value={f.premiumCount ?? 0} min={1} max={Math.max(1, f.count - 1)} onChange={(v) => set({ premiumCount: v ?? 1 })} />
+              <NumberInput
+                label="Premium accounts"
+                value={f.premiumCount ?? 0}
+                min={1}
+                max={Math.max(1, f.count - 1)}
+                onChange={(v) => set({ premiumCount: v ?? 1 })}
+              />
               <NumberInput label="Free accounts" value={Math.max(0, f.count - (f.premiumCount ?? 0))} disabled onChange={() => undefined} />
             </>
           ) : null}
-          {premium > 0 ? <NumberInput label="Premium lasts" unit="days" value={f.premiumDays ?? 30} min={1} max={365} onChange={(v) => set({ premiumDays: v ?? 30 })} /> : null}
+          {premium > 0 ? (
+            <NumberInput
+              label="Premium lasts"
+              unit="days"
+              value={f.premiumDays ?? 30}
+              min={1}
+              max={365}
+              onChange={(v) => set({ premiumDays: v ?? 30 })}
+            />
+          ) : null}
           <div className="rounded-card border border-border bg-input p-3 text-sm sm:col-span-2">
             <div className="font-semibold">Password style</div>
             <div>
@@ -256,7 +285,12 @@ export function ImportDialog({ open, onClose, onStarted }: { open: boolean; onCl
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input label="Group name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
-          <Select label="Sample data" options={PRESETS} value={preset} onChange={(e) => setPreset(e.target.value as CreateForm['seedPreset'])} />
+          <Select
+            label="Sample data"
+            options={PRESETS}
+            value={preset}
+            onChange={(e) => setPreset(e.target.value as CreateForm['seedPreset'])}
+          />
         </div>
         {prev ? (
           <div className="flex flex-col gap-2" data-testid="import-preview">
@@ -268,11 +302,19 @@ export function ImportDialog({ open, onClose, onStarted }: { open: boolean; onCl
                 <li key={r.line} className="flex items-start gap-2 border-b border-border px-3 py-1.5 last:border-0">
                   <span className="w-10 shrink-0 text-text-muted">#{r.line}</span>
                   <span className="w-28 shrink-0 font-mono">{r.login || '—'}</span>
-                  {r.ok ? <Badge tone="teal" size="sm">OK{r.premium ? ` · premium ${r.days}d` : ''}</Badge> : <span className="text-danger-text">{r.errors.join('; ')}</span>}
+                  {r.ok ? (
+                    <Badge tone="teal" size="sm">
+                      OK{r.premium ? ` · premium ${r.days}d` : ''}
+                    </Badge>
+                  ) : (
+                    <span className="text-danger-text">{r.errors.join('; ')}</span>
+                  )}
                 </li>
               ))}
             </ul>
-            {prev.invalid > 0 ? <Checkbox label="Import only the valid rows" checked={skip} onChange={(e) => setSkip(e.target.checked)} /> : null}
+            {prev.invalid > 0 ? (
+              <Checkbox label="Import only the valid rows" checked={skip} onChange={(e) => setSkip(e.target.checked)} />
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -285,7 +327,17 @@ export function ImportDialog({ open, onClose, onStarted }: { open: boolean; onCl
 type Busy = null | string;
 
 /** Manage one tester: every action says what it does to the person and what stays the same. */
-export function ManageDialog({ row, canManage, onClose, onJob }: { row: BetaRow | null; canManage: boolean; onClose: () => void; onJob: (id: string) => void }) {
+export function ManageDialog({
+  row,
+  canManage,
+  onClose,
+  onJob,
+}: {
+  row: BetaRow | null;
+  canManage: boolean;
+  onClose: () => void;
+  onJob: (id: string) => void;
+}) {
   const [busy, setBusy] = useState<Busy>(null);
   const [days, setDays] = useState<number | null>(30);
   const [reason, setReason] = useState('');
@@ -299,7 +351,11 @@ export function ManageDialog({ row, canManage, onClose, onJob }: { row: BetaRow 
     setSample(null);
     setTyped('');
     setReason('');
-    if (row && canManage) void betaApi.sample(row.id).then((s) => setSample(s.total)).catch(() => setSample(null));
+    if (row && canManage)
+      void betaApi
+        .sample(row.id)
+        .then((s) => setSample(s.total))
+        .catch(() => setSample(null));
   }, [row?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!row) return null;
   const run = async (key: string, fn: () => Promise<unknown>, done: string) => {
@@ -325,16 +381,32 @@ export function ManageDialog({ row, canManage, onClose, onJob }: { row: BetaRow 
       title={`Manage ${row.login}`}
       description={row.email ?? undefined}
       size="lg"
-      footer={<Button variant="outline" onClick={onClose}>Close</Button>}
+      footer={
+        <Button variant="outline" onClick={onClose}>
+          Close
+        </Button>
+      }
     >
       <div className="flex flex-col gap-5 overflow-auto">
         <div className="flex flex-wrap gap-2" aria-label="Status">
-          <Badge tone={row.state === 'active' ? 'teal' : row.state === 'suspended' ? 'warning' : 'danger'} size="sm">{row.state === 'active' ? 'Active' : row.state === 'suspended' ? 'Suspended' : 'Deleting'}</Badge>
-          <Badge tone="ember" size="sm">{row.access.label}</Badge>
-          <Badge tone="neutral" size="sm">{row.online ? 'Online now' : 'Offline'}</Badge>
-          {row.provisioning !== 'ready' ? <Badge tone="warning" size="sm">Setup {row.provisioning}</Badge> : null}
+          <Badge tone={row.state === 'active' ? 'teal' : row.state === 'suspended' ? 'warning' : 'danger'} size="sm">
+            {row.state === 'active' ? 'Active' : row.state === 'suspended' ? 'Suspended' : 'Deleting'}
+          </Badge>
+          <Badge tone="ember" size="sm">
+            {row.access.label}
+          </Badge>
+          <Badge tone="neutral" size="sm">
+            {row.online ? 'Online now' : 'Offline'}
+          </Badge>
+          {row.provisioning !== 'ready' ? (
+            <Badge tone="warning" size="sm">
+              Setup {row.provisioning}
+            </Badge>
+          ) : null}
         </div>
-        {row.state === 'suspended' && row.suspendedReason ? <p className="text-sm text-text-muted">Suspended: {row.suspendedReason}</p> : null}
+        {row.state === 'suspended' && row.suspendedReason ? (
+          <p className="text-sm text-text-muted">Suspended: {row.suspendedReason}</p>
+        ) : null}
         {hasBeta ? <p className="text-sm text-text-muted">Beta premium ends {formatDate(row.access.betaExpiresAt!)}.</p> : null}
         {!canManage ? (
           <p className="text-sm text-text-muted">Your role can look at test accounts but not change them.</p>
@@ -343,16 +415,32 @@ export function ManageDialog({ row, canManage, onClose, onJob }: { row: BetaRow 
             {profile.data ? <ProfileEdit u={profile.data} onSaved={() => void refresh()} /> : null}
             <section className="flex flex-col gap-2" aria-label="Premium access">
               <h3 className="text-h3">Premium access</h3>
-              <p className="text-sm text-text-muted">Changes reach the tester's open app within seconds; they do not need to sign in again. A paid subscription is never touched.</p>
+              <p className="text-sm text-text-muted">
+                Changes reach the tester's open app within seconds; they do not need to sign in again. A paid subscription is never touched.
+              </p>
               <div className="flex flex-wrap items-end gap-3">
                 <NumberInput label="Days" value={days} min={1} max={365} onChange={setDays} />
-                <Button loading={busy === 'grant'} disabled={blocked && row.state === 'deleting'} onClick={() => void run('grant', () => betaApi.one(row.id, 'grant', { days: days ?? 30 }), 'Beta premium granted')}>
+                <Button
+                  loading={busy === 'grant'}
+                  disabled={blocked && row.state === 'deleting'}
+                  onClick={() => void run('grant', () => betaApi.one(row.id, 'grant', { days: days ?? 30 }), 'Beta premium granted')}
+                >
                   {hasBeta ? 'Set end date from today' : 'Grant beta premium'}
                 </Button>
-                <Button variant="outline" loading={busy === 'extend'} disabled={!hasBeta} onClick={() => void run('extend', () => betaApi.one(row.id, 'extend', { days: days ?? 30 }), 'Beta premium extended')}>
+                <Button
+                  variant="outline"
+                  loading={busy === 'extend'}
+                  disabled={!hasBeta}
+                  onClick={() => void run('extend', () => betaApi.one(row.id, 'extend', { days: days ?? 30 }), 'Beta premium extended')}
+                >
                   Extend
                 </Button>
-                <Button variant="outline" loading={busy === 'remove'} disabled={!hasBeta} onClick={() => void run('remove', () => betaApi.one(row.id, 'remove'), 'Beta access removed')}>
+                <Button
+                  variant="outline"
+                  loading={busy === 'remove'}
+                  disabled={!hasBeta}
+                  onClick={() => void run('remove', () => betaApi.one(row.id, 'remove'), 'Beta access removed')}
+                >
                   Remove beta access
                 </Button>
               </div>
@@ -361,28 +449,64 @@ export function ManageDialog({ row, canManage, onClose, onJob }: { row: BetaRow 
               <h3 className="text-h3">Account</h3>
               {row.state === 'suspended' ? (
                 <>
-                  <p className="text-sm text-text-muted">Resuming allows a new sign-in. Old sessions stay signed out and the beta end date does not move.</p>
-                  <Button variant="outline" className="self-start" loading={busy === 'resume'} onClick={() => void run('resume', () => betaApi.one(row.id, 'resume'), 'Account resumed')}>
+                  <p className="text-sm text-text-muted">
+                    Resuming allows a new sign-in. Old sessions stay signed out and the beta end date does not move.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="self-start"
+                    loading={busy === 'resume'}
+                    onClick={() => void run('resume', () => betaApi.one(row.id, 'resume'), 'Account resumed')}
+                  >
                     Resume account
                   </Button>
                 </>
               ) : (
                 <div className="flex flex-wrap items-end gap-3">
                   <Input label="Reason (only admins see it)" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} />
-                  <Button variant="outline" disabled={row.state !== 'active'} loading={busy === 'suspend'} onClick={() => void run('suspend', () => betaApi.one(row.id, 'suspend', { reason: reason.trim() || 'Suspended by an admin' }), 'Account suspended')}>
+                  <Button
+                    variant="outline"
+                    disabled={row.state !== 'active'}
+                    loading={busy === 'suspend'}
+                    onClick={() =>
+                      void run(
+                        'suspend',
+                        () => betaApi.one(row.id, 'suspend', { reason: reason.trim() || 'Suspended by an admin' }),
+                        'Account suspended',
+                      )
+                    }
+                  >
                     Suspend
                   </Button>
                 </div>
               )}
-              <p className="text-sm text-text-muted">Suspending signs the tester out on every device and blocks sign-in until you resume. Their beta time keeps running.</p>
+              <p className="text-sm text-text-muted">
+                Suspending signs the tester out on every device and blocks sign-in until you resume. Their beta time keeps running.
+              </p>
             </section>
             <section className="flex flex-col gap-2" aria-label="Password and data">
               <h3 className="text-h3">Password and sample data</h3>
               <div className="flex flex-wrap gap-3">
-                <Button variant="outline" loading={busy === 'pw'} disabled={row.state === 'deleting'} onClick={() => void run('pw', async () => setCred((await betaApi.one(row.id, 'reset_password')) as { login: string; password: string }), 'New password created')}>
+                <Button
+                  variant="outline"
+                  loading={busy === 'pw'}
+                  disabled={row.state === 'deleting'}
+                  onClick={() =>
+                    void run(
+                      'pw',
+                      async () => setCred((await betaApi.one(row.id, 'reset_password')) as { login: string; password: string }),
+                      'New password created',
+                    )
+                  }
+                >
                   Reset password
                 </Button>
-                <Button variant="outline" loading={busy === 'sample'} disabled={sample === 0} onClick={() => void run('sample', () => betaApi.one(row.id, 'reset_sample'), 'Sample data removed')}>
+                <Button
+                  variant="outline"
+                  loading={busy === 'sample'}
+                  disabled={sample === 0}
+                  onClick={() => void run('sample', () => betaApi.one(row.id, 'reset_sample'), 'Sample data removed')}
+                >
                   Reset sample data{sample ? ` (${sample})` : ''}
                 </Button>
               </div>
@@ -393,15 +517,33 @@ export function ManageDialog({ row, canManage, onClose, onJob }: { row: BetaRow 
                   <span className="text-text-muted">Shown once. The tester is signed out everywhere. Share it privately.</span>
                 </p>
               ) : null}
-              <p className="text-sm text-text-muted">Reset sample data removes only the fictional profile and history added at creation, never what the tester did.</p>
+              <p className="text-sm text-text-muted">
+                Reset sample data removes only the fictional profile and history added at creation, never what the tester did.
+              </p>
             </section>
             <section className="flex flex-col gap-2" aria-label="Delete">
               <h3 className="text-h3">Delete account</h3>
-              <p className="text-sm text-text-muted">Access stops immediately; the data is then removed in the background. Deleting does not cancel any store subscription.</p>
+              <p className="text-sm text-text-muted">
+                Access stops immediately; the data is then removed in the background. Deleting does not cancel any store subscription.
+              </p>
               <div className="flex flex-wrap items-end gap-3">
                 <Input label={`Type ${phrase}`} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
-                <Button variant="danger" disabled={typed.trim() !== phrase || row.state === 'deleting'} loading={busy === 'delete'}
-                  onClick={() => void run('delete', async () => { const r = (await betaApi.one(row.id, 'delete', { confirm: phrase })) as { jobId: string }; onJob(r.jobId); onClose(); }, 'Deleting the account')}>
+                <Button
+                  variant="danger"
+                  disabled={typed.trim() !== phrase || row.state === 'deleting'}
+                  loading={busy === 'delete'}
+                  onClick={() =>
+                    void run(
+                      'delete',
+                      async () => {
+                        const r = (await betaApi.one(row.id, 'delete', { confirm: phrase })) as { jobId: string };
+                        onJob(r.jobId);
+                        onClose();
+                      },
+                      'Deleting the account',
+                    )
+                  }
+                >
                   Delete
                 </Button>
               </div>
@@ -436,7 +578,21 @@ const EXPLAIN: Record<BulkAction, string> = {
 };
 
 /** Confirm a bulk action for a fixed selection. The scope and count are shown first; delete also needs the typed phrase. */
-export function BulkDialog({ action, selection, count, scope, onClose, onJob }: { action: BulkAction | null; selection: Selection; count: number; scope: string; onClose: () => void; onJob: (id: string) => void }) {
+export function BulkDialog({
+  action,
+  selection,
+  count,
+  scope,
+  onClose,
+  onJob,
+}: {
+  action: BulkAction | null;
+  selection: Selection;
+  count: number;
+  scope: string;
+  onClose: () => void;
+  onJob: (id: string) => void;
+}) {
   const [days, setDays] = useState<number | null>(30);
   const [reason, setReason] = useState('');
   const [typed, setTyped] = useState('');
@@ -447,10 +603,24 @@ export function BulkDialog({ action, selection, count, scope, onClose, onJob }: 
   useEffect(() => {
     setReview(null);
     setTyped('');
-    if (action === 'delete') void betaApi.review(sel.current).then(setReview).catch((e) => { toast.apiError(e); onClose(); });
+    if (action === 'delete')
+      void betaApi
+        .review(sel.current)
+        .then(setReview)
+        .catch((e) => {
+          toast.apiError(e);
+          onClose();
+        });
   }, [action]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!action) return null;
-  const params = (): ActionParams => (action === 'grant' || action === 'extend' ? { days: days ?? 30 } : action === 'suspend' ? { reason: reason.trim() || 'Suspended by an admin' } : action === 'delete' ? { confirm: typed.trim() } : {});
+  const params = (): ActionParams =>
+    action === 'grant' || action === 'extend'
+      ? { days: days ?? 30 }
+      : action === 'suspend'
+        ? { reason: reason.trim() || 'Suspended by an admin' }
+        : action === 'delete'
+          ? { confirm: typed.trim() }
+          : {};
   const go = async (a: BulkAction = action, p: ActionParams = params()) => {
     setBusy(true);
     try {
@@ -488,13 +658,18 @@ export function BulkDialog({ action, selection, count, scope, onClose, onJob }: 
     >
       <div className="flex flex-col gap-3">
         <p className="text-sm text-text-muted">{EXPLAIN[action]}</p>
-        {action === 'grant' || action === 'extend' ? <NumberInput label={action === 'grant' ? 'Premium lasts (days)' : 'Add days'} value={days} min={1} max={365} onChange={setDays} /> : null}
-        {action === 'suspend' ? <Input label="Reason (only admins see it)" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} /> : null}
+        {action === 'grant' || action === 'extend' ? (
+          <NumberInput label={action === 'grant' ? 'Premium lasts (days)' : 'Add days'} value={days} min={1} max={365} onChange={setDays} />
+        ) : null}
+        {action === 'suspend' ? (
+          <Input label="Reason (only admins see it)" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} />
+        ) : null}
         {action === 'delete' ? (
           review ? (
             <div className="flex flex-col gap-2" data-testid="delete-review">
               <p className="text-body">
-                <strong>{review.count}</strong> of {review.selected} selected accounts will be deleted{review.groups.length ? `: ${review.groups.map((g) => `${g.name} (${g.count})`).join(', ')}` : ''}.
+                <strong>{review.count}</strong> of {review.selected} selected accounts will be deleted
+                {review.groups.length ? `: ${review.groups.map((g) => `${g.name} (${g.count})`).join(', ')}` : ''}.
               </p>
               {review.blocked.length ? (
                 <div className="rounded-card border border-border p-3 text-sm">
@@ -508,7 +683,13 @@ export function BulkDialog({ action, selection, count, scope, onClose, onJob }: 
                   </ul>
                 </div>
               ) : null}
-              <Input label={`Type ${review.phrase} to confirm`} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" spellCheck={false} />
+              <Input
+                label={`Type ${review.phrase} to confirm`}
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                autoComplete="off"
+                spellCheck={false}
+              />
             </div>
           ) : (
             <p className="text-sm text-text-muted">Checking the selection…</p>
@@ -578,7 +759,15 @@ export function JobPanel({ id, label, onClose }: { id: string; label: string; on
           <Button
             size="sm"
             className="self-start"
-            onClick={() => void betaApi.retryJob(id).then(() => { toast.info('Retrying the failed accounts'); void qc.invalidateQueries({ queryKey: ['betaJob', id] }); }).catch(toast.apiError)}
+            onClick={() =>
+              void betaApi
+                .retryJob(id)
+                .then(() => {
+                  toast.info('Retrying the failed accounts');
+                  void qc.invalidateQueries({ queryKey: ['betaJob', id] });
+                })
+                .catch(toast.apiError)
+            }
           >
             Retry failed accounts
           </Button>

@@ -58,13 +58,20 @@ describe('Beta Testers', () => {
     const t = await table();
     await within(t).findByText('beta003');
     await userEvent.click(within(t).getAllByRole('checkbox')[3]!); // beta003
-    await userEvent.click(within(await screen.findByRole('region', { name: 'Selection' })).getByRole('button', { name: 'Grant beta premium' }));
+    await userEvent.click(
+      within(await screen.findByRole('region', { name: 'Selection' })).getByRole('button', { name: 'Grant beta premium' }),
+    );
     const d = await dialog();
     expect(within(d).getByText(/Their open apps update within seconds/)).toBeInTheDocument();
     await userEvent.click(within(d).getByRole('button', { name: 'Grant beta premium' }));
     const panel = await screen.findByTestId('job-panel');
     await within(panel).findByText('Finished');
-    expect(beta.calls.find((c) => c.path === '/bulk')?.body).toMatchObject({ action: 'grant', selection: { ids: [expect.stringContaining('0198b000')] }, params: { days: 30 }, expectedCount: 1 });
+    expect(beta.calls.find((c) => c.path === '/bulk')?.body).toMatchObject({
+      action: 'grant',
+      selection: { ids: [expect.stringContaining('0198b000')] },
+      params: { days: 30 },
+      expectedCount: 1,
+    });
   });
 
   it('a failed account is listed and only it is retried', async () => {
@@ -97,7 +104,10 @@ describe('Beta Testers', () => {
     expect(go).toBeEnabled();
     await userEvent.click(go);
     await screen.findByTestId('job-panel');
-    expect(beta.calls.find((c) => c.path === '/bulk')?.body).toMatchObject({ action: 'delete', params: { confirm: 'DELETE Beta Round 1' } });
+    expect(beta.calls.find((c) => c.path === '/bulk')?.body).toMatchObject({
+      action: 'delete',
+      params: { confirm: 'DELETE Beta Round 1' },
+    });
   });
 
   it('creating accounts reviews the counts and the password style before anything is made', async () => {
@@ -113,7 +123,14 @@ describe('Beta Testers', () => {
     expect(beta.calls).toHaveLength(0); // nothing created yet
     await userEvent.click(within(d).getByRole('button', { name: 'Create 150 accounts' }));
     await screen.findByTestId('job-panel');
-    expect(beta.calls[0]?.body).toMatchObject({ count: 150, prefix: 'beta', access: 'mixed', premiumCount: 100, freeCount: 50, premiumDays: 30 });
+    expect(beta.calls[0]?.body).toMatchObject({
+      count: 150,
+      prefix: 'beta',
+      access: 'mixed',
+      premiumCount: 100,
+      freeCount: 50,
+      premiumDays: 30,
+    });
   });
 
   it('manage: grant, then reset password shows the new one once', async () => {
@@ -149,7 +166,12 @@ describe('Beta Testers', () => {
     openApp('/beta-testers');
     const t = await table();
     await within(t).findByText('beta003');
-    beta.rows[2]!.access = { source: 'beta', paidExpiresAt: null, betaExpiresAt: new Date(Date.now() + 86_400_000).toISOString(), label: 'Beta premium' };
+    beta.rows[2]!.access = {
+      source: 'beta',
+      paidExpiresAt: null,
+      betaExpiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+      label: 'Beta premium',
+    };
     await live.emit('entity:changed', { type: 'user', id: beta.rows[2]!.id, op: 'update', version: 0, by: null });
     await waitFor(() => expect(within(t).getAllByText('Beta premium')).toHaveLength(3), { timeout: 4000 });
   });

@@ -31,7 +31,12 @@ const row = (n: number, over: Partial<BetaRow> = {}): BetaRow => {
     batch: { id: 'batch-1', name: 'Beta Round 1' },
     state: 'active',
     suspendedReason: null,
-    access: { source: premium ? 'beta' : 'none', paidExpiresAt: null, betaExpiresAt: premium ? inDays(20) : null, label: premium ? 'Beta premium' : 'Free' },
+    access: {
+      source: premium ? 'beta' : 'none',
+      paidExpiresAt: null,
+      betaExpiresAt: premium ? inDays(20) : null,
+      label: premium ? 'Beta premium' : 'Free',
+    },
     online: n === 1,
     lastActiveAt: new Date(Date.now() - n * 3_600_000).toISOString(),
     createdAt: new Date().toISOString(),
@@ -45,7 +50,25 @@ const row = (n: number, over: Partial<BetaRow> = {}): BetaRow => {
 export function resetBeta() {
   beta.rows = [row(1), row(2), row(3), row(4, { state: 'suspended', suspendedReason: 'Round over' })];
   beta.batches = [
-    { id: 'batch-1', name: 'Beta Round 1', prefix: 'beta', total: 4, premiumCount: 2, grantExpiresAt: inDays(20), seedPreset: 'blank', source: 'generate', status: 'ready', jobId: 'job-gen', createdAt: new Date().toISOString(), accounts: 4, ready: 4, failed: 0, suspended: 1, deleting: 0, credentialsAvailable: true },
+    {
+      id: 'batch-1',
+      name: 'Beta Round 1',
+      prefix: 'beta',
+      total: 4,
+      premiumCount: 2,
+      grantExpiresAt: inDays(20),
+      seedPreset: 'blank',
+      source: 'generate',
+      status: 'ready',
+      jobId: 'job-gen',
+      createdAt: new Date().toISOString(),
+      accounts: 4,
+      ready: 4,
+      failed: 0,
+      suspended: 1,
+      deleting: 0,
+      credentialsAvailable: true,
+    },
   ];
   beta.jobs.clear();
   beta.calls.length = 0;
@@ -62,7 +85,20 @@ const summary = (): BetaSummary => ({
   online: beta.rows.filter((r) => r.online).length,
 });
 
-const job = (id: string, over: Partial<BetaJob>): BetaJob => ({ id, type: 'beta_bulk', status: 'done', progress: 100, error: null, action: 'grant', total: 0, ok: 0, failed: 0, skipped: [], failures: [], ...over });
+const job = (id: string, over: Partial<BetaJob>): BetaJob => ({
+  id,
+  type: 'beta_bulk',
+  status: 'done',
+  progress: 100,
+  error: null,
+  action: 'grant',
+  total: 0,
+  ok: 0,
+  failed: 0,
+  skipped: [],
+  failures: [],
+  ...over,
+});
 
 export const betaHandlers = [
   http.get(u('/summary'), () => (allowed(CONTENT) ? ok(summary()) : denied())),
@@ -82,7 +118,20 @@ export const betaHandlers = [
     if (!allowed(MANAGERS)) return denied();
     const b = await body(request);
     const premium = b.access === 'premium' ? Number(b.count) : b.access === 'free' ? 0 : Number(b.premiumCount ?? 0);
-    return ok({ total: b.count, premium, free: Number(b.count) - premium, premiumExpiresAt: premium ? inDays(Number(b.premiumDays ?? 30)) : null, domain: 'testers.example', seedPreset: b.seedPreset, passwordStyle: 'Username + we (example: beta001we)', examples: [1, 2, 3].map((n) => ({ login: `${b.prefix}00${n}`, email: `${b.prefix}00${n}@testers.example`, password: `${b.prefix}00${n}we` })) });
+    return ok({
+      total: b.count,
+      premium,
+      free: Number(b.count) - premium,
+      premiumExpiresAt: premium ? inDays(Number(b.premiumDays ?? 30)) : null,
+      domain: 'testers.example',
+      seedPreset: b.seedPreset,
+      passwordStyle: 'Username + we (example: beta001we)',
+      examples: [1, 2, 3].map((n) => ({
+        login: `${b.prefix}00${n}`,
+        email: `${b.prefix}00${n}@testers.example`,
+        password: `${b.prefix}00${n}we`,
+      })),
+    });
   }),
   http.post(u('/batches'), async ({ request }) => {
     if (!allowed(MANAGERS)) return denied();
@@ -94,7 +143,19 @@ export const betaHandlers = [
     if (!allowed(MANAGERS)) return denied();
     const { csv = '' } = (await body(request)) as { csv?: string };
     const lines = csv.trim().split('\n').slice(1);
-    const rows = lines.map((l, i) => { const [login = ''] = l.split(','); const bad = login.length < 3; return { line: i + 2, login, displayName: null, premium: false, days: null, errors: bad ? ['Login must be 3–20 lowercase letters or digits, starting with a letter'] : [], ok: !bad }; });
+    const rows = lines.map((l, i) => {
+      const [login = ''] = l.split(',');
+      const bad = login.length < 3;
+      return {
+        line: i + 2,
+        login,
+        displayName: null,
+        premium: false,
+        days: null,
+        errors: bad ? ['Login must be 3–20 lowercase letters or digits, starting with a letter'] : [],
+        ok: !bad,
+      };
+    });
     return ok({ domain: 'testers.example', rows, valid: rows.filter((r) => r.ok).length, invalid: rows.filter((r) => !r.ok).length });
   }),
   http.post(u('/import'), async ({ request }) => {
@@ -105,7 +166,19 @@ export const betaHandlers = [
   }),
   http.post(u('/bulk/review'), async ({ request }) => {
     if (!allowed(MANAGERS)) return denied();
-    const review: DeleteReview = { count: 3, selected: 4, phrase: 'DELETE Beta Round 1', groups: [{ name: 'Beta Round 1', count: 3 }], blocked: [{ id: 'x', login: 'beta004', reason: 'Has a paid store subscription: review billing first (deleting the account does not cancel it)' }] };
+    const review: DeleteReview = {
+      count: 3,
+      selected: 4,
+      phrase: 'DELETE Beta Round 1',
+      groups: [{ name: 'Beta Round 1', count: 3 }],
+      blocked: [
+        {
+          id: 'x',
+          login: 'beta004',
+          reason: 'Has a paid store subscription: review billing first (deleting the account does not cancel it)',
+        },
+      ],
+    };
     void body(request);
     return ok(review);
   }),
@@ -113,9 +186,21 @@ export const betaHandlers = [
     if (!allowed(MANAGERS)) return denied();
     const b = await body(request);
     beta.calls.push({ method: 'POST', path: '/bulk', body: b });
-    if (b.action === 'delete' && (b.params as { confirm?: string })?.confirm !== 'DELETE Beta Round 1') return fail(400, 'VALIDATION_FAILED', 'The confirmation does not match');
+    if (b.action === 'delete' && (b.params as { confirm?: string })?.confirm !== 'DELETE Beta Round 1')
+      return fail(400, 'VALIDATION_FAILED', 'The confirmation does not match');
     const failing = b.action === 'suspend';
-    beta.jobs.set('job-bulk', job('job-bulk', { action: String(b.action), total: 3, ok: failing ? 2 : 3, failed: failing ? 1 : 0, status: failing ? 'failed' : 'done', error: failing ? '1 of 3 accounts failed' : null, failures: failing ? [{ id: 'f1', login: 'beta003', error: 'Try again' }] : [] }));
+    beta.jobs.set(
+      'job-bulk',
+      job('job-bulk', {
+        action: String(b.action),
+        total: 3,
+        ok: failing ? 2 : 3,
+        failed: failing ? 1 : 0,
+        status: failing ? 'failed' : 'done',
+        error: failing ? '1 of 3 accounts failed' : null,
+        failures: failing ? [{ id: 'f1', login: 'beta003', error: 'Try again' }] : [],
+      }),
+    );
     return ok({ jobId: 'job-bulk', count: 3, skipped: [] }, undefined, { status: 202 });
   }),
   http.get(u('/jobs/:id'), ({ params }) => {
@@ -135,14 +220,33 @@ export const betaHandlers = [
     beta.calls.push({ method: 'POST', path: `/users/${String(params.id)}/action`, body: b });
     const r = beta.rows.find((x) => x.id === params.id);
     if (!r) return fail(404, 'NOT_FOUND', 'Test account not found');
-    if (b.action === 'suspend') { r.state = 'suspended'; r.suspendedReason = String((b.params as { reason?: string })?.reason ?? ''); }
-    if (b.action === 'resume') { r.state = 'active'; r.suspendedReason = null; }
-    if (b.action === 'grant') r.access = { source: 'beta', paidExpiresAt: null, betaExpiresAt: inDays(Number((b.params as { days?: number })?.days ?? 30)), label: 'Beta premium' };
+    if (b.action === 'suspend') {
+      r.state = 'suspended';
+      r.suspendedReason = String((b.params as { reason?: string })?.reason ?? '');
+    }
+    if (b.action === 'resume') {
+      r.state = 'active';
+      r.suspendedReason = null;
+    }
+    if (b.action === 'grant')
+      r.access = {
+        source: 'beta',
+        paidExpiresAt: null,
+        betaExpiresAt: inDays(Number((b.params as { days?: number })?.days ?? 30)),
+        label: 'Beta premium',
+      };
     if (b.action === 'remove') r.access = { source: 'none', paidExpiresAt: null, betaExpiresAt: null, label: 'Free' };
     if (b.action === 'reset_password') return ok({ login: r.login, password: 'Zx81QpLm20aBcd' });
     return ok({ changed: true });
   }),
-  http.get(u('/users/export'), () => (allowed(MANAGERS) ? new Response('login,email\n', { headers: { 'content-type': 'text/csv' } }) : denied())),
-  http.get(u('/batches/:id/credentials'), () => (allowed(MANAGERS) ? new Response('login,email,password\n', { headers: { 'content-type': 'text/csv' } }) : denied())),
-  http.get(u('/import/template'), () => new Response('login,display_name,access,premium_days\n', { headers: { 'content-type': 'text/csv' } })),
+  http.get(u('/users/export'), () =>
+    allowed(MANAGERS) ? new Response('login,email\n', { headers: { 'content-type': 'text/csv' } }) : denied(),
+  ),
+  http.get(u('/batches/:id/credentials'), () =>
+    allowed(MANAGERS) ? new Response('login,email,password\n', { headers: { 'content-type': 'text/csv' } }) : denied(),
+  ),
+  http.get(
+    u('/import/template'),
+    () => new Response('login,display_name,access,premium_days\n', { headers: { 'content-type': 'text/csv' } }),
+  ),
 ];

@@ -165,7 +165,12 @@ export const betaApi = {
   retryBatch: (id: string) => post<{ jobId: string }>(`/v1/admin/beta/batches/${id}/retry`),
   importPreview: (csv: string) => post<ImportPreview>('/v1/admin/beta/import/preview', { csv }),
   importCsv: (csv: string, name: string, skipInvalid: boolean, seedPreset: CreateForm['seedPreset']) =>
-    post<{ batchId: string; jobId: string; imported: number; skipped: number }>('/v1/admin/beta/import', { csv, name, skipInvalid, seedPreset }),
+    post<{ batchId: string; jobId: string; imported: number; skipped: number }>('/v1/admin/beta/import', {
+      csv,
+      name,
+      skipInvalid,
+      seedPreset,
+    }),
   one: (id: string, action: BulkAction | 'reset_password' | 'reset_progress', params: ActionParams = {}) =>
     post<unknown>(`/v1/admin/beta/users/${id}/action`, { action, params }),
   review: (selection: Selection) => post<DeleteReview>('/v1/admin/beta/bulk/review', { selection }),
@@ -177,12 +182,18 @@ export const betaApi = {
       expectedCount,
     }),
   retryJob: (id: string) => post<{ jobId: string }>(`/v1/admin/beta/jobs/${id}/retry`),
-  sample: (id: string) => api<{ items: { kind: string; count: number }[]; total: number }>(`/v1/admin/beta/users/${id}/sample`).then((r) => r.data),
+  sample: (id: string) =>
+    api<{ items: { kind: string; count: number }[]; total: number }>(`/v1/admin/beta/users/${id}/sample`).then((r) => r.data),
   exportList: (f: BetaFilter) => download('/v1/admin/beta/users/export', 'wehum-beta-testers.csv', clean(f)),
   credentials: (batchId: string) => download(`/v1/admin/beta/batches/${batchId}/credentials`, 'wehum-beta-credentials.csv'),
   template: () => download('/v1/admin/beta/import/template', 'wehum-beta-import-template.csv'),
 };
 
-export const SOURCE_LABEL: Record<BetaSource, string> = { none: 'Free', paid: 'Paid', beta: 'Beta premium', 'paid+beta': 'Paid + beta premium' };
+export const SOURCE_LABEL: Record<BetaSource, string> = {
+  none: 'Free',
+  paid: 'Paid',
+  beta: 'Beta premium',
+  'paid+beta': 'Paid + beta premium',
+};
 export const STATE_LABEL: Record<BetaState, string> = { active: 'Active', suspended: 'Suspended', deleting: 'Deleting' };
 export const PRESET_LABEL = { blank: 'Blank (no sample data)', profile: 'Profile only', light: 'Light sample data' } as const;

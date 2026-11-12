@@ -96,7 +96,15 @@ function ChallengeEditor({ challenge, onCreated }: { challenge: Challenge | null
     save: (v, version) => challengeApi.update(challenge!.id, v, version),
     onSaved: (row, v) => {
       cache.saved(row);
-      toast.success(v.status === 'live' ? (challengesInApp.shown ? 'Challenge is live' : 'Challenge is ready') : v.status ? 'Challenge updated' : 'Challenge saved');
+      toast.success(
+        v.status === 'live'
+          ? challengesInApp.shown
+            ? 'Challenge is live'
+            : 'Challenge is ready'
+          : v.status
+            ? 'Challenge updated'
+            : 'Challenge saved',
+      );
     },
     onError,
   });

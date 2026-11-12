@@ -160,7 +160,12 @@ function JobProgress({ id, label, onDone }: { id: string; label: string; onDone?
 /** Admin types name, e-mail and a note by hand (beta testers). */
 export function ProfileEdit({ u, onSaved }: { u: UserDetail; onSaved?: () => void }) {
   const qc = useQueryClient();
-  const [f, setF] = useState({ firstName: u.name ?? '', lastName: u.lastName ?? '', contactEmail: u.contactEmail ?? '', note: u.note ?? '' });
+  const [f, setF] = useState({
+    firstName: u.name ?? '',
+    lastName: u.lastName ?? '',
+    contactEmail: u.contactEmail ?? '',
+    note: u.note ?? '',
+  });
   const [err, setErr] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((p) => ({ ...p, [k]: e.target.value }));
@@ -186,7 +191,14 @@ export function ProfileEdit({ u, onSaved }: { u: UserDetail; onSaved?: () => voi
         <Input label="First name" value={f.firstName} onChange={set('firstName')} maxLength={30} />
         <Input label="Last name" value={f.lastName} onChange={set('lastName')} maxLength={30} />
       </div>
-      <Input label="Contact email" hint="not the login email" type="email" value={f.contactEmail} onChange={set('contactEmail')} error={err.contactEmail} />
+      <Input
+        label="Contact email"
+        hint="not the login email"
+        type="email"
+        value={f.contactEmail}
+        onChange={set('contactEmail')}
+        error={err.contactEmail}
+      />
       <Textarea label="Notes" value={f.note} onChange={set('note')} maxLength={1000} rows={4} />
       <Button loading={busy} onClick={() => void save()}>
         Save

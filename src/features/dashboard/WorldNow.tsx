@@ -154,7 +154,9 @@ export default function WorldNow({
                     <span className="tabular text-sm text-text-muted">{formatNumber(r.n)}</span>
                   </li>
                 ))}
-                {cities.length > 8 ? <li className="border-t border-border pt-2 text-sm text-text-muted">+{cities.length - 8} more cities</li> : null}
+                {cities.length > 8 ? (
+                  <li className="border-t border-border pt-2 text-sm text-text-muted">+{cities.length - 8} more cities</li>
+                ) : null}
               </ul>
               {total > inCities ? (
                 <p className="text-xs text-text-muted">

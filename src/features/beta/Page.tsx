@@ -71,7 +71,11 @@ export function BetaTestersPage() {
   const group = batches.data?.find((b) => b.id === filter.batchId);
   const groupScope = wholeGroup && group ? group : null;
   const count = groupScope ? groupScope.accounts : allMatching ? matching : picked.size;
-  const selection: Selection = groupScope ? { all: true, filter: { batchId: groupScope.id } } : allMatching ? { all: true, filter } : { ids: [...picked] };
+  const selection: Selection = groupScope
+    ? { all: true, filter: { batchId: groupScope.id } }
+    : allMatching
+      ? { all: true, filter }
+      : { ids: [...picked] };
   const scope = groupScope
     ? `${groupScope.name} · the whole group (${formatNumber(groupScope.accounts)} accounts)`
     : `${group ? group.name : 'All groups'}${allMatching ? ` · all ${formatNumber(matching)} matching accounts` : ` · ${picked.size} selected`}`;
@@ -161,7 +165,10 @@ export function BetaTestersPage() {
 
   const s = summary.data;
   const filtered = !!(filter.q || filter.access || filter.state || filter.presence || filter.batchId);
-  const groupOptions = [{ value: '', label: 'All groups' }, ...(batches.data ?? []).map((b) => ({ value: b.id, label: `${b.name} (${b.accounts})` }))];
+  const groupOptions = [
+    { value: '', label: 'All groups' },
+    ...(batches.data ?? []).map((b) => ({ value: b.id, label: `${b.name} (${b.accounts})` })),
+  ];
   const set = (p: Partial<BetaFilter>) => setFilter((f) => ({ ...f, ...p }));
 
   const exportList = async () => {
@@ -210,18 +217,66 @@ export function BetaTestersPage() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5" aria-label="Summary">
         <KpiTile label="Test accounts" value={s ? formatNumber(s.total) : '—'} loading={summary.isPending} size="sm" />
-        <KpiTile label="Beta premium" value={s ? formatNumber(s.beta) : '—'} loading={summary.isPending} size="sm" hint="With a running end date" />
+        <KpiTile
+          label="Beta premium"
+          value={s ? formatNumber(s.beta) : '—'}
+          loading={summary.isPending}
+          size="sm"
+          hint="With a running end date"
+        />
         <KpiTile label="Free access" value={s ? formatNumber(s.free) : '—'} loading={summary.isPending} size="sm" />
-        <KpiTile label="Suspended" value={s ? formatNumber(s.suspended) : '—'} loading={summary.isPending} size="sm" hint="Counted separately from access" />
-        <KpiTile label="Online now" value={onlineNow === undefined ? '—' : formatNumber(onlineNow)} loading={summary.isPending} size="sm" live hint="Not added to the others" />
+        <KpiTile
+          label="Suspended"
+          value={s ? formatNumber(s.suspended) : '—'}
+          loading={summary.isPending}
+          size="sm"
+          hint="Counted separately from access"
+        />
+        <KpiTile
+          label="Online now"
+          value={onlineNow === undefined ? '—' : formatNumber(onlineNow)}
+          loading={summary.isPending}
+          size="sm"
+          live
+          hint="Not added to the others"
+        />
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
-        <SearchInput label="Search test accounts" placeholder="Search login, name or tester ID" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <Select label="Group" size="sm" options={groupOptions} value={filter.batchId ?? ''} onChange={(e) => set({ batchId: e.target.value || undefined })} />
-        <Select label="Access" size="sm" options={ACCESS_FILTERS} value={filter.access ?? ''} onChange={(e) => set({ access: (e.target.value || undefined) as BetaFilter['access'] })} />
-        <Select label="Account state" size="sm" options={STATE_FILTERS} value={filter.state ?? ''} onChange={(e) => set({ state: (e.target.value || undefined) as BetaFilter['state'] })} />
-        <Select label="Presence" size="sm" options={PRESENCE_FILTERS} value={filter.presence ?? ''} onChange={(e) => set({ presence: (e.target.value || undefined) as BetaFilter['presence'] })} />
+        <SearchInput
+          label="Search test accounts"
+          placeholder="Search login, name or tester ID"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <Select
+          label="Group"
+          size="sm"
+          options={groupOptions}
+          value={filter.batchId ?? ''}
+          onChange={(e) => set({ batchId: e.target.value || undefined })}
+        />
+        <Select
+          label="Access"
+          size="sm"
+          options={ACCESS_FILTERS}
+          value={filter.access ?? ''}
+          onChange={(e) => set({ access: (e.target.value || undefined) as BetaFilter['access'] })}
+        />
+        <Select
+          label="Account state"
+          size="sm"
+          options={STATE_FILTERS}
+          value={filter.state ?? ''}
+          onChange={(e) => set({ state: (e.target.value || undefined) as BetaFilter['state'] })}
+        />
+        <Select
+          label="Presence"
+          size="sm"
+          options={PRESENCE_FILTERS}
+          value={filter.presence ?? ''}
+          onChange={(e) => set({ presence: (e.target.value || undefined) as BetaFilter['presence'] })}
+        />
       </div>
 
       {group ? (
@@ -230,10 +285,26 @@ export function BetaTestersPage() {
           <span className="text-text-muted">
             {group.accounts} accounts · {group.premiumCount} planned premium · created {formatDate(group.createdAt)}
           </span>
-          {group.status !== 'ready' ? <Badge tone={group.status === 'creating' ? 'neutral' : 'warning'} size="sm">{group.status === 'creating' ? 'Creating' : `Setup ${group.status}: ${group.failed} need a retry`}</Badge> : null}
+          {group.status !== 'ready' ? (
+            <Badge tone={group.status === 'creating' ? 'neutral' : 'warning'} size="sm">
+              {group.status === 'creating' ? 'Creating' : `Setup ${group.status}: ${group.failed} need a retry`}
+            </Badge>
+          ) : null}
           <span className="flex-1" />
           {canManage && (group.status === 'partial' || group.status === 'failed') ? (
-            <Button size="sm" variant="outline" onClick={() => void betaApi.retryBatch(group.id).then((r) => { toast.info('Finishing the missing steps'); setJob({ id: r.jobId, label: `Finishing ${group.name}` }); }).catch(toast.apiError)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                void betaApi
+                  .retryBatch(group.id)
+                  .then((r) => {
+                    toast.info('Finishing the missing steps');
+                    setJob({ id: r.jobId, label: `Finishing ${group.name}` });
+                  })
+                  .catch(toast.apiError)
+              }
+            >
               Retry setup
             </Button>
           ) : null}
@@ -243,7 +314,16 @@ export function BetaTestersPage() {
             </Button>
           ) : null}
           {canManage ? (
-            <Button size="sm" variant="danger" onClick={() => { setPicked(new Set()); setAllMatching(false); setWholeGroup(true); setBulk('delete'); }}>
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() => {
+                setPicked(new Set());
+                setAllMatching(false);
+                setWholeGroup(true);
+                setBulk('delete');
+              }}
+            >
               Delete group
             </Button>
           ) : null}
@@ -253,7 +333,11 @@ export function BetaTestersPage() {
       {job ? <JobPanel id={job.id} label={job.label} onClose={() => setJob(null)} /> : null}
 
       {count > 0 ? (
-        <div role="region" aria-label="Selection" className="flex flex-wrap items-center gap-2 rounded-card border border-border-strong bg-input px-4 py-2 text-sm">
+        <div
+          role="region"
+          aria-label="Selection"
+          className="flex flex-wrap items-center gap-2 rounded-card border border-border-strong bg-input px-4 py-2 text-sm"
+        >
           <strong>{allMatching ? `All ${formatNumber(matching)} matching accounts` : `${picked.size} selected on this page`}</strong>
           <span className="text-text-muted">· {group ? group.name : 'all groups'}</span>
           {!allMatching && picked.size === rows.length && matching > rows.length ? (
@@ -299,27 +383,55 @@ export function BetaTestersPage() {
             <EmptyState
               title="No test accounts yet"
               description="Create a group of testers. Each gets a login and password, and your members stay untouched."
-              action={canManage ? <Button size="sm" onClick={() => setGenerate(true)}>Create accounts</Button> : undefined}
+              action={
+                canManage ? (
+                  <Button size="sm" onClick={() => setGenerate(true)}>
+                    Create accounts
+                  </Button>
+                ) : undefined
+              }
             />
           )
         }
         summary={`Showing ${formatNumber(rows.length)} of ${formatNumber(matching)} · sorted by login${live ? '' : ' · live updates paused'}`}
       />
       {users.hasNextPage ? (
-        <Button variant="outline" size="sm" className="self-end" loading={users.isFetchingNextPage} onClick={() => void users.fetchNextPage()}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-end"
+          loading={users.isFetchingNextPage}
+          onClick={() => void users.fetchNextPage()}
+        >
           Load more
         </Button>
       ) : null}
 
-      <GenerateDialog open={generate} onClose={() => setGenerate(false)} onStarted={(id) => setJob({ id, label: 'Creating test accounts' })} />
-      <ImportDialog open={importing} onClose={() => setImporting(false)} onStarted={(id) => setJob({ id, label: 'Importing test accounts' })} />
-      <ManageDialog row={manage} canManage={canManage} onClose={() => setManage(null)} onJob={(id) => setJob({ id, label: 'Deleting the account' })} />
+      <GenerateDialog
+        open={generate}
+        onClose={() => setGenerate(false)}
+        onStarted={(id) => setJob({ id, label: 'Creating test accounts' })}
+      />
+      <ImportDialog
+        open={importing}
+        onClose={() => setImporting(false)}
+        onStarted={(id) => setJob({ id, label: 'Importing test accounts' })}
+      />
+      <ManageDialog
+        row={manage}
+        canManage={canManage}
+        onClose={() => setManage(null)}
+        onJob={(id) => setJob({ id, label: 'Deleting the account' })}
+      />
       <BulkDialog
         action={bulk}
         selection={selection}
         count={count}
         scope={scope}
-        onClose={() => { setBulk(null); setWholeGroup(false); }}
+        onClose={() => {
+          setBulk(null);
+          setWholeGroup(false);
+        }}
         onJob={(id) => {
           setJob({ id, label: bulk ? `${BULK_LABEL[bulk]} · ${count} accounts` : 'Working' });
           clearSelection();

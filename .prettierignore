@@ -8,3 +8,4 @@ src/lib/api-types.ts
 src/lib/socket-events.ts
 src/styles/tokens.css
 WeHum_CMS_Spec.md
+src/features/dashboard/world-map.ts

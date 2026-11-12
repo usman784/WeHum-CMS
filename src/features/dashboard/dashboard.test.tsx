@@ -91,14 +91,26 @@ describe('Dashboard', () => {
     expect(within(screen.getByRole('list', { name: 'People online by city' })).getAllByRole('listitem')[0]).toHaveTextContent('New York');
     expect(screen.getByText(/with no city yet/)).toBeInTheDocument(); // 486 online, fewer in cities
     // a dot lands inside its country (Lahore is in Pakistan's box on the 960×470 map)
-    const x = Number(dot('Lahore')!.getAttribute('cx')), y = Number(dot('Lahore')!.getAttribute('cy'));
-    expect(x).toBeGreaterThan(650); expect(x).toBeLessThan(690); expect(y).toBeGreaterThan(160); expect(y).toBeLessThan(190);
+    const x = Number(dot('Lahore')!.getAttribute('cx')),
+      y = Number(dot('Lahore')!.getAttribute('cy'));
+    expect(x).toBeGreaterThan(650);
+    expect(x).toBeLessThan(690);
+    expect(y).toBeGreaterThan(160);
+    expect(y).toBeLessThan(190);
     await userEvent.click(screen.getByRole('radio', { name: /Meditating/ }));
     expect(dot('Lahore')).toHaveAttribute('data-n', '9');
     expect(dot('Berlin')).toBeNull(); // nobody meditating there
     await emit('dashboard:kpis', {
-      liveNow: 1, meditationsToday: 1, minutesToday: 1, payingMembers: 1, inTrial: 1, mrrUsd: 1,
-      founding: { taken: 1, cap: 10, open: true }, moderationOpen: 0, onlineNow: 2, onlineGuests: 0,
+      liveNow: 1,
+      meditationsToday: 1,
+      minutesToday: 1,
+      payingMembers: 1,
+      inTrial: 1,
+      mrrUsd: 1,
+      founding: { taken: 1, cap: 10, open: true },
+      moderationOpen: 0,
+      onlineNow: 2,
+      onlineGuests: 0,
       onlineCountries: [{ c: 'JP', n: 2 }],
       onlineCities: [{ c: 'JP', name: 'Tokyo', lat: 35.7, lng: 139.7, n: 2 }],
       meditatingCities: [{ c: 'JP', name: 'Tokyo', lat: 35.7, lng: 139.7, n: 1 }],
